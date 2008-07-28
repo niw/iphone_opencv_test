@@ -110,16 +110,24 @@
 	if(imageView.image) {
 		IplImage *image = [self CreateIplImageFromUIImage:imageView.image];
 
+		// Scaling down
+        IplImage *small_image = cvCreateImage(cvSize(image->width/2,image->height/2), IPL_DEPTH_8U, 3);
+        cvPyrDown(image, small_image, CV_GAUSSIAN_5x5);
+		int scale = 2;
+
 		// Load XML
 		NSString *path = [[NSBundle mainBundle] pathForResource:@"haarcascade_frontalface_default" ofType:@"xml"];
 		CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*)cvLoad([path cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL);
 		CvMemStorage* storage = cvCreateMemStorage(0);
 
 		// Detect faces and draw rectangle on them
-		CvSeq* faces = cvHaarDetectObjects(image, cascade, storage, 1.1f, 3, 0, cvSize(0, 0));
+		CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
+		cvReleaseImage(&small_image);
+
 		for(int i = 0; i < faces->total; i++) {
 			CvRect face_rect = *(CvRect*)cvGetSeqElem(faces, i);
-			cvRectangle(image, cvPoint(face_rect.x, face_rect.y), cvPoint(face_rect.x + face_rect.width, face_rect.y + face_rect.height), CV_RGB(255, 0, 0), 3, 8, 0);
+			cvRectangle(image, cvPoint(face_rect.x * scale, face_rect.y * scale),
+						cvPoint((face_rect.x + face_rect.width) * scale, (face_rect.y + face_rect.height) * scale), CV_RGB(255, 0, 0), 3, 8, 0);
 		}
 		cvReleaseMemStorage(&storage);
 		cvReleaseHaarClassifierCascade(&cascade);
