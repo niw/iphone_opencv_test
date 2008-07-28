@@ -8,7 +8,7 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="12"/>
+			<integer value="13"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -59,16 +59,21 @@
 							<reference key="NSSuperview" ref="453656443"/>
 							<bool key="IBUIOpaque">NO</bool>
 							<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
-							<int key="IBUIBarStyle">1</int>
+							<int key="IBUIBarStyle">2</int>
 							<object class="NSMutableArray" key="IBUIItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="IBUIBarButtonItem" id="824346888">
-									<string key="IBUITitle">show</string>
-									<int key="IBUIStyle">1</int>
+									<int key="IBUIStyle">2</int>
+									<int key="IBUISystemItemIdentifier">15</int>
 									<reference key="IBUIToolbar" ref="1035851962"/>
 								</object>
 								<object class="IBUIBarButtonItem" id="767415372">
-									<string key="IBUITitle">edge</string>
+									<string key="IBUITitle">Edge</string>
+									<int key="IBUIStyle">1</int>
+									<reference key="IBUIToolbar" ref="1035851962"/>
+								</object>
+								<object class="IBUIBarButtonItem" id="469280561">
+									<string key="IBUITitle">Faces</string>
 									<int key="IBUIStyle">1</int>
 									<reference key="IBUIToolbar" ref="1035851962"/>
 								</object>
@@ -143,6 +148,14 @@
 					</object>
 					<int key="connectionID">21</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">faceDetect:</string>
+						<reference key="source" ref="469280561"/>
+						<reference key="destination" ref="943309135"/>
+					</object>
+					<int key="connectionID">23</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -207,6 +220,7 @@
 							<reference ref="824346888"/>
 							<reference ref="767415372"/>
 							<reference ref="948588678"/>
+							<reference ref="469280561"/>
 						</object>
 						<reference key="parent" ref="453656443"/>
 					</object>
@@ -230,6 +244,11 @@
 						<reference key="object" ref="948588678"/>
 						<reference key="parent" ref="1035851962"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">22</int>
+						<reference key="object" ref="469280561"/>
+						<reference key="parent" ref="1035851962"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -250,6 +269,7 @@
 					<string>2.IBAttributePlaceholdersKey</string>
 					<string>2.IBEditorWindowLastContentRect</string>
 					<string>2.IBPluginDependency</string>
+					<string>22.IBPluginDependency</string>
 					<string>3.CustomClassName</string>
 					<string>3.IBPluginDependency</string>
 				</object>
@@ -258,7 +278,7 @@
 					<string>UIApplication</string>
 					<string>UIResponder</string>
 					<string>OpenCVTestViewController</string>
-					<string>{{689, 323}, {320, 480}}</string>
+					<string>{{448, 351}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -276,6 +296,7 @@
 						</object>
 					</object>
 					<string>{{362, 376}, {320, 480}}</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>OpenCVTestAppDelegate</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -301,7 +322,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">21</int>
+			<int key="maxID">24</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -343,10 +364,12 @@
 						<object class="NSMutableArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>edgeDetect:</string>
+							<string>faceDetect:</string>
 							<string>loadImage:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 						</object>

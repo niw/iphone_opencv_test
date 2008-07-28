@@ -20,6 +20,8 @@
 		540724050E3DD76A00B598A2 /* libcxcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 540724000E3DD76A00B598A2 /* libcxcore.a */; };
 		540724060E3DD76A00B598A2 /* libhighgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 540724010E3DD76A00B598A2 /* libhighgui.a */; };
 		540724070E3DD76A00B598A2 /* libml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 540724020E3DD76A00B598A2 /* libml.a */; };
+		540ABC6B0E3E1C5300E30885 /* haarcascade_frontalface_default.xml in Resources */ = {isa = PBXBuildFile; fileRef = 540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */; };
+		540ABCF60E3E280700E30885 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 540ABCF50E3E280700E30885 /* Icon.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		540724000E3DD76A00B598A2 /* libcxcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcxcore.a; path = opencv_armv6/lib/libcxcore.a; sourceTree = "<group>"; };
 		540724010E3DD76A00B598A2 /* libhighgui.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhighgui.a; path = opencv_armv6/lib/libhighgui.a; sourceTree = "<group>"; };
 		540724020E3DD76A00B598A2 /* libml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libml.a; path = opencv_armv6/lib/libml.a; sourceTree = "<group>"; };
+		540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = haarcascade_frontalface_default.xml; path = opencv_armv6/share/opencv/haarcascades/haarcascade_frontalface_default.xml; sourceTree = "<group>"; };
+		540ABCF50E3E280700E30885 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				540ABCF50E3E280700E30885 /* Icon.png */,
+				540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */,
 				5452E0090E3D08AA00FE4518 /* lena.jpg */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
@@ -179,6 +185,8 @@
 			files = (
 				540723DB0E3DD25B00B598A2 /* MainWindow.xib in Resources */,
 				540723DC0E3DD25B00B598A2 /* lena.jpg in Resources */,
+				540ABC6B0E3E1C5300E30885 /* haarcascade_frontalface_default.xml in Resources */,
+				540ABCF60E3E280700E30885 /* Icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
