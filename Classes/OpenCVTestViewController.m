@@ -95,8 +95,11 @@
 		
 		// Convert black and whilte to 24bit image then convert to UIImage to show
 		IplImage *image = cvCreateImage(cvGetSize(img2), IPL_DEPTH_8U, 3);
-		for(int i=0; i<img2->imageSize; i++) {
-			image->imageData[i*3] = image->imageData[i*3+1] = image->imageData[i*3+2] = img2->imageData[i];
+		for(int y=0; y<img2->height; y++) {
+			for(int x=0; x<img2->width; x++) {
+				char *p = image->imageData + y * image->widthStep + x * 3;
+				*p = *(p+1) = *(p+2) = img2->imageData[y * img2->widthStep + x];
+			}
 		}
 		cvReleaseImage(&img2);
 		imageView.image = [self UIImageFromIplImage:image];
