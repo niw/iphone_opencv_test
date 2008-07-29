@@ -1,7 +1,13 @@
 #import <UIKit/UIKit.h>
 
+typedef enum {
+	ActionSheetToSelectTypeOfSource = 1,
+	ActionSheetToSelectTypeOfMarks
+} OpenCVTestViewControllerActionSheetAction;
+
 @interface OpenCVTestViewController : UIViewController <UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
 	IBOutlet UIImageView *imageView;
+	OpenCVTestViewControllerActionSheetAction actionSheetAction;
 }
 
 - (IBAction)loadImage:(id)sender;

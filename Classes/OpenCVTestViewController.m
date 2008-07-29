@@ -1,7 +1,6 @@
 #import "OpenCVTestViewController.h"
 
 #include <opencv/cv.h>
-#include <opencv/highgui.h>
 
 @implementation OpenCVTestViewController
 @synthesize imageView;
@@ -56,28 +55,15 @@
 #pragma mark IBAction
 
 - (IBAction)loadImage:(id)sender {
-/* // Testing IplImage <-> UIImage Conversion
-	cvSetErrMode(CV_ErrModeParent);
-	NSString *path = [[NSBundle mainBundle] pathForResource:@"lena" ofType:@"jpg"];
-
-	// Load UIImage and convert to IplImage
-	UIImage *uiimage = [UIImage imageWithContentsOfFile:path];
-	IplImage *img = [self CreateIplImageFromUIImage:uiimage];
-
-	// Convert IplImage(BGR) to IplImage(RGB) then convert to UIImage to show
-	IplImage *image = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 3);
-	cvCvtColor(img, image, CV_BGR2RGB);
-	cvReleaseImage(&img);
-
-	imageView.image = [self UIImageFromIplImage:image];
-	cvReleaseImage(&image);
-*/
-	UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
-															 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
-													otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", @"Use Default Lena", nil];
-	actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
-	[actionSheet showInView:self.view];
-	[actionSheet release];
+	if(!actionSheetAction) {
+		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
+																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
+														otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", @"Use Default Lena", nil];
+		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+		actionSheetAction = ActionSheetToSelectTypeOfSource;
+		[actionSheet showInView:self.view];
+		[actionSheet release];
+	}
 }
 
 - (IBAction)edgeDetect:(id)sender {
@@ -107,38 +93,14 @@
 
 - (IBAction)faceDetect:(id)sender {
 	cvSetErrMode(CV_ErrModeParent);
-	if(imageView.image) {
-		IplImage *image = [self CreateIplImageFromUIImage:imageView.image];
-
-		// Scaling down
-        IplImage *small_image = cvCreateImage(cvSize(image->width/2,image->height/2), IPL_DEPTH_8U, 3);
-        cvPyrDown(image, small_image, CV_GAUSSIAN_5x5);
-		int scale = 2;
-
-		// Load XML
-		NSString *path = [[NSBundle mainBundle] pathForResource:@"haarcascade_frontalface_default" ofType:@"xml"];
-		CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*)cvLoad([path cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL);
-		CvMemStorage* storage = cvCreateMemStorage(0);
-
-		// Detect faces and draw rectangle on them
-		CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
-		cvReleaseImage(&small_image);
-
-		for(int i = 0; i < faces->total; i++) {
-			CvRect face_rect = *(CvRect*)cvGetSeqElem(faces, i);
-			cvRectangle(image, cvPoint(face_rect.x * scale, face_rect.y * scale),
-						cvPoint((face_rect.x + face_rect.width) * scale, (face_rect.y + face_rect.height) * scale), CV_RGB(255, 0, 0), 3, 8, 0);
-		}
-		cvReleaseMemStorage(&storage);
-		cvReleaseHaarClassifierCascade(&cascade);
-
-		// Convert BGR to RGB, then show it
-		IplImage *img = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, 3);
-		cvCvtColor(image, img, CV_BGR2RGB);
-		cvReleaseImage(&image);
-
-		imageView.image = [self UIImageFromIplImage:img];
-		cvReleaseImage(&img);
+	if(imageView.image && !actionSheetAction) {
+		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
+																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
+														otherButtonTitles:@"Bounding Box", @"Laughing Man", nil];
+		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+		actionSheetAction = ActionSheetToSelectTypeOfMarks;
+		[actionSheet showInView:self.view];
+		[actionSheet release];
 	}
 }
 
@@ -163,29 +125,92 @@
 #pragma mark UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	UIImagePickerControllerSourceType sourceType;
+	switch(actionSheetAction) {
+		case ActionSheetToSelectTypeOfSource: {
+			UIImagePickerControllerSourceType sourceType;
+			if (buttonIndex == 0) {
+				sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+			} else if(buttonIndex == 1) {
+				sourceType = UIImagePickerControllerSourceTypeCamera;
+			} else if(buttonIndex == 2) {
+				NSString *path = [[NSBundle mainBundle] pathForResource:@"lena" ofType:@"jpg"];
+				imageView.image = [UIImage imageWithContentsOfFile:path];
+				break;
+			} else {
+				// Cancel
+				break;
+			}
+			if([UIImagePickerController isSourceTypeAvailable:sourceType]) {
+				UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+				picker.sourceType = sourceType;
+				picker.delegate = self;
+				picker.allowsImageEditing = NO;
+				[self presentModalViewController:picker animated:YES];
+				[picker release];
+			}
+			break;
+		}
+		case ActionSheetToSelectTypeOfMarks: {
+			if(buttonIndex != 0 && buttonIndex != 1) {
+				break;
+			}
 
-	if (buttonIndex == 0) {
-		sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-	} else if(buttonIndex == 1) {
-		sourceType = UIImagePickerControllerSourceTypeCamera;
-	} else if(buttonIndex == 2) {
-		NSString *path = [[NSBundle mainBundle] pathForResource:@"lena" ofType:@"jpg"];
-		imageView.image = [UIImage imageWithContentsOfFile:path];
-		return;
-	} else {
-		// Cancel
-		return;
-	}
+			NSString *path;
+			IplImage *image = [self CreateIplImageFromUIImage:imageView.image];
 
-	if([UIImagePickerController isSourceTypeAvailable:sourceType]) {
-		UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-		picker.sourceType = sourceType;
-		picker.delegate = self;
-		picker.allowsImageEditing = NO;
-		[self presentModalViewController:picker animated:YES];
-		[picker release];
+			// Scaling down
+			IplImage *small_image = cvCreateImage(cvSize(image->width/2,image->height/2), IPL_DEPTH_8U, 3);
+			cvPyrDown(image, small_image, CV_GAUSSIAN_5x5);
+			int scale = 2;
+			
+			// Load XML
+			path = [[NSBundle mainBundle] pathForResource:@"haarcascade_frontalface_default" ofType:@"xml"];
+			CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*)cvLoad([path cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL);
+			CvMemStorage* storage = cvCreateMemStorage(0);
+			
+			// Detect faces and draw rectangle on them
+			CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
+			cvReleaseImage(&small_image);
+
+			// Create canvas to show the results
+			CGImageRef imageRef = imageView.image.CGImage;
+			CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+			CGContextRef contextRef = CGBitmapContextCreate(NULL, imageView.image.size.width, imageView.image.size.height,
+															CGImageGetBitsPerComponent(imageRef), CGImageGetBytesPerRow(imageRef),
+															colorSpace, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
+			CGContextDrawImage(contextRef, CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height), imageRef);
+			
+			path = [[NSBundle mainBundle] pathForResource:@"laughing_man" ofType:@"png"];
+			CGImageRef laughing_man = [UIImage imageWithContentsOfFile:path].CGImage;
+
+			// Draw results on the iamge
+			for(int i = 0; i < faces->total; i++) {
+				NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+
+				// Calc the rect of faces
+				CvRect cvrect = *(CvRect*)cvGetSeqElem(faces, i);
+				CGRect face_rect = CGContextConvertRectToDeviceSpace(contextRef, CGRectMake(cvrect.x * scale, cvrect.y * scale, cvrect.width * scale, cvrect.height * scale));
+
+				if(buttonIndex == 0) {
+					CGContextStrokeRect(contextRef, face_rect);
+				} else if(buttonIndex == 1) {
+					CGContextDrawImage(contextRef, face_rect, laughing_man);
+				}
+
+				[pool release];
+			}
+
+			imageView.image = [UIImage imageWithCGImage:CGBitmapContextCreateImage(contextRef)];
+			CGContextRelease(contextRef);
+			CGColorSpaceRelease(colorSpace);
+
+			cvReleaseMemStorage(&storage);
+			cvReleaseHaarClassifierCascade(&cascade);
+
+			break;
+		}
 	}
+	actionSheetAction = 0;
 }
 
 #pragma mark -
