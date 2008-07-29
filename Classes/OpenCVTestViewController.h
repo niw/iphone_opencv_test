@@ -11,6 +11,7 @@ typedef enum {
 }
 
 - (IBAction)loadImage:(id)sender;
+- (IBAction)saveImage:(id)sender;
 - (IBAction)edgeDetect:(id)sender;
 - (IBAction)faceDetect:(id)sender;
 

@@ -66,6 +66,19 @@
 	}
 }
 
+- (IBAction)saveImage:(id)sender {
+	if(imageView.image) {
+		UIImageWriteToSavedPhotosAlbum(imageView.image, self, @selector(finishUIImageWriteToSavedPhotosAlbum:didFinishSavingWithError:contextInfo:), nil);
+	}
+}
+
+- (void)finishUIImageWriteToSavedPhotosAlbum:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"" message:@"The image was saved in the photo album"
+												   delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+	[alert show];	
+	[alert release];
+}
+
 - (IBAction)edgeDetect:(id)sender {
 	cvSetErrMode(CV_ErrModeParent);
 	if(imageView.image) {
@@ -115,6 +128,7 @@
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+	[self loadImage:nil];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
