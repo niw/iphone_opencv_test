@@ -193,9 +193,12 @@
 			CGImageRef imageRef = imageView.image.CGImage;
 			CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 			CGContextRef contextRef = CGBitmapContextCreate(NULL, imageView.image.size.width, imageView.image.size.height,
-															CGImageGetBitsPerComponent(imageRef), CGImageGetBytesPerRow(imageRef),
+															8, imageView.image.size.width * 4,
 															colorSpace, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
 			CGContextDrawImage(contextRef, CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height), imageRef);
+
+			CGContextSetLineWidth(contextRef, 4);
+			CGContextSetRGBStrokeColor(contextRef, 0.0, 0.0, 1.0, 0.5);
 			
 			path = [[NSBundle mainBundle] pathForResource:@"laughing_man" ofType:@"png"];
 			CGImageRef laughing_man = [UIImage imageWithContentsOfFile:path].CGImage;
