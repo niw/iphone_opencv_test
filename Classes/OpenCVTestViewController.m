@@ -1,11 +1,12 @@
 #import "OpenCVTestViewController.h"
 
-#include <opencv/cv.h>
+#import <opencv/cv.h>
 
 @implementation OpenCVTestViewController
 @synthesize imageView;
 
 - (void)dealloc {
+	AudioServicesDisposeSystemSoundID(alertSoundID);
 	[imageView dealloc];
 	[super dealloc];
 }
@@ -52,36 +53,35 @@
 }
 
 #pragma mark -
-#pragma mark IBAction
+#pragma mark Utilities for intarnal use
 
-- (IBAction)loadImage:(id)sender {
-	if(!actionSheetAction) {
-		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
-																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
-														otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", @"Use Default Lena", nil];
-		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
-		actionSheetAction = ActionSheetToSelectTypeOfSource;
-		[actionSheet showInView:self.view];
-		[actionSheet release];
+- (void)showProgressIndicator:(NSString *)text {
+	//[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+	self.view.userInteractionEnabled = FALSE;
+	if(!progressHUD) {
+		CGFloat w = 160.0f, h = 120.0f;
+		progressHUD = [[UIProgressHUD alloc] initWithFrame:CGRectMake((self.view.frame.size.width-w)/2, (self.view.frame.size.height-h)/2, w, h)];
+		[progressHUD setText:text];
+		[progressHUD showInView:self.view];
 	}
 }
 
-- (IBAction)saveImage:(id)sender {
-	if(imageView.image) {
-		UIImageWriteToSavedPhotosAlbum(imageView.image, self, @selector(finishUIImageWriteToSavedPhotosAlbum:didFinishSavingWithError:contextInfo:), nil);
+- (void)hideProgressIndicator {
+	//[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	self.view.userInteractionEnabled = TRUE;
+	if(progressHUD) {
+		[progressHUD hide];
+		[progressHUD release];
+		progressHUD = nil;
+
+		AudioServicesPlaySystemSound(alertSoundID);
 	}
 }
 
-- (void)finishUIImageWriteToSavedPhotosAlbum:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"" message:@"The image was saved in the photo album"
-												   delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
-	[alert show];	
-	[alert release];
-}
-
-- (IBAction)edgeDetect:(id)sender {
-	cvSetErrMode(CV_ErrModeParent);
+- (void)opencvEdgeDetect {
 	if(imageView.image) {
+		cvSetErrMode(CV_ErrModeParent);
+
 		// Create grayscale IplImage from UIImage
 		IplImage *img_color = [self CreateIplImageFromUIImage:imageView.image];
 		IplImage *img = cvCreateImage(cvGetSize(img_color), IPL_DEPTH_8U, 1);
@@ -104,7 +104,100 @@
 		cvReleaseImage(&img2);
 		imageView.image = [self UIImageFromIplImage:image];
 		cvReleaseImage(&image);
+
+		[self hideProgressIndicator];
 	}
+}
+
+- (void) opencvFaceDetect:(UIImage *)overlayImage  {
+	if(imageView.image) {
+		cvSetErrMode(CV_ErrModeParent);
+
+		IplImage *image = [self CreateIplImageFromUIImage:imageView.image];
+		
+		// Scaling down
+		IplImage *small_image = cvCreateImage(cvSize(image->width/2,image->height/2), IPL_DEPTH_8U, 3);
+		cvPyrDown(image, small_image, CV_GAUSSIAN_5x5);
+		int scale = 2;
+		
+		// Load XML
+		NSString *path = [[NSBundle mainBundle] pathForResource:@"haarcascade_frontalface_default" ofType:@"xml"];
+		CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*)cvLoad([path cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL);
+		CvMemStorage* storage = cvCreateMemStorage(0);
+		
+		// Detect faces and draw rectangle on them
+		CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
+		cvReleaseImage(&small_image);
+		
+		// Create canvas to show the results
+		CGImageRef imageRef = imageView.image.CGImage;
+		CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+		CGContextRef contextRef = CGBitmapContextCreate(NULL, imageView.image.size.width, imageView.image.size.height,
+														8, imageView.image.size.width * 4,
+														colorSpace, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
+		CGContextDrawImage(contextRef, CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height), imageRef);
+		
+		CGContextSetLineWidth(contextRef, 4);
+		CGContextSetRGBStrokeColor(contextRef, 0.0, 0.0, 1.0, 0.5);
+		
+		// Draw results on the iamge
+		for(int i = 0; i < faces->total; i++) {
+			NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+			
+			// Calc the rect of faces
+			CvRect cvrect = *(CvRect*)cvGetSeqElem(faces, i);
+			CGRect face_rect = CGContextConvertRectToDeviceSpace(contextRef, CGRectMake(cvrect.x * scale, cvrect.y * scale, cvrect.width * scale, cvrect.height * scale));
+			
+			if(overlayImage) {
+				CGContextDrawImage(contextRef, face_rect, overlayImage.CGImage);
+			} else {
+				CGContextStrokeRect(contextRef, face_rect);
+			}
+			
+			[pool release];
+		}
+		
+		imageView.image = [UIImage imageWithCGImage:CGBitmapContextCreateImage(contextRef)];
+		CGContextRelease(contextRef);
+		CGColorSpaceRelease(colorSpace);
+		
+		cvReleaseMemStorage(&storage);
+		cvReleaseHaarClassifierCascade(&cascade);
+
+		[self hideProgressIndicator];
+	}
+}
+
+
+#pragma mark -
+#pragma mark IBAction
+
+- (IBAction)loadImage:(id)sender {
+	if(!actionSheetAction) {
+		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
+																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
+														otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", @"Use Default Lena", nil];
+		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+		actionSheetAction = ActionSheetToSelectTypeOfSource;
+		[actionSheet showInView:self.view];
+		[actionSheet release];
+	}
+}
+
+- (IBAction)saveImage:(id)sender {
+	if(imageView.image) {
+		[self showProgressIndicator:@"Saving"];
+		UIImageWriteToSavedPhotosAlbum(imageView.image, self, @selector(finishUIImageWriteToSavedPhotosAlbum:didFinishSavingWithError:contextInfo:), nil);
+	}
+}
+
+- (void)finishUIImageWriteToSavedPhotosAlbum:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+	[self hideProgressIndicator];
+}
+
+- (IBAction)edgeDetect:(id)sender {
+	[self showProgressIndicator:@"Detecting"];
+	[self performSelectorInBackground:@selector(opencvEdgeDetect) withObject:nil];
 }
 
 - (IBAction)faceDetect:(id)sender {
@@ -123,19 +216,17 @@
 #pragma mark -
 #pragma mark UIViewControllerDelegate
 
-- (void)loadView {
-	[super loadView];
-	imageView.image = nil;
-}
-
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
 	[self loadImage:nil];
+
+	NSURL *url = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"Tink" ofType:@"aiff"] isDirectory:NO];
+	AudioServicesCreateSystemSoundID((CFURLRef)url, &alertSoundID);
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	return YES;
+	return NO;
 }
 
 #pragma mark -
@@ -172,61 +263,14 @@
 				break;
 			}
 
-			NSString *path;
-			IplImage *image = [self CreateIplImageFromUIImage:imageView.image];
-
-			// Scaling down
-			IplImage *small_image = cvCreateImage(cvSize(image->width/2,image->height/2), IPL_DEPTH_8U, 3);
-			cvPyrDown(image, small_image, CV_GAUSSIAN_5x5);
-			int scale = 2;
-			
-			// Load XML
-			path = [[NSBundle mainBundle] pathForResource:@"haarcascade_frontalface_default" ofType:@"xml"];
-			CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*)cvLoad([path cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL);
-			CvMemStorage* storage = cvCreateMemStorage(0);
-			
-			// Detect faces and draw rectangle on them
-			CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
-			cvReleaseImage(&small_image);
-
-			// Create canvas to show the results
-			CGImageRef imageRef = imageView.image.CGImage;
-			CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-			CGContextRef contextRef = CGBitmapContextCreate(NULL, imageView.image.size.width, imageView.image.size.height,
-															8, imageView.image.size.width * 4,
-															colorSpace, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
-			CGContextDrawImage(contextRef, CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height), imageRef);
-
-			CGContextSetLineWidth(contextRef, 4);
-			CGContextSetRGBStrokeColor(contextRef, 0.0, 0.0, 1.0, 0.5);
-			
-			path = [[NSBundle mainBundle] pathForResource:@"laughing_man" ofType:@"png"];
-			CGImageRef laughing_man = [UIImage imageWithContentsOfFile:path].CGImage;
-
-			// Draw results on the iamge
-			for(int i = 0; i < faces->total; i++) {
-				NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-
-				// Calc the rect of faces
-				CvRect cvrect = *(CvRect*)cvGetSeqElem(faces, i);
-				CGRect face_rect = CGContextConvertRectToDeviceSpace(contextRef, CGRectMake(cvrect.x * scale, cvrect.y * scale, cvrect.width * scale, cvrect.height * scale));
-
-				if(buttonIndex == 0) {
-					CGContextStrokeRect(contextRef, face_rect);
-				} else if(buttonIndex == 1) {
-					CGContextDrawImage(contextRef, face_rect, laughing_man);
-				}
-
-				[pool release];
+			UIImage *image = nil;
+			if(buttonIndex == 1) {
+				NSString *path = [[NSBundle mainBundle] pathForResource:@"laughing_man" ofType:@"png"];
+				image = [UIImage imageWithContentsOfFile:path];
 			}
 
-			imageView.image = [UIImage imageWithCGImage:CGBitmapContextCreateImage(contextRef)];
-			CGContextRelease(contextRef);
-			CGColorSpaceRelease(colorSpace);
-
-			cvReleaseMemStorage(&storage);
-			cvReleaseHaarClassifierCascade(&cascade);
-
+			[self showProgressIndicator:@"Detecting"];
+			[self performSelectorInBackground:@selector(opencvFaceDetect:) withObject:image];
 			break;
 		}
 	}

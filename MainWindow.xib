@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<archive type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="7.02">
+<archive type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="7.03">
 	<data>
 		<int key="IBDocument.SystemTarget">512</int>
-		<string key="IBDocument.SystemVersion">9E17</string>
-		<string key="IBDocument.InterfaceBuilderVersion">670</string>
-		<string key="IBDocument.AppKitVersion">949.33</string>
-		<string key="IBDocument.HIToolboxVersion">352.00</string>
+		<string key="IBDocument.SystemVersion">9G55</string>
+		<string key="IBDocument.InterfaceBuilderVersion">677</string>
+		<string key="IBDocument.AppKitVersion">949.43</string>
+		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="28"/>
+			<integer value="26"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+		</object>
+		<object class="NSMutableDictionary" key="IBDocument.Metadata">
+			<bool key="EncodedWithXMLCoder">YES</bool>
+			<object class="NSArray" key="dict.sortedKeys">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+			</object>
+			<object class="NSMutableArray" key="dict.values">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+			</object>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.RootObjects" id="1000">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -62,6 +71,10 @@
 							<int key="IBUIBarStyle">2</int>
 							<object class="NSMutableArray" key="IBUIItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="IBUIBarButtonItem" id="948588678">
+									<int key="IBUISystemItemIdentifier">5</int>
+									<reference key="IBUIToolbar" ref="1035851962"/>
+								</object>
 								<object class="IBUIBarButtonItem" id="767415372">
 									<string key="IBUITitle">Edge</string>
 									<int key="IBUIStyle">1</int>
@@ -72,7 +85,7 @@
 									<int key="IBUIStyle">1</int>
 									<reference key="IBUIToolbar" ref="1035851962"/>
 								</object>
-								<object class="IBUIBarButtonItem" id="948588678">
+								<object class="IBUIBarButtonItem" id="490634659">
 									<int key="IBUISystemItemIdentifier">5</int>
 									<reference key="IBUIToolbar" ref="1035851962"/>
 								</object>
@@ -90,7 +103,7 @@
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="IBUINavigationItem" id="912946853">
 									<reference key="IBUINavigationBar" ref="921304554"/>
-									<string key="IBUITitle">OpenCV</string>
+									<string key="IBUITitle"/>
 									<object class="IBUIBarButtonItem" key="IBUILeftBarButtonItem" id="824346888">
 										<int key="IBUIStyle">2</int>
 										<int key="IBUISystemItemIdentifier">15</int>
@@ -235,8 +248,8 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="1035851962"/>
-							<reference ref="1053640927"/>
 							<reference ref="921304554"/>
+							<reference ref="1053640927"/>
 						</object>
 						<reference key="parent" ref="943309135"/>
 					</object>
@@ -246,8 +259,9 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="767415372"/>
-							<reference ref="948588678"/>
+							<reference ref="490634659"/>
 							<reference ref="469280561"/>
+							<reference ref="948588678"/>
 						</object>
 						<reference key="parent" ref="453656443"/>
 					</object>
@@ -259,11 +273,6 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">17</int>
 						<reference key="object" ref="767415372"/>
-						<reference key="parent" ref="1035851962"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">19</int>
-						<reference key="object" ref="948588678"/>
 						<reference key="parent" ref="1035851962"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -300,6 +309,16 @@
 						<reference key="object" ref="824346888"/>
 						<reference key="parent" ref="912946853"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">30</int>
+						<reference key="object" ref="490634659"/>
+						<reference key="parent" ref="1035851962"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">31</int>
+						<reference key="object" ref="948588678"/>
+						<reference key="parent" ref="1035851962"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -316,7 +335,6 @@
 					<string>14.IBPluginDependency</string>
 					<string>15.IBPluginDependency</string>
 					<string>17.IBPluginDependency</string>
-					<string>19.IBPluginDependency</string>
 					<string>2.IBAttributePlaceholdersKey</string>
 					<string>2.IBEditorWindowLastContentRect</string>
 					<string>2.IBPluginDependency</string>
@@ -326,14 +344,15 @@
 					<string>28.IBPluginDependency</string>
 					<string>3.CustomClassName</string>
 					<string>3.IBPluginDependency</string>
+					<string>30.IBPluginDependency</string>
+					<string>31.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>UIApplication</string>
 					<string>UIResponder</string>
 					<string>OpenCVTestViewController</string>
-					<string>{{448, 351}, {320, 480}}</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>{{316, 163}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -357,6 +376,8 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>OpenCVTestAppDelegate</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -379,7 +400,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">29</int>
+			<int key="maxID">31</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
