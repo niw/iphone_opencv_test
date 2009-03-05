@@ -2,7 +2,7 @@ Using OpenCV on iPhone
 ----------------------
 This source repository includes pre-compiled OpenCV library and headeres
 so that you can get started easily!
-see /opencv_arm6 for iPhone device and /opencv_sim for iPhone simulator.
+see /opencv_arm6 for iPhone device and /opencv_sim for iPhone simulator(for Intel Mac only).
 
 Building Static Link Version of OpenCV
 --------------------------------------
