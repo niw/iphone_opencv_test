@@ -8,13 +8,20 @@ Building Static Link Version of OpenCV
 --------------------------------------
 If you want to build it from source code, you can do by next steps.
 
-1. 	Getting source code from sourceforge svn
+1. 	Getting source code from sourceforge. I tested with [opencv-1.1pre1.tar.gz](http://sourceforge.net/project/showfiles.php?group_id=22870&package_id=16948&release_id=634504).
 
-        % svn co https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/trunk/opencv opencv_svnhead
+2.  Extract tar.gz in the top of project dir
 
-2.  Edit opencv_build_scripts/configure_*.sh for your enviroment(--prefix etc...) if need
+        % tar xzvf opencv-1.1pre1.tar.gz
 
-3.  Build for each platforms(arm6, sim)
+3.  Edit opencv_build_scripts/configure_*.sh for your enviroment(--prefix etc...) if need
 
+4.  Build for each platforms(armv6, sim)
+
+        % cd opencv-1.1.0
         % mkdir build_(platform)
-        % pushd build_(platform); ../../opencv_build_scripts/configure_(platform).sh; make; make install; popd
+        % pushd build_(platform)
+		% ../../opencv_build_scripts/configure_(platform).sh
+		% make
+		% make install
+		% popd
