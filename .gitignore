@@ -2,4 +2,4 @@
 /*.xcodeproj/*.perspectivev3
 /*.xcodeproj/*.pbxuser
 /*.xcodeproj/*.mode*
-/opencv_snapshot
+/opencv-*
