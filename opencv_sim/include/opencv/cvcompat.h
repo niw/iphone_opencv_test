@@ -729,7 +729,7 @@ CV_INLINE void  cvProjectPoints( int point_count, CvPoint3D64f* _object_points,
 
     cvProjectPoints2( &object_points, &rotation_vector, &translation_vector,
                       &camera_matrix, &dist_coeffs, &image_points,
-                      &dpdr, &dpdt, &dpdf, &dpdc, &dpdk );
+                      &dpdr, &dpdt, &dpdf, &dpdc, &dpdk, 0 );
 }
 
 
@@ -747,7 +747,7 @@ CV_INLINE void  cvProjectPointsSimple( int point_count, CvPoint3D64f* _object_po
 
     cvProjectPoints2( &object_points, &rotation_matrix, &translation_vector,
                       &camera_matrix, &dist_coeffs, &image_points,
-                      0, 0, 0, 0, 0 );
+                      0, 0, 0, 0, 0, 0 );
 }
 
 
@@ -887,10 +887,12 @@ CV_INLINE  void  cvPolyLineAA( CvArr* img, CvPoint** pts, int* npts, int contour
 }
 
 
-#define cvMake2DPoints cvConvertPointsHomogenious
-#define cvMake3DPoints cvConvertPointsHomogenious
+#define cvMake2DPoints cvConvertPointsHomogeneous
+#define cvMake3DPoints cvConvertPointsHomogeneous
 
 #define cvWarpPerspectiveQMatrix cvGetPerspectiveTransform
+
+#define cvConvertPointsHomogenious cvConvertPointsHomogeneous
 
 /****************************************************************************************\
 *                                   Pixel Access Macros                                  *

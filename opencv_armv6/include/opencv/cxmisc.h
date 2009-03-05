@@ -147,11 +147,7 @@
 
 #define CV_IMPL CV_EXTERN_C
 
-#if defined WIN32 && !defined WIN64 && (_MSC_VER >= 1200 || defined CV_ICC)
-    #define CV_DBG_BREAK() __asm int 3
-#else
-    #define CV_DBG_BREAK() assert(0);
-#endif
+#define CV_DBG_BREAK() { volatile int* crashMe = 0; *crashMe = 0; }
 
 /* default step, set in case of continuous data
    to work around checks for valid step in some ipp functions */

@@ -1130,37 +1130,20 @@ CVAPI(void)  cvDeleteMoire( IplImage*  img );
  *	 Foreground Object Detection from Videos Containing Complex Background.
  *	 Liyuan Li, Weimin Huang, Irene Y.H. Gu, and Qi Tian. 
  *	 ACM MM2003 9p
- *	 http://muq.org/~cynbe/bib/foreground-object-detection-from-videos-containing-complex-background.pdf
  *
  *  o CV_BG_MODEL_FGD_SIMPLE:
  *       A code comment describes this as a simplified version of the above,
- *       but the code is in fact currently identical. (Cynbe 2008-05-25)
+ *       but the code is in fact currently identical
  *
  *  o CV_BG_MODEL_MOG: "Mixture of Gaussians", older algorithm, described in
  *
  *       Moving target classification and tracking from real-time video.
  *       A Lipton, H Fujijoshi, R Patil
  *       Proceedings IEEE Workshop on Application of Computer Vision pp 8-14 1998
- *       http://www.vision.cs.chubu.ac.jp/04/pdf/VSAM02.pdf
  *
  *       Learning patterns of activity using real-time tracking
  *       C Stauffer and W Grimson  August 2000
  *       IEEE Transactions on Pattern Analysis and Machine Intelligence 22(8):747-757
- *       http://people.csail.mit.edu/people/stauffer/Home/_papers/vsam-pami-tracking.ps
- *
- * Additional background may be found on the Wiki page
- *
- *       http://opencvlibrary.sourceforge.net/VideoSurveillance
- *
- * which in particular recommends the Intel semi-popular overview article
- *
- *       Computer Vision Workload Analysis: Case Study of Video Surveillance Systems
- *       Chen et al, Intel Technology Journal V09:02 , 2005 12p
- *       http://developer.intel.com/technology/itj/2005/volume09issue02/art02_computer_vision/vol09_art02.pdf
- *
- * which has both a good overview of the blobtracker software in particular,
- * and also many references to introductory (and advanced) papers on computer vision.
- *
  */
 
 
@@ -1391,6 +1374,51 @@ CvGaussBGModel;
 /* Creates Gaussian mixture background model */
 CVAPI(CvBGStatModel*) cvCreateGaussianBGModel( IplImage* first_frame,
                 CvGaussBGStatModelParams* parameters CV_DEFAULT(NULL));
+
+
+typedef struct CvBGCodeBookElem
+{
+    struct CvBGCodeBookElem* next;
+    int tLastUpdate;
+    int stale;
+    uchar boxMin[3];
+    uchar boxMax[3];
+    uchar learnMin[3];
+    uchar learnMax[3];
+}
+CvBGCodeBookElem;
+
+typedef struct CvBGCodeBookModel
+{
+    CvSize size;
+    int t;
+    uchar cbBounds[3];
+    uchar modMin[3];
+    uchar modMax[3];
+    CvBGCodeBookElem** cbmap;
+    CvMemStorage* storage;
+    CvBGCodeBookElem* freeList;
+}
+CvBGCodeBookModel;
+
+CVAPI(CvBGCodeBookModel*) cvCreateBGCodeBookModel();
+CVAPI(void) cvReleaseBGCodeBookModel( CvBGCodeBookModel** model );
+
+CVAPI(void) cvBGCodeBookUpdate( CvBGCodeBookModel* model, const CvArr* image,
+                                CvRect roi CV_DEFAULT(cvRect(0,0,0,0)),
+                                const CvArr* mask CV_DEFAULT(0) );
+
+CVAPI(int) cvBGCodeBookDiff( const CvBGCodeBookModel* model, const CvArr* image,
+                             CvArr* fgmask, CvRect roi CV_DEFAULT(cvRect(0,0,0,0)) );
+
+CVAPI(void) cvBGCodeBookClearStale( CvBGCodeBookModel* model, int staleThresh,
+                                    CvRect roi CV_DEFAULT(cvRect(0,0,0,0)),
+                                    const CvArr* mask CV_DEFAULT(0) );
+
+CVAPI(CvSeq*) cvSegmentFGMask( CvArr *fgmask, int poly1Hull0 CV_DEFAULT(1),
+                               float perimScale CV_DEFAULT(4.f),
+                               CvMemStorage* storage CV_DEFAULT(0),
+                               CvPoint offset CV_DEFAULT(cvPoint(0,0)));
 
 #ifdef __cplusplus
 }

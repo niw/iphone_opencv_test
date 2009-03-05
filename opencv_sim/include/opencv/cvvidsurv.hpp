@@ -115,7 +115,7 @@ private: /* Internal functions: */
         if(p->pComment)free(p->pComment);
         cvFree((void**)pp);
     }
-    CvDefParam* NewParam(char* name)
+    CvDefParam* NewParam(const char* name)
     {
         CvDefParam* pNew = (CvDefParam*)cvAlloc(sizeof(CvDefParam));
         memset(pNew,0,sizeof(CvDefParam));
@@ -139,7 +139,7 @@ private: /* Internal functions: */
         for(;index>0 && p;index--,p=p->next);
         return p;
     }
-    CvDefParam* GetParamPtr(char* name)
+    CvDefParam* GetParamPtr(const char* name)
     {
         CvDefParam* p = m_pParamList;
         for(;p;p=p->next)
@@ -149,23 +149,23 @@ private: /* Internal functions: */
         return p;
     }
 protected: /* INTERNAL INTERFACE */
-    int  IsParam(char* name)
+    int  IsParam(const char* name)
     {
         return GetParamPtr(name)?1:0;
     };
-    void AddParam(char* name, double* pAddr)
+    void AddParam(const char* name, double* pAddr)
     {
         NewParam(name)->pDouble = pAddr;
     };
-    void AddParam(char* name, float* pAddr)
+    void AddParam(const char* name, float* pAddr)
     {
         NewParam(name)->pFloat=pAddr;
     };
-    void AddParam(char* name, int* pAddr)
+    void AddParam(const char* name, int* pAddr)
     {
         NewParam(name)->pInt=pAddr;
     };
-    void AddParam(char* name, char** pAddr)
+    void AddParam(const char* name, char** pAddr)
     {
         CvDefParam* pP = NewParam(name);
         char* p = pAddr?pAddr[0]:NULL;
@@ -176,19 +176,19 @@ protected: /* INTERNAL INTERFACE */
             pP->pStr[0] = pP->Str;
         }
     };
-    void AddParam(char* name)
+    void AddParam(const char* name)
     {
         CvDefParam* p = NewParam(name);
         p->pDouble = &p->Double;
     };
-    void CommentParam(char* name, char* pComment)
+    void CommentParam(const char* name, const char* pComment)
     {
         CvDefParam* p = GetParamPtr(name);
         if(p)p->pComment = pComment ? strdup(pComment) : 0;
     };
-    void SetTypeName(char* name){m_pModuleTypeName = strdup(name);}
-    void SetModuleName(char* name){m_pModuleName = strdup(name);}
-    void DelParam(char* name)
+    void SetTypeName(const char* name){m_pModuleTypeName = strdup(name);}
+    void SetModuleName(const char* name){m_pModuleName = strdup(name);}
+    void DelParam(const char* name)
     {
         CvDefParam* p = m_pParamList;
         CvDefParam* pPrev = NULL;
@@ -217,13 +217,13 @@ public: /* EXTERNAL INTERFACE */
         CvDefParam* p = GetParamPtr(index);
         return p?p->pName:NULL;
     }
-    char* GetParamComment(char* name)
+    char* GetParamComment(const char* name)
     {
         CvDefParam* p = GetParamPtr(name);
         if(p && p->pComment) return p->pComment;
         return NULL;
     }
-    double GetParam(char* name)
+    double GetParam(const char* name)
     {
         CvDefParam* p = GetParamPtr(name);
         if(p)
@@ -235,12 +235,12 @@ public: /* EXTERNAL INTERFACE */
         return 0;
     };
 
-    char* GetParamStr(char* name)
+    const char* GetParamStr(const char* name)
     {
         CvDefParam* p = GetParamPtr(name);
         return p?p->Str:NULL;
     }
-    void   SetParam(char* name, double val)
+    void   SetParam(const char* name, double val)
     {
         CvDefParam* p = m_pParamList;
         for(;p;p=p->next)
@@ -251,7 +251,7 @@ public: /* EXTERNAL INTERFACE */
             if(p->pInt)p->pInt[0] = cvRound(val);
         }
     }
-    void   SetParamStr(char* name, char* str)
+    void   SetParamStr(const char* name, const char* str)
     {
         CvDefParam* p = m_pParamList;
         for(; p; p=p->next)
@@ -298,7 +298,7 @@ public: /* EXTERNAL INTERFACE */
             }
             if(pM->GetParamStr(N))
             {
-                char* val = pM->GetParamStr(N);
+                const char* val = pM->GetParamStr(N);
                 SetParamStr(FN,val);
             }
             else
@@ -341,11 +341,11 @@ public: /* EXTERNAL INTERFACE */
     }/* Transfer params */
 
     virtual void ParamUpdate(){};
-    char*   GetTypeName()
+    const char*   GetTypeName()
     {
         return m_pModuleTypeName;
     }
-    int     IsModuleTypeName(char* name)
+    int     IsModuleTypeName(const char* name)
     {
         return m_pModuleTypeName?(cv_stricmp(m_pModuleTypeName,name)==0):0;
     }
@@ -353,11 +353,11 @@ public: /* EXTERNAL INTERFACE */
     {
         return m_pModuleName;
     }
-    int     IsModuleName(char* name)
+    int     IsModuleName(const char* name)
     {
         return m_pModuleName?(cv_stricmp(m_pModuleName,name)==0):0;
     }
-    void SetNickName(char* pStr)
+    void SetNickName(const char* pStr)
     {
         if(m_pNickName)
             free(m_pNickName);
@@ -367,22 +367,22 @@ public: /* EXTERNAL INTERFACE */
         if(pStr)
             m_pNickName = strdup(pStr);
     }
-    char* GetNickName()
+    const char* GetNickName()
     {
-        return m_pNickName ? m_pNickName : (char *)"unknown";
+        return m_pNickName ? m_pNickName : "unknown";
     }
     virtual void SaveState(CvFileStorage*){};
     virtual void LoadState(CvFileStorage*, CvFileNode*){};
 
     virtual void Release() = 0;
 };/* CvVMModule */
-void inline cvWriteStruct(CvFileStorage* fs, char* name, void* addr, char* desc, int num=1)
+void inline cvWriteStruct(CvFileStorage* fs, const char* name, void* addr, char* desc, int num=1)
 {
     cvStartWriteStruct(fs,name,CV_NODE_SEQ|CV_NODE_FLOW);
     cvWriteRawData(fs,addr,num,desc);
     cvEndWriteStruct(fs);
 }
-void inline cvReadStructByName(CvFileStorage* fs, CvFileNode* node, char* name, void* addr, char* desc)
+void inline cvReadStructByName(CvFileStorage* fs, CvFileNode* node, const char* name, void* addr, char* desc)
 {
     CvFileNode* pSeqNode = cvGetFileNodeByName(fs, node, name);
     if(pSeqNode==NULL)
@@ -504,12 +504,12 @@ public:
     {
         return m_pSeq->total;
     };
-    virtual void Write(CvFileStorage* fs, char* name)
+    virtual void Write(CvFileStorage* fs, const char* name)
     {
-        char*  attr[] = {"dt",m_pElemFormat,NULL};
+        const char*  attr[] = {"dt",m_pElemFormat,NULL};
         if(fs)
         {
-            cvWrite(fs,name,m_pSeq,cvAttrList((const char**)attr,NULL));
+            cvWrite(fs,name,m_pSeq,cvAttrList(attr,NULL));
         }
     }
     virtual void Load(CvFileStorage* fs, CvFileNode* node)

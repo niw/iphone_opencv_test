@@ -243,6 +243,8 @@ CVAPI(CvCapture*) cvCreateFileCapture( const char* filename );
 
 #define CV_CAP_UNICAP   600   // Unicap drivers
 
+#define CV_CAP_DSHOW    700   // DirectShow (via videoInput)
+
 /* start capturing frames from camera: index = camera_index + domain_offset (CV_CAP_*) */
 CVAPI(CvCapture*) cvCreateCameraCapture( int index );
 

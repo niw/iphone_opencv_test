@@ -676,6 +676,15 @@ CVAPI(void) cvRandArr( CvRNG* rng, CvArr* arr, int dist_type,
 CVAPI(void) cvRandShuffle( CvArr* mat, CvRNG* rng,
                            double iter_factor CV_DEFAULT(1.));
 
+#define CV_SORT_EVERY_ROW 0
+#define CV_SORT_EVERY_COLUMN 1
+#define CV_SORT_ASCENDING 0
+#define CV_SORT_DESCENDING 16
+
+CVAPI(void) cvSort( const CvArr* src, CvArr* dst CV_DEFAULT(NULL),
+                    CvArr* idxmat CV_DEFAULT(NULL),
+                    int flags CV_DEFAULT(0));
+
 /* Finds real roots of a cubic equation */
 CVAPI(int) cvSolveCubic( const CvMat* coeffs, CvMat* roots );
 
@@ -724,6 +733,8 @@ CVAPI(void) cvMulTransposed( const CvArr* src, CvArr* dst, int order,
 CVAPI(void)  cvTranspose( const CvArr* src, CvArr* dst );
 #define cvT cvTranspose
 
+/* Completes the symmetric matrix from the lower (LtoR=0) or from the upper (LtoR!=0) part */
+CVAPI(void)  cvCompleteSymm( CvMat* matrix, int LtoR CV_DEFAULT(0) );
 
 /* Mirror array data around horizontal (flip=0),
    vertical (flip=1) or both(flip=-1) axises:
@@ -750,6 +761,8 @@ CVAPI(void)   cvSVBkSb( const CvArr* W, const CvArr* U,
 #define CV_LU  0
 #define CV_SVD 1
 #define CV_SVD_SYM 2
+#define CV_LSQ 8
+
 /* Inverts matrix */
 CVAPI(double)  cvInvert( const CvArr* src, CvArr* dst,
                          int method CV_DEFAULT(CV_LU));
@@ -1744,6 +1757,19 @@ CVAPI(int)  cvGetNumThreads( void );
 CVAPI(void) cvSetNumThreads( int threads CV_DEFAULT(0) );
 /* get index of the thread being executed */
 CVAPI(int)  cvGetThreadNum( void );
+
+/*************** Convenience functions for better interaction with HighGUI **************/
+
+typedef IplImage* (CV_CDECL * CvLoadImageFunc)( const char* filename, int colorness );
+typedef CvMat* (CV_CDECL * CvLoadImageMFunc)( const char* filename, int colorness );
+typedef int (CV_CDECL * CvSaveImageFunc)( const char* filename, const CvArr* image );
+typedef void (CV_CDECL * CvShowImageFunc)( const char* windowname, const CvArr* image );
+
+CVAPI(int) cvSetImageIOFunctions( CvLoadImageFunc _load_image, CvLoadImageMFunc _load_image_m,
+                            CvSaveImageFunc _save_image, CvShowImageFunc _show_image );
+
+#define CV_SET_IMAGE_IO_FUNCTIONS() \
+    cvSetImageIOFunctions( cvLoadImage, cvLoadImageM, cvSaveImage, cvShowImage )
 
 #ifdef __cplusplus
 }

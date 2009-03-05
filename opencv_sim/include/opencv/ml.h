@@ -593,11 +593,9 @@ public:
     enum { START_E_STEP=1, START_M_STEP=2, START_AUTO_STEP=0 };
 
     CvEM();
+    CvEM( const CvMat* samples, const CvMat* sample_idx=0,
+          CvEMParams params=CvEMParams(), CvMat* labels=0 );
 
-    // TODO: implement non-default constructor!
-    //       see bug 1830346 on the sourceforge bug tracker
-    //CvEM( const CvMat* samples, const CvMat* sample_idx=0,
-    //      CvEMParams params=CvEMParams(), CvMat* labels=0 );
     virtual ~CvEM();
 
     virtual bool train( const CvMat* samples, const CvMat* sample_idx=0,
@@ -611,6 +609,8 @@ public:
     const CvMat** get_covs() const;
     const CvMat* get_weights() const;
     const CvMat* get_probs() const;
+
+    inline double get_log_likelihood () const { return log_likelihood; };
 
 protected:
 
