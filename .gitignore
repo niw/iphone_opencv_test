@@ -1,0 +1,4 @@
+/build
+/*.xcodeproj/*.perspectivev3
+/*.xcodeproj/*.pbxuser
+/*.xcodeproj/*.mode*
