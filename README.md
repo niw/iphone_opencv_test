@@ -8,7 +8,7 @@ Building Static Link Version of OpenCV
 --------------------------------------
 If you want to build it from source code, you can do by next steps.
 
-1. 	Getting source code from sourceforge. I tested with [opencv-1.1pre1.tar.gz](http://sourceforge.net/project/showfiles.php?group_id=22870&package_id=16948&release_id=634504).
+1.  Getting source code from sourceforge. I tested with [opencv-1.1pre1.tar.gz](http://sourceforge.net/project/showfiles.php?group_id=22870&package_id=16948&release_id=634504).
 
 2.  Extract tar.gz in the top of project dir
 
@@ -21,7 +21,7 @@ If you want to build it from source code, you can do by next steps.
         % cd opencv-1.1.0
         % mkdir build_(platform)
         % pushd build_(platform)
-		% ../../opencv_build_scripts/configure_(platform).sh
-		% make
-		% make install
-		% popd
+        % ../../opencv_build_scripts/configure_(platform).sh
+        % make
+        % make install
+        % popd
