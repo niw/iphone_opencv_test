@@ -215,15 +215,16 @@
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_sim/include";
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
+					"-lstdc++",
 					"$(SRCROOT)/opencv_armv6/lib/libcv.a",
 					"$(SRCROOT)/opencv_armv6/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
+					"-lstdc++",
 					"$(SRCROOT)/opencv_sim/lib/libcv.a",
 					"$(SRCROOT)/opencv_sim/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 			};
 			name = Debug;
 		};
@@ -238,15 +239,16 @@
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_sim/include";
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
+					"-lstdc++",
 					"$(SRCROOT)/opencv_armv6/lib/libcv.a",
 					"$(SRCROOT)/opencv_armv6/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
+					"-lstdc++",
 					"$(SRCROOT)/opencv_sim/lib/libcv.a",
 					"$(SRCROOT)/opencv_sim/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 			};
 			name = Release;
 		};
