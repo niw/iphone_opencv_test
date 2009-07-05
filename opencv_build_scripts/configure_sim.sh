@@ -1,10 +1,27 @@
 #!/bin/sh
+if [ -z "${SDK_VERSION}" ]; then
+	SDK_VERSION=3.0
+fi
+if [ -z "${GCC_VERSION}" ]; then
+	if [ `expr ${SDK_VERSION} \\>= 3.0` = '1' ]; then
+		GCC_VERSION=4.2
+	else
+		GCC_VERSION=4.0
+	fi
+fi
+PLATFORM=/Developer/Platforms/iPhoneSimulator.platform
+BIN=${PLATFORM}/Developer/usr/bin
+SDK=${PLATFORM}/Developer/SDKs/iPhoneSimulator${SDK_VERSION}.sdk
+
 PREFIX=`pwd`/`dirname $0`/../opencv_sim
-PATH=/bin:/sbin:/usr/bin:/usr/sbin:/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:${BIN}
+
 ../configure --prefix=${PREFIX} \
-	--host=i686-apple-darwin \
+	--build=i686-apple-darwin9 \
+	--host=i686-apple-darwin9 \
 	--enable-static \
 	--disable-shared \
+	--disable-apps \
 	--without-python \
 	--without-ffmpeg \
 	--without-1394libs \
@@ -14,11 +31,10 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/Developer/Platforms/iPhoneSimulator.platform
 	--without-carbon \
 	--without-gtk \
 	--without-gthread \
-	--disable-apps \
-	CC=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/i686-apple-darwin9-gcc-4.0.1 \
-	CXX=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/i686-apple-darwin9-g++-4.0.1 \
-	CFLAGS="-arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator2.2.sdk" \
-	CXXFLAGS="-arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator2.2.sdk" \
-	CPP=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/cpp \
-	CXXCPP=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/cpp \
-	AR=/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/ar
+	CC=${BIN}/gcc-${GCC_VERSION} \
+	CXX=${BIN}/g++-${GCC_VERSION} \
+	CFLAGS="-arch i686 -isysroot ${SDK}" \
+	CXXFLAGS="-arch i686 -isysroot ${SDK}" \
+	CPP=${BIN}/cpp-${GCC_VERSION} \
+	CXXCPP=${BIN}/cpp-${GCC_VERSION} \
+	AR=${BIN}/ar
