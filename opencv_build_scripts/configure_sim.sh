@@ -6,9 +6,9 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/Developer/Platforms/iPhoneSimulator.platform
 	--enable-static \
 	--disable-shared \
 	--without-python \
-	--without-ffmepg \
-	--without-1392libs \
-	--without-v41 \
+	--without-ffmpeg \
+	--without-1394libs \
+	--without-v4l \
 	--without-imageio \
 	--without-quicktime \
 	--without-carbon \
