@@ -1,0 +1,72 @@
+#!/bin/sh
+if [ "$1" = "--help" -o "$1" = "-h" ]; then
+	echo "Usage: $0 [Options] [Enviroment Variables]"
+	echo ""
+	echo "OPTIONS"
+	echo "  -h, --help    Show this guide"
+	echo ""
+	echo "ENVIROMENT VARIABLES"
+	echo "  SDK_VERION    Select iPhone SDK Version (2.0, 2.1, 2.2, 2.2.1, 3.0[default] and more)"
+	echo "  GCC_VERSION   Select GCC Version (4.0 for SDK 2.x, 3.x, 4.2 for SDK 3.x and more[default])"
+	echo "  ARCH          Select target architecture (arm for device, i686 for simulator[default])"
+	echo ""
+	echo "EXAMPLES"
+	echo "  % $0                            Making OpenCV with SDK3.0 using GCC4.2 for iPhone simulator"
+	echo "  % $0 GCC_VERISON=4.0 ARCH=arm   Making OpenCV with SDK3.0 using GCC4.0 for iPhone device"
+	echo "  % $0 SDK_VERISON=3.0 ARCH=arm   Making OpenCV with SDK3.0 using GCC4.2 for iPhone device"
+	echo "  % $0 SDK_VERSION=2.2.1          Making OpenCV with SDK2.2.1 using GCC4.0 for iPhone simulator"
+	exit
+fi
+if [ -z "${SDK_VERSION}" ]; then
+	SDK_VERSION=3.0
+fi
+if [ -z "${GCC_VERSION}" ]; then
+	if [ `expr ${SDK_VERSION} \\>= 3.0` = '1' ]; then
+		GCC_VERSION=4.2
+	else
+		GCC_VERSION=4.0
+	fi
+fi
+if [ -z "${ARCH}" ]; then
+	ARCH=i686
+fi
+if [ "${ARCH}" = "i686" ]; then
+	ARCH_SDKNAME=Simulator
+	ARCH_FLAG=i686
+elif [ "${ARCH}" = "arm" ]; then
+	ARCH_SDKNAME=OS
+	ARCH_FLAG=armv6
+else
+	echo "Please select target architecture with ARCH enviroment variable (i686 or arm)"
+	exit
+fi
+PLATFORM=/Developer/Platforms/iPhone${ARCH_SDKNAME}.platform
+BIN=${PLATFORM}/Developer/usr/bin
+SDK=${PLATFORM}/Developer/SDKs/iPhone${ARCH_SDKNAME}${SDK_VERSION}.sdk
+
+PREFIX=`pwd`/`dirname $0`/opencv_${ARCH}
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:${BIN}
+
+../configure --prefix=${PREFIX} \
+	--build=${ARCH}-apple-darwin9 \
+	--host=${ARCH}-apple-darwin9 \
+	--enable-static \
+	--disable-shared \
+	--disable-sse \
+	--disable-apps \
+	--without-python \
+	--without-ffmpeg  \
+	--without-1394libs \
+	--without-v4l \
+	--without-imageio \
+	--without-quicktime \
+	--without-carbon \
+	--without-gtk \
+	--without-gthread \
+	CC=${BIN}/gcc-${GCC_VERSION} \
+	CXX=${BIN}/g++-${GCC_VERSION} \
+	CFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
+	CXXFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
+	CPP=${BIN}/cpp-${GCC_VERSION} \
+	CXXCPP=${BIN}/cpp-${GCC_VERSION} \
+	AR=${BIN}/ar
