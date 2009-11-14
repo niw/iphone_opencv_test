@@ -6,9 +6,12 @@ if [ "$1" = "--help" -o "$1" = "-h" ]; then
 	echo "  -h, --help    Show this guide"
 	echo ""
 	echo "ENVIROMENT VARIABLES"
-	echo "  SDK_VERION    Select iPhone SDK Version (2.0, 2.1, 2.2, 2.2.1, 3.0[default] and more)"
-	echo "  GCC_VERSION   Select GCC Version (4.0 for SDK 2.x, 3.x, 4.2 for SDK 3.x and more[default])"
-	echo "  ARCH          Select target architecture (arm for device, i686 for simulator[default])"
+	echo "  SDK_VERION    Select iPhone SDK Version (2.0, 2.1, 2.2, 2.2.1, 3.0, 3.1, 3.1.2 and more)"
+	echo "                Default = 3.1.2"
+	echo "  GCC_VERSION   Select GCC Version (4.0 for SDK 2.x, 3.x, 4.2 for SDK 3.x and more)"
+	echo "                Default = 4.0 for SDK 2.x, 4.2 for SDK 3.x"
+	echo "  ARCH          Select target architecture (arm for device, i686 for simulator)"
+	echo "                Default = i686"
 	echo ""
 	echo "EXAMPLES"
 	echo "  % $0                            Making OpenCV with SDK3.0 using GCC4.2 for iPhone simulator"
@@ -18,7 +21,7 @@ if [ "$1" = "--help" -o "$1" = "-h" ]; then
 	exit
 fi
 if [ -z "${SDK_VERSION}" ]; then
-	SDK_VERSION=3.0
+	SDK_VERSION=3.1.2
 fi
 if [ -z "${GCC_VERSION}" ]; then
 	if [ `expr ${SDK_VERSION} \\>= 3.0` = '1' ]; then
@@ -40,6 +43,8 @@ else
 	echo "Please select target architecture with ARCH enviroment variable (i686 or arm)"
 	exit
 fi
+echo "Use iPhone SDK ${SDK_VERSION}(gcc ${GCC_VERSION}) for ${ARCH}"
+
 PLATFORM=/Developer/Platforms/iPhone${ARCH_SDKNAME}.platform
 BIN=${PLATFORM}/Developer/usr/bin
 SDK=${PLATFORM}/Developer/SDKs/iPhone${ARCH_SDKNAME}${SDK_VERSION}.sdk
@@ -48,7 +53,7 @@ PREFIX=`pwd`/`dirname $0`/opencv_${ARCH}
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:${BIN}
 
 ../configure --prefix=${PREFIX} \
-	--build=${ARCH}-apple-darwin9 \
+	--build=i686-apple-darwin9 \
 	--host=${ARCH}-apple-darwin9 \
 	--enable-static \
 	--disable-shared \
