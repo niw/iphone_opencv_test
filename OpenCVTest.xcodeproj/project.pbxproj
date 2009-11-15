@@ -34,7 +34,7 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* OpenCVTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCVTest_Prefix.pch; sourceTree = "<group>"; };
 		540723ED0E3DD25B00B598A2 /* OpenCVTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenCVTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = haarcascade_frontalface_default.xml; path = opencv_armv6/share/opencv/haarcascades/haarcascade_frontalface_default.xml; sourceTree = "<group>"; };
+		540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = haarcascade_frontalface_default.xml; path = opencv_device/share/opencv/haarcascades/haarcascade_frontalface_default.xml; sourceTree = "<group>"; };
 		540ABCF50E3E280700E30885 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -211,18 +211,20 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OpenCVTest_Prefix.pch;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_armv6/include";
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_sim/include";
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/include";
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
 					"-lstdc++",
-					"$(SRCROOT)/opencv_armv6/lib/libcv.a",
-					"$(SRCROOT)/opencv_armv6/lib/libcxcore.a",
+					"-lz",
+					"$(SRCROOT)/opencv_device/lib/libcv.a",
+					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
 					"-lstdc++",
-					"$(SRCROOT)/opencv_sim/lib/libcv.a",
-					"$(SRCROOT)/opencv_sim/lib/libcxcore.a",
+					"-lz",
+					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
+					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
 			};
@@ -235,18 +237,20 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OpenCVTest_Prefix.pch;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_armv6/include";
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_sim/include";
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/include";
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
 					"-lstdc++",
-					"$(SRCROOT)/opencv_armv6/lib/libcv.a",
-					"$(SRCROOT)/opencv_armv6/lib/libcxcore.a",
+					"-lz",
+					"$(SRCROOT)/opencv_device/lib/libcv.a",
+					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
 					"-lstdc++",
-					"$(SRCROOT)/opencv_sim/lib/libcv.a",
-					"$(SRCROOT)/opencv_sim/lib/libcxcore.a",
+					"-lz",
+					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
+					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
 			};
