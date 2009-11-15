@@ -3,3 +3,5 @@
 /*.xcodeproj/*.pbxuser
 /*.xcodeproj/*.mode*
 /opencv-*
+/opencv_*/lib/*.la
+/opencv_*/lib/pkgconfig
