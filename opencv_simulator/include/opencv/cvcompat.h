@@ -654,7 +654,7 @@ CV_INLINE void cvFindExtrinsicCameraParams( int point_count,
     a[8] = 1.f;
 
     cvFindExtrinsicCameraParams2( &object_points, &image_points, &camera_matrix,
-        &dist_coeffs, &rotation_vector, &translation_vector );
+        &dist_coeffs, &rotation_vector, &translation_vector, 0 );
 }
 
 
@@ -679,7 +679,7 @@ CV_INLINE void cvFindExtrinsicCameraParams_64d( int point_count,
     a[8] = 1.;
 
     cvFindExtrinsicCameraParams2( &object_points, &image_points, &camera_matrix,
-        &dist_coeffs, &rotation_vector, &translation_vector );
+        &dist_coeffs, &rotation_vector, &translation_vector, 0 );
 }
 
 
@@ -818,7 +818,7 @@ CV_INLINE  void  cvKMeans( int num_clusters, float** samples,
     int i;
     for( i = 0; i < num_samples; i++ )
         memcpy( samples_mat->data.fl + i*vec_size, samples[i], vec_size*sizeof(float));
-    cvKMeans2( samples_mat, num_clusters, &cluster_idx_mat, termcrit );
+    cvKMeans2( samples_mat, num_clusters, &cluster_idx_mat, termcrit, 1, 0, 0, 0, 0 );
     cvReleaseMat( &samples_mat );
 }
 

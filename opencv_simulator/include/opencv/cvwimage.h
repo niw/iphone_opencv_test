@@ -327,7 +327,7 @@ public:
 
     // Clone an image which reallocates the image if of a different dimension.
     void CloneFrom(const WImage<T>& src) {
-        Allocate(src.Width(), src.Height());
+        Allocate(src.Width(), src.Height(), src.Channels());
         CopyFrom(src);
     }
 
@@ -506,7 +506,7 @@ protected:
 template<>
 inline int WImage<uchar>::Depth() const {return IPL_DEPTH_8U; }
 template<>
-inline int WImage<schar>::Depth() const {return IPL_DEPTH_8S; }
+inline int WImage<signed char>::Depth() const {return IPL_DEPTH_8S; }
 template<>
 inline int WImage<short>::Depth() const {return IPL_DEPTH_16S; }
 template<>

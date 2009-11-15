@@ -1164,7 +1164,7 @@ typedef int (CV_CDECL * CvUpdateBGStatModel)( IplImage* curr_frame, struct CvBGS
     IplImage*       foreground;   /*8UC1 foreground image*/                         \
     IplImage**      layers;       /*8UC3 reference background image, can be null */ \
     int             layer_count;  /* can be zero */                                 \
-    CvMemStorage*   storage;      /*storage for “foreground_regions”*/              \
+    CvMemStorage*   storage;      /*storage for foreground_regions*/                \
     CvSeq*          foreground_regions /*foreground object contours*/
 
 typedef struct CvBGStatModel
@@ -1566,7 +1566,6 @@ protected:
 
 #include "cvaux.hpp"
 #include "cvvidsurv.hpp"
-/*#include "cvmat.hpp"*/
 #endif
 
 #endif

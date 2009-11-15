@@ -7,10 +7,11 @@
 //  copy or use the software.
 //
 //
-//                        Intel License Agreement
+//                           License Agreement
 //                For Open Source Computer Vision Library
 //
-// Copyright (C) 2000, Intel Corporation, all rights reserved.
+// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
+// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -23,7 +24,7 @@
 //     this list of conditions and the following disclaimer in the documentation
 //     and/or other materials provided with the distribution.
 //
-//   * The name of Intel Corporation may not be used to endorse or promote products
+//   * The name of the copyright holders may not be used to endorse or promote products
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
@@ -38,7 +39,6 @@
 // the use of this software, even if advised of the possibility of such damage.
 //
 //M*/
-
 
 #ifndef _CV_H_
 #define _CV_H_
@@ -102,7 +102,7 @@ CVAPI(void) cvIntegral( const CvArr* image, CvArr* sum,
 CVAPI(void)  cvPyrDown( const CvArr* src, CvArr* dst,
                         int filter CV_DEFAULT(CV_GAUSSIAN_5x5) );
 
-/* 
+/*
    Up-samples image and smoothes the result with gaussian kernel.
    dst_width = src_width*2,
    dst_height = src_height*2
@@ -131,7 +131,7 @@ CVAPI(void) cvPyrSegmentation( IplImage* src, IplImage* dst,
                               double threshold2 );
 
 /* Filters image using meanshift algorithm */
-CVAPI(void) cvPyrMeanShiftFiltering( const CvArr* src, CvArr* dst, 
+CVAPI(void) cvPyrMeanShiftFiltering( const CvArr* src, CvArr* dst,
     double sp, double sr, int max_level CV_DEFAULT(1),
     CvTermCriteria termcrit CV_DEFAULT(cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS,5,1)));
 
@@ -269,14 +269,14 @@ CVAPI(void)  cvCvtColor( const CvArr* src, CvArr* dst, int code );
 CVAPI(void)  cvResize( const CvArr* src, CvArr* dst,
                        int interpolation CV_DEFAULT( CV_INTER_LINEAR ));
 
-/* Warps image with affine transform */ 
+/* Warps image with affine transform */
 CVAPI(void)  cvWarpAffine( const CvArr* src, CvArr* dst, const CvMat* map_matrix,
                            int flags CV_DEFAULT(CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS),
                            CvScalar fillval CV_DEFAULT(cvScalarAll(0)) );
 
 /* Computes affine transform matrix for mapping src[i] to dst[i] (i=0,1,2) */
-CVAPI(CvMat*) cvGetAffineTransform( const CvPoint2D32f * src, 
-                                    const CvPoint2D32f * dst, 
+CVAPI(CvMat*) cvGetAffineTransform( const CvPoint2D32f * src,
+                                    const CvPoint2D32f * dst,
                                     CvMat * map_matrix );
 
 /* Computes rotation_matrix matrix */
@@ -306,6 +306,11 @@ CVAPI(void)  cvConvertMaps( const CvArr* mapx, const CvArr* mapy,
 /* Performs forward or inverse log-polar image transform */
 CVAPI(void)  cvLogPolar( const CvArr* src, CvArr* dst,
                          CvPoint2D32f center, double M,
+                         int flags CV_DEFAULT(CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS));
+
+/* Performs forward or inverse linear-polar image transform */
+CVAPI(void)  cvLinearPolar( const CvArr* src, CvArr* dst,
+                         CvPoint2D32f center, double maxRadius,
                          int flags CV_DEFAULT(CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS));
 
 #define  CV_SHAPE_RECT      0
@@ -535,7 +540,7 @@ CVAPI(void)    cvCalcMotionGradient( const CvArr* mhi, CvArr* mask, CvArr* orien
                                      double delta1, double delta2,
                                      int aperture_size CV_DEFAULT(3));
 
-/* Calculates average motion direction within a selected motion region 
+/* Calculates average motion direction within a selected motion region
    (region can be selected by setting ROIs and/or by composing a valid gradient mask
    with the region mask) */
 CVAPI(double)  cvCalcGlobalOrientation( const CvArr* orientation, const CvArr* mask,
@@ -1039,7 +1044,7 @@ CVAPI(void)  cvGoodFeaturesToTrack( const CvArr* image, CvArr* eig_image,
    rho, theta and threshold are used for each of those methods;
    param1 ~ line length, param2 ~ line gap - for probabilistic,
    param1 ~ srn, param2 ~ stn - for multi-scale */
-CVAPI(CvSeq*)  cvHoughLines2( CvArr* image, void* line_storage, int method, 
+CVAPI(CvSeq*)  cvHoughLines2( CvArr* image, void* line_storage, int method,
                               double rho, double theta, int threshold,
                               double param1 CV_DEFAULT(0), double param2 CV_DEFAULT(0));
 
@@ -1060,20 +1065,61 @@ CVAPI(void)  cvFitLine( const CvArr* points, int dist_type, double param,
 struct CvFeatureTree;
 
 /* Constructs kd-tree from set of feature descriptors */
-CVAPI(struct CvFeatureTree*) cvCreateFeatureTree(CvMat* desc);
+CVAPI(struct CvFeatureTree*) cvCreateKDTree(CvMat* desc);
 
-/* Release kd-tree */
+/* Constructs spill-tree from set of feature descriptors */
+CVAPI(struct CvFeatureTree*) cvCreateSpillTree( const CvMat* raw_data,
+                                    const int naive CV_DEFAULT(50),
+                                    const double rho CV_DEFAULT(.7),
+                                    const double tau CV_DEFAULT(.1) );
+
+/* Release feature tree */
 CVAPI(void) cvReleaseFeatureTree(struct CvFeatureTree* tr);
 
-/* Searches kd-tree for k nearest neighbors of given reference points,
-   searching at most emax leaves. */
-CVAPI(void) cvFindFeatures(struct CvFeatureTree* tr, CvMat* desc,
-		    CvMat* results, CvMat* dist, int k CV_DEFAULT(2), int emax CV_DEFAULT(20));
+/* Searches feature tree for k nearest neighbors of given reference points,
+   searching (in case of kd-tree/bbf) at most emax leaves. */
+CVAPI(void) cvFindFeatures(struct CvFeatureTree* tr, const CvMat* query_points,
+                           CvMat* indices, CvMat* dist, int k, int emax CV_DEFAULT(20));
 
-/* Search kd-tree for all points that are inlier to given rect region. */
+/* Search feature tree for all points that are inlier to given rect region.
+   Only implemented for kd trees */
 CVAPI(int) cvFindFeaturesBoxed(struct CvFeatureTree* tr,
-		    CvMat* bounds_min, CvMat* bounds_max,
-		    CvMat* results);
+                               CvMat* bounds_min, CvMat* bounds_max,
+                               CvMat* out_indices);
+
+
+struct CvLSH;
+struct CvLSHOperations;
+
+/* Construct a Locality Sensitive Hash (LSH) table, for indexing d-dimensional vectors of
+   given type. Vectors will be hashed L times with k-dimensional p-stable (p=2) functions. */
+CVAPI(struct CvLSH*) cvCreateLSH(struct CvLSHOperations* ops, int d,
+                                 int L CV_DEFAULT(10), int k CV_DEFAULT(10),
+                                 int type CV_DEFAULT(CV_64FC1), double r CV_DEFAULT(4),
+                                 int64 seed CV_DEFAULT(-1));
+
+/* Construct in-memory LSH table, with n bins. */
+CVAPI(struct CvLSH*) cvCreateMemoryLSH(int d, int n, int L CV_DEFAULT(10), int k CV_DEFAULT(10),
+                                       int type CV_DEFAULT(CV_64FC1), double r CV_DEFAULT(4),
+                                       int64 seed CV_DEFAULT(-1));
+
+/* Free the given LSH structure. */
+CVAPI(void) cvReleaseLSH(struct CvLSH** lsh);
+
+/* Return the number of vectors in the LSH. */
+CVAPI(unsigned int) LSHSize(struct CvLSH* lsh);
+
+/* Add vectors to the LSH structure, optionally returning indices. */
+CVAPI(void) cvLSHAdd(struct CvLSH* lsh, const CvMat* data, CvMat* indices CV_DEFAULT(0));
+
+/* Remove vectors from LSH, as addressed by given indices. */
+CVAPI(void) cvLSHRemove(struct CvLSH* lsh, const CvMat* indices);
+
+/* Query the LSH n times for at most k nearest points; data is n x d,
+   indices and dist are n x k. At most emax stored points will be accessed. */
+CVAPI(void) cvLSHQuery(struct CvLSH* lsh, const CvMat* query_points,
+                       CvMat* indices, CvMat* dist, int k, int emax);
+
 
 typedef struct CvSURFPoint
 {
@@ -1108,9 +1154,93 @@ typedef struct CvSURFParams
 CvSURFParams;
 
 CVAPI(CvSURFParams) cvSURFParams( double hessianThreshold, int extended CV_DEFAULT(0) );
+
+// If useProvidedKeyPts!=0, keypoints are not detected, but descriptors are computed
+//  at the locations provided in keypoints (a CvSeq of CvSURFPoint).
 CVAPI(void) cvExtractSURF( const CvArr* img, const CvArr* mask,
                            CvSeq** keypoints, CvSeq** descriptors,
-                           CvMemStorage* storage, CvSURFParams params );
+                           CvMemStorage* storage, CvSURFParams params, int useProvidedKeyPts CV_DEFAULT(0)  );
+
+typedef struct CvMSERParams
+{
+    // delta, in the code, it compares (size_{i}-size_{i-delta})/size_{i-delta}
+    int delta;
+    // prune the area which bigger/smaller than max_area/min_area
+    int maxArea;
+    int minArea;
+    // prune the area have simliar size to its children
+    float maxVariation;
+    // trace back to cut off mser with diversity < min_diversity
+    float minDiversity;
+    /* the next few params for MSER of color image */
+    // for color image, the evolution steps
+    int maxEvolution;
+    // the area threshold to cause re-initialize
+    double areaThreshold;
+    // ignore too small margin
+    double minMargin;
+    // the aperture size for edge blur
+    int edgeBlurSize;
+}
+CvMSERParams;
+
+CVAPI(CvMSERParams) cvMSERParams( int delta CV_DEFAULT(5), int min_area CV_DEFAULT(60),
+                           int max_area CV_DEFAULT(14400), float max_variation CV_DEFAULT(.25f),
+                           float min_diversity CV_DEFAULT(.2f), int max_evolution CV_DEFAULT(200),
+                           double area_threshold CV_DEFAULT(1.01),
+                           double min_margin CV_DEFAULT(.003),
+                           int edge_blur_size CV_DEFAULT(5) );
+
+// Extracts the contours of Maximally Stable Extremal Regions
+CVAPI(void) cvExtractMSER( CvArr* _img, CvArr* _mask, CvSeq** contours, CvMemStorage* storage, CvMSERParams params );
+
+
+typedef struct CvStarKeypoint
+{
+    CvPoint pt;
+    int size;
+    float response;
+}
+CvStarKeypoint;
+
+CV_INLINE CvStarKeypoint cvStarKeypoint(CvPoint pt, int size, float response)
+{
+    CvStarKeypoint kpt;
+    kpt.pt = pt;
+    kpt.size = size;
+    kpt.response = response;
+    return kpt;
+}
+
+typedef struct CvStarDetectorParams
+{
+    int maxSize;
+    int responseThreshold;
+    int lineThresholdProjected;
+    int lineThresholdBinarized;
+    int suppressNonmaxSize;
+}
+CvStarDetectorParams;
+
+CV_INLINE CvStarDetectorParams cvStarDetectorParams(
+    int maxSize CV_DEFAULT(45),
+    int responseThreshold CV_DEFAULT(30),
+    int lineThresholdProjected CV_DEFAULT(10),
+    int lineThresholdBinarized CV_DEFAULT(8),
+    int suppressNonmaxSize CV_DEFAULT(5))
+{
+    CvStarDetectorParams params;
+    params.maxSize = maxSize;
+    params.responseThreshold = responseThreshold;
+    params.lineThresholdProjected = lineThresholdProjected;
+    params.lineThresholdBinarized = lineThresholdBinarized;
+    params.suppressNonmaxSize = suppressNonmaxSize;
+
+    return params;
+}
+
+CVAPI(CvSeq*) cvGetStarKeypoints( const CvArr* img, CvMemStorage* storage,
+        CvStarDetectorParams params CV_DEFAULT(cvStarDetectorParams()));
 
 /****************************************************************************************\
 *                         Haar-like Object Detection functions                           *
@@ -1125,7 +1255,7 @@ CVAPI(void) cvReleaseHaarClassifierCascade( CvHaarClassifierCascade** cascade );
 
 #define CV_HAAR_DO_CANNY_PRUNING    1
 #define CV_HAAR_SCALE_IMAGE         2
-#define CV_HAAR_FIND_BIGGEST_OBJECT 4 
+#define CV_HAAR_FIND_BIGGEST_OBJECT 4
 #define CV_HAAR_DO_ROUGH_SEARCH     8
 
 CVAPI(CvSeq*) cvHaarDetectObjects( const CvArr* image,
@@ -1140,8 +1270,8 @@ CVAPI(void) cvSetImagesForHaarClassifierCascade( CvHaarClassifierCascade* cascad
                                                 const CvArr* tilted_sum, double scale );
 
 /* runs the cascade on the specified window */
-CVAPI(int) cvRunHaarClassifierCascade( CvHaarClassifierCascade* cascade,
-                                      CvPoint pt, int start_stage CV_DEFAULT(0));
+CVAPI(int) cvRunHaarClassifierCascade( const CvHaarClassifierCascade* cascade,
+                                       CvPoint pt, int start_stage CV_DEFAULT(0));
 
 /****************************************************************************************\
 *                      Camera Calibration, Pose Estimation and Stereo                    *
@@ -1232,7 +1362,8 @@ CVAPI(void) cvFindExtrinsicCameraParams2( const CvMat* object_points,
                                           const CvMat* camera_matrix,
                                           const CvMat* distortion_coeffs,
                                           CvMat* rotation_vector,
-                                          CvMat* translation_vector );
+                                          CvMat* translation_vector,
+                                          int use_extrinsic_guess CV_DEFAULT(0) );
 
 /* Computes initial estimate of the intrinsic camera parameters
    in case of planar calibration target (e.g. chessboard) */
@@ -1244,7 +1375,7 @@ CVAPI(void) cvInitIntrinsicParams2D( const CvMat* object_points,
 
 #define CV_CALIB_CB_ADAPTIVE_THRESH  1
 #define CV_CALIB_CB_NORMALIZE_IMAGE  2
-#define CV_CALIB_CB_FILTER_QUADS     4 
+#define CV_CALIB_CB_FILTER_QUADS     4
 
 /* Detects corners on a chessboard calibration pattern */
 CVAPI(int) cvFindChessboardCorners( const void* image, CvSize pattern_size,
@@ -1367,6 +1498,15 @@ CVAPI(void) cvComputeCorrespondEpilines( const CvMat* points,
                                          const CvMat* fundamental_matrix,
                                          CvMat* correspondent_lines );
 
+/* Triangulation functions */
+
+CVAPI(void) cvTriangulatePoints(CvMat* projMatr1, CvMat* projMatr2,
+                                CvMat* projPoints1, CvMat* projPoints2,
+                                CvMat* points4D);
+
+CVAPI(void) cvCorrectMatches(CvMat* F, CvMat* points1, CvMat* points2,
+                             CvMat* new_points1, CvMat* new_points2);
+
 /* stereo correspondence parameters and functions */
 
 #define CV_STEREO_BM_NORMALIZED_RESPONSE  0
@@ -1378,12 +1518,12 @@ typedef struct CvStereoBMState
     int preFilterType; // =CV_STEREO_BM_NORMALIZED_RESPONSE now
     int preFilterSize; // averaging window size: ~5x5..21x21
     int preFilterCap; // the output of pre-filtering is clipped by [-preFilterCap,preFilterCap]
-    
+
     // correspondence using Sum of Absolute Difference (SAD)
     int SADWindowSize; // ~5x5..21x21
-    int minDisparity;  // minimum disparity (can be negative) 
+    int minDisparity;  // minimum disparity (can be negative)
     int numberOfDisparities; // maximum disparity - minimum disparity (> 0)
-    
+
     // post-filtering
     int textureThreshold;  // the disparity is only computed for pixels
                            // with textured enough neighborhood
@@ -1393,10 +1533,15 @@ typedef struct CvStereoBMState
     int speckleWindowSize; // disparity variation window
     int speckleRange; // acceptable range of variation in window
 
+    int trySmallerWindows; // if 1, the results may be more accurate,
+                           // at the expense of slower processing 
+
     // temporary buffers
     CvMat* preFilteredImg0;
     CvMat* preFilteredImg1;
     CvMat* slidingSumBuf;
+    CvMat* dbmin;
+    CvMat* dbmax;
 }
 CvStereoBMState;
 
@@ -1440,20 +1585,23 @@ CVAPI(CvStereoGCState*) cvCreateStereoGCState( int numberOfDisparities, int maxI
 CVAPI(void) cvReleaseStereoGCState( CvStereoGCState** state );
 
 CVAPI(void) cvFindStereoCorrespondenceGC( const CvArr* left, const CvArr* right,
-                                          CvArr* disparityLeft, CvArr* disparityRight, 
-                                          CvStereoGCState* state, 
+                                          CvArr* disparityLeft, CvArr* disparityRight,
+                                          CvStereoGCState* state,
                                           int useDisparityGuess CV_DEFAULT(0) );
 
 /* Reprojects the computed disparity image to the 3D space using the specified 4x4 matrix */
 CVAPI(void)  cvReprojectImageTo3D( const CvArr* disparityImage,
-                                   CvArr* _3dImage, const CvMat* Q );
+                                   CvArr* _3dImage, const CvMat* Q,
+                                   int handleMissingValues CV_DEFAULT(0) );
 
 #ifdef __cplusplus
 }
 #endif
 
 #ifdef __cplusplus
+#ifndef SKIP_INCLUDES // for now only expose old interface to swig
 #include "cv.hpp"
+#endif // SKIP_INCLUDES
 #endif
 
 /****************************************************************************************\

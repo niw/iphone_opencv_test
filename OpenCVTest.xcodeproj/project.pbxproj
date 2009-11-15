@@ -216,11 +216,13 @@
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
 					"-lstdc++",
+					"-lz",
 					"$(SRCROOT)/opencv_device/lib/libcv.a",
 					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
 					"-lstdc++",
+					"-lz",
 					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
 					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);
@@ -240,11 +242,13 @@
 				INFOPLIST_FILE = Info.plist;
 				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
 					"-lstdc++",
+					"-lz",
 					"$(SRCROOT)/opencv_device/lib/libcv.a",
 					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
 				);
 				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
 					"-lstdc++",
+					"-lz",
 					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
 					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);

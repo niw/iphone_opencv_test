@@ -45,13 +45,13 @@
 #ifndef SKIP_INCLUDES
 
   #include "cxcore.h"
-  #if defined WIN32 || defined WIN64
+  #if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
     #include <windows.h>
   #endif
 
 #else // SKIP_INCLUDES
 
-  #if defined WIN32 || defined WIN64
+  #if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
     #define CV_CDECL __cdecl
     #define CV_STDCALL __stdcall
   #else
@@ -80,14 +80,14 @@
   #ifndef CV_INLINE
     #if defined __cplusplus
       #define CV_INLINE inline
-    #elif (defined WIN32 || defined WIN64) && !defined __GNUC__
+    #elif (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && !defined __GNUC__
       #define CV_INLINE __inline
     #else
       #define CV_INLINE static
     #endif
   #endif /* CV_INLINE */
 
-  #if (defined WIN32 || defined WIN64) && defined CVAPI_EXPORTS
+  #if (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && defined CVAPI_EXPORTS
     #define CV_EXPORTS __declspec(dllexport)
   #else
     #define CV_EXPORTS
@@ -146,7 +146,13 @@ typedef void (CV_CDECL *CvTrackbarCallback)(int pos);
 
 /* create trackbar and display it on top of given window, set callback */
 CVAPI(int) cvCreateTrackbar( const char* trackbar_name, const char* window_name,
-                             int* value, int count, CvTrackbarCallback on_change );
+                             int* value, int count, CvTrackbarCallback on_change);
+
+typedef void (CV_CDECL *CvTrackbarCallback2)(int pos, void* userdata);
+
+CVAPI(int) cvCreateTrackbar2( const char* trackbar_name, const char* window_name,
+                              int* value, int count, CvTrackbarCallback2 on_change,
+                              void* userdata CV_DEFAULT(0));
 
 /* retrieve or set trackbar position */
 CVAPI(int) cvGetTrackbarPos( const char* trackbar_name, const char* window_name );
@@ -196,8 +202,21 @@ CVAPI(void) cvSetMouseCallback( const char* window_name, CvMouseCallback on_mous
 CVAPI(IplImage*) cvLoadImage( const char* filename, int iscolor CV_DEFAULT(CV_LOAD_IMAGE_COLOR));
 CVAPI(CvMat*) cvLoadImageM( const char* filename, int iscolor CV_DEFAULT(CV_LOAD_IMAGE_COLOR));
 
+#define CV_IMWRITE_JPEG_QUALITY 1
+#define CV_IMWRITE_PNG_COMPRESSION 16
+#define CV_IMWRITE_PXM_BINARY 32
+
 /* save image to file */
-CVAPI(int) cvSaveImage( const char* filename, const CvArr* image );
+CVAPI(int) cvSaveImage( const char* filename, const CvArr* image,
+                        const int* params CV_DEFAULT(0) );
+
+/* decode image stored in the buffer */
+CVAPI(IplImage*) cvDecodeImage( const CvMat* buf, int iscolor CV_DEFAULT(CV_LOAD_IMAGE_COLOR));
+CVAPI(CvMat*) cvDecodeImageM( const CvMat* buf, int iscolor CV_DEFAULT(CV_LOAD_IMAGE_COLOR));
+
+/* encode image and store the result as a byte vector (single-row 8uC1 matrix) */
+CVAPI(CvMat*) cvEncodeImage( const char* ext, const CvArr* image,
+                             const int* params CV_DEFAULT(0) );
 
 #define CV_CVTIMG_FLIP      1
 #define CV_CVTIMG_SWAP_RB   2
@@ -256,7 +275,7 @@ CVAPI(int) cvGrabFrame( CvCapture* capture );
   This function may apply some frame processing like
   frame decompression, flipping etc.
   !!!DO NOT RELEASE or MODIFY the retrieved frame!!! */
-CVAPI(IplImage*) cvRetrieveFrame( CvCapture* capture );
+CVAPI(IplImage*) cvRetrieveFrame( CvCapture* capture, int streamIdx CV_DEFAULT(0) );
 
 /* Just a combination of cvGrabFrame and cvRetrieveFrame
    !!!DO NOT RELEASE or MODIFY the retrieved frame!!!      */
@@ -280,21 +299,31 @@ CVAPI(void) cvReleaseCapture( CvCapture** capture );
 #define CV_CAP_PROP_SATURATION    12
 #define CV_CAP_PROP_HUE           13
 #define CV_CAP_PROP_GAIN          14
-#define CV_CAP_PROP_CONVERT_RGB   15
-
+#define CV_CAP_PROP_EXPOSURE      15
+#define CV_CAP_PROP_CONVERT_RGB   16
+#define CV_CAP_PROP_WHITE_BALANCE 17
+#define CV_CAP_PROP_RECTIFICATION 18
 
 /* retrieve or set capture properties */
 CVAPI(double) cvGetCaptureProperty( CvCapture* capture, int property_id );
 CVAPI(int)    cvSetCaptureProperty( CvCapture* capture, int property_id, double value );
 
+// Return the type of the capturer (eg, CV_CAP_V4W, CV_CAP_UNICAP), which is unknown if created with CV_CAP_ANY
+CVAPI(int)    cvGetCaptureDomain( CvCapture* capture);  
+
 /* "black box" video file writer structure */
 typedef struct CvVideoWriter CvVideoWriter;
 
+#ifndef SWIG
 #define CV_FOURCC(c1,c2,c3,c4)  \
     (((c1)&255) + (((c2)&255)<<8) + (((c3)&255)<<16) + (((c4)&255)<<24))
+#else
+  // Prototype for CV_FOURCC so that swig can generate wrapper without mixing up the define
+  int CV_FOURCC(char c1, char c2, char c3, char c4);
+#endif
 
 #define CV_FOURCC_PROMPT -1  /* Open Codec Selection Dialog (Windows only) */
-#define CV_FOURCC_DEFAULT -1 /* Use default codec for specified filename (Linux only) */
+#define CV_FOURCC_DEFAULT CV_FOURCC('I', 'Y', 'U', 'V') /* Use default codec for specified filename (Linux only) */
 
 /* initialize video file writer */
 CVAPI(CvVideoWriter*) cvCreateVideoWriter( const char* filename, int fourcc,
@@ -342,7 +371,7 @@ CVAPI(void) cvReleaseVideoWriter( CvVideoWriter** writer );
 #define set_preprocess_func cvSetPreprocessFuncWin32
 #define set_postprocess_func cvSetPostprocessFuncWin32
 
-#ifdef WIN32
+#if defined WIN32 || defined _WIN32
 
 typedef int (CV_CDECL * CvWin32WindowCallback)(HWND, UINT, WPARAM, LPARAM, int*);
 CVAPI(void) cvSetPreprocessFuncWin32( CvWin32WindowCallback on_preprocess );
@@ -365,7 +394,7 @@ CV_INLINE int iplHeight( const IplImage* img )
 #endif /* obsolete functions */
 
 /* For use with Win32 */
-#ifdef WIN32
+#if defined WIN32 || defined _WIN32
 
 CV_INLINE RECT NormalizeRect( RECT r );
 CV_INLINE RECT NormalizeRect( RECT r )
@@ -429,9 +458,7 @@ CV_INLINE IplROI RectToROI( RECT r )
 #endif /* __cplusplus */
 
 
-#if defined __cplusplus && (!defined WIN32 || !defined (__GNUC__)) && !defined CV_NO_CVV_IMAGE
-
-#define CImage CvvImage
+#if defined __cplusplus && !defined CV_NO_CVV_IMAGE
 
 /* CvvImage class definition */
 class CV_EXPORTS CvvImage
@@ -450,7 +477,7 @@ public:
     virtual bool  LoadRect( const char* filename,
                             int desired_color, CvRect r );
 
-#ifdef WIN32
+#if defined WIN32 || defined _WIN32
     virtual bool  LoadRect( const char* filename,
                             int desired_color, RECT r )
     {
@@ -479,7 +506,7 @@ public:
     /* draw to highgui window */
     virtual void  Show( const char* window );
 
-#ifdef WIN32
+#if defined WIN32 || defined _WIN32
     /* draw part of image to the specified DC */
     virtual void  Show( HDC dc, int x, int y, int width, int height,
                         int from_x = 0, int from_y = 0 );
@@ -492,6 +519,16 @@ protected:
     IplImage*  m_img;
 };
 
+typedef CvvImage CImage;
+
+
 #endif /* __cplusplus */
+
+
+/****************************************************************************************\
+*                                    New interface                                       *
+\****************************************************************************************/
+
+#include "highgui.hpp"
 
 #endif /* _HIGH_GUI_ */

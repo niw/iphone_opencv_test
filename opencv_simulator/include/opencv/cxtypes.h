@@ -7,10 +7,11 @@
 //  copy or use the software.
 //
 //
-//                        Intel License Agreement
+//                          License Agreement
 //                For Open Source Computer Vision Library
 //
-// Copyright (C) 2000, Intel Corporation, all rights reserved.
+// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
+// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -23,7 +24,7 @@
 //     this list of conditions and the following disclaimer in the documentation
 //     and/or other materials provided with the distribution.
 //
-//   * The name of Intel Corporation may not be used to endorse or promote products
+//   * The name of the copyright holders may not be used to endorse or promote products
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
@@ -46,11 +47,24 @@
 #define _CRT_SECURE_NO_DEPRECATE /* to avoid multiple Visual Studio 2005 warnings */
 #endif
 
+#if _MSC_VER >= 1500
+#ifndef _BIND_TO_CURRENT_CRT_VERSION
+  #define _BIND_TO_CURRENT_CRT_VERSION 1
+#endif
+#ifndef _BIND_TO_CURRENT_VCLIBS_VERSION
+  #define _BIND_TO_CURRENT_VCLIBS_VERSION 1
+#endif
+#endif
+
 #ifndef SKIP_INCLUDES
   #include <assert.h>
   #include <stdlib.h>
   #include <string.h>
   #include <float.h>
+
+#if !defined _MSC_VER && !defined __BORLANDC__
+  #include <stdint.h>
+#endif
 
   #if defined __ICL
     #define CV_ICC   __ICL
@@ -62,8 +76,8 @@
     #define CV_ICC   __ECC
   #endif
 
-  #if defined WIN32 && (!defined WIN64 || defined EM64T) && \
-      (_MSC_VER >= 1400 || defined CV_ICC) \
+  #if ((defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && \
+      (_MSC_VER >= 1400 || defined CV_ICC)) \
       || (defined __SSE2__ && defined __GNUC__ && __GNUC__ >= 4)
     #include <emmintrin.h>
     #define CV_SSE2 1
@@ -71,17 +85,19 @@
     #define CV_SSE2 0
   #endif
 
+  #if ((defined __SSE__ || defined __MMX__) && defined __GNUC__ && __GNUC__ >= 3)
+    #include <mmintrin.h>
+  #endif
+
   #if defined __BORLANDC__
     #include <fastmath.h>
-  #elif defined WIN64 && !defined EM64T && defined CV_ICC
-    #include <mathimf.h>
   #else
     #include <math.h>
   #endif
 
   #ifdef HAVE_IPL
       #ifndef __IPL_H__
-          #if defined WIN32 || defined WIN64
+          #if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
               #include <ipl.h>
           #else
               #include <ipl/ipl.h>
@@ -92,7 +108,7 @@
   #endif
 #endif // SKIP_INCLUDES
 
-#if defined WIN32 || defined WIN64
+#if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
     #define CV_CDECL __cdecl
     #define CV_STDCALL __stdcall
 #else
@@ -121,14 +137,14 @@
 #ifndef CV_INLINE
 #if defined __cplusplus
     #define CV_INLINE inline
-#elif (defined WIN32 || defined WIN64) && !defined __GNUC__
+#elif (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64 || defined WINCE) && !defined __GNUC__
     #define CV_INLINE __inline
 #else
     #define CV_INLINE static
 #endif
 #endif /* CV_INLINE */
 
-#if (defined WIN32 || defined WIN64) && defined CVAPI_EXPORTS
+#if (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64 || defined WINCE) && defined CVAPI_EXPORTS
     #define CV_EXPORTS __declspec(dllexport)
 #else
     #define CV_EXPORTS
@@ -142,8 +158,8 @@
 typedef __int64 int64;
 typedef unsigned __int64 uint64;
 #else
-typedef long long int64;
-typedef unsigned long long uint64;
+typedef int64_t int64;
+typedef uint64_t uint64;
 #endif
 
 #ifndef HAVE_IPL
@@ -209,10 +225,10 @@ Cv64suf;
 
 CV_INLINE  int  cvRound( double value )
 {
-#if CV_SSE2
-    __m128d t = _mm_load_sd( &value );
+#if CV_SSE2 && !defined __APPLE__
+    __m128d t = _mm_set_sd( value );
     return _mm_cvtsd_si32(t);
-#elif defined WIN32 && !defined WIN64 && defined _MSC_VER
+#elif (defined WIN32 || defined _WIN32) && !defined WIN64 && !defined _WIN64 && defined _MSC_VER
     int t;
     __asm
     {
@@ -220,46 +236,47 @@ CV_INLINE  int  cvRound( double value )
         fistp t;
     }
     return t;
-#elif (defined HAVE_LRINT) || (defined WIN64 && !defined EM64T && defined CV_ICC)
+#elif defined HAVE_LRINT || defined CV_ICC || defined __GNUC__
     return (int)lrint(value);
 #else
-    /*
-     the algorithm was taken from Agner Fog's optimization guide
-     at http://www.agner.org/assem
-     */
-    Cv64suf temp;
-    temp.f = value + 6755399441055744.0;
-    return (int)temp.u;
+    // while this is not IEEE754-compliant rounding, it's usually a good enough approximation
+    return (int)(value + 0.5);
 #endif
 }
 
 
 CV_INLINE  int  cvFloor( double value )
 {
-#if CV_SSE2
-    __m128d t = _mm_load_sd( &value );
+#ifdef __GNUC__
+    int i = (int)value;
+    return i - (i > value);
+#elif CV_SSE2
+    __m128d t = _mm_set_sd( value );
     int i = _mm_cvtsd_si32(t);
-    return i - _mm_movemask_pd(_mm_cmplt_sd(t,_mm_cvtsi32_sd(t,i)));
+    return i - _mm_movemask_pd(_mm_cmplt_sd(t, _mm_cvtsi32_sd(t,i)));
 #else
-    int temp = cvRound(value);
+    int i = cvRound(value);
     Cv32suf diff;
-    diff.f = (float)(value - temp);
-    return temp - (diff.i < 0);
+    diff.f = (float)(value - i);
+    return i - (diff.i < 0);
 #endif
 }
 
 
 CV_INLINE  int  cvCeil( double value )
 {
-#if CV_SSE2
-    __m128d t = _mm_load_sd( &value );
+#ifdef __GNUC__
+    int i = (int)value;
+    return i + (i < value);
+#elif CV_SSE2
+    __m128d t = _mm_set_sd( value );
     int i = _mm_cvtsd_si32(t);
-    return i + _mm_movemask_pd(_mm_cmplt_sd(_mm_cvtsi32_sd(t,i),t));
+    return i + _mm_movemask_pd(_mm_cmplt_sd(_mm_cvtsi32_sd(t,i), t));
 #else
-    int temp = cvRound(value);
+    int i = cvRound(value);
     Cv32suf diff;
-    diff.f = (float)(temp - value);
-    return temp + (diff.i < 0);
+    diff.f = (float)(i - value);
+    return i + (diff.i < 0);
 #endif
 }
 
@@ -310,7 +327,7 @@ CV_INLINE CvRNG cvRNG( int64 seed CV_DEFAULT(-1))
 CV_INLINE unsigned cvRandInt( CvRNG* rng )
 {
     uint64 temp = *rng;
-    temp = (uint64)(unsigned)temp*1554115554 + (temp >> 32);
+    temp = (uint64)(unsigned)temp*4164903690U + (temp >> 32);
     *rng = temp;
     return (unsigned)temp;
 }
@@ -474,7 +491,10 @@ IplConvKernelFP;
 #define CV_64F  6
 #define CV_USRTYPE1 7
 
-#define CV_MAKETYPE(depth,cn) ((depth) + (((cn)-1) << CV_CN_SHIFT))
+#define CV_MAT_DEPTH_MASK       (CV_DEPTH_MAX - 1)
+#define CV_MAT_DEPTH(flags)     ((flags) & CV_MAT_DEPTH_MASK)
+
+#define CV_MAKETYPE(depth,cn) (CV_MAT_DEPTH(depth) + (((cn)-1) << CV_CN_SHIFT))
 #define CV_MAKE_TYPE CV_MAKETYPE
 
 #define CV_8UC1 CV_MAKETYPE(CV_8U,1)
@@ -524,8 +544,6 @@ IplConvKernelFP;
 
 #define CV_MAT_CN_MASK          ((CV_CN_MAX - 1) << CV_CN_SHIFT)
 #define CV_MAT_CN(flags)        ((((flags) & CV_MAT_CN_MASK) >> CV_CN_SHIFT) + 1)
-#define CV_MAT_DEPTH_MASK       (CV_DEPTH_MAX - 1)
-#define CV_MAT_DEPTH(flags)     ((flags) & CV_MAT_DEPTH_MASK)
 #define CV_MAT_TYPE_MASK        (CV_DEPTH_MAX*CV_CN_MAX - 1)
 #define CV_MAT_TYPE(flags)      ((flags) & CV_MAT_TYPE_MASK)
 #define CV_MAT_CONT_FLAG_SHIFT  14
@@ -627,7 +645,7 @@ CV_INLINE CvMat cvMat( int rows, int cols, int type, void* data CV_DEFAULT(NULL)
     m.type = CV_MAT_MAGIC_VAL | CV_MAT_CONT_FLAG | type;
     m.cols = cols;
     m.rows = rows;
-    m.step = rows > 1 ? m.cols*CV_ELEM_SIZE(type) : 0;
+    m.step = m.cols*CV_ELEM_SIZE(type);
     m.data.ptr = (uchar*)data;
     m.refcount = NULL;
     m.hdr_refcount = 0;
@@ -683,7 +701,7 @@ CV_INLINE  void  cvmSet( CvMat* mat, int row, int col, double value )
 }
 
 
-CV_INLINE int cvCvToIplDepth( int type )
+CV_INLINE int cvIplDepth( int type )
 {
     int depth = CV_MAT_DEPTH(type);
     return CV_ELEM_SIZE1(depth)*8 | (depth == CV_8S || depth == CV_16S ||

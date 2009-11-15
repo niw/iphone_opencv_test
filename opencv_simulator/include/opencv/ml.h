@@ -51,13 +51,13 @@
   #include "cxcore.h"
   #include <limits.h>
 
-  #if defined WIN32 || defined WIN64
+  #if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
     #include <windows.h>
   #endif
 
 #else // SKIP_INCLUDES
 
-  #if defined WIN32 || defined WIN64
+  #if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
     #define CV_CDECL __cdecl
     #define CV_STDCALL __stdcall
   #else
@@ -86,14 +86,14 @@
   #ifndef CV_INLINE
     #if defined __cplusplus
       #define CV_INLINE inline
-    #elif (defined WIN32 || defined WIN64) && !defined __GNUC__
+    #elif (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && !defined __GNUC__
       #define CV_INLINE __inline
     #else
       #define CV_INLINE static
     #endif
   #endif /* CV_INLINE */
 
-  #if (defined WIN32 || defined WIN64) && defined CVAPI_EXPORTS
+  #if (defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && defined CVAPI_EXPORTS
     #define CV_EXPORTS __declspec(dllexport)
   #else
     #define CV_EXPORTS
@@ -110,6 +110,8 @@
 
 // Apple defines a check() macro somewhere in the debug headers
 // that interferes with a method definiton in this header
+
+using namespace std;
 #undef check
 
 /****************************************************************************************\
@@ -184,6 +186,9 @@ CV_INLINE CvParamLattice cvDefaultParamLattice( void )
 #define CV_TYPE_NAME_ML_CNN         "opencv-ml-cnn"
 #define CV_TYPE_NAME_ML_RTREES      "opencv-ml-random-trees"
 
+#define CV_TRAIN_ERROR  0
+#define CV_TEST_ERROR   1
+
 class CV_EXPORTS CvStatModel
 {
 public:
@@ -192,16 +197,15 @@ public:
 
     virtual void clear();
 
-    virtual void save( const char* filename, const char* name=0 );
+    virtual void save( const char* filename, const char* name=0 ) const;
     virtual void load( const char* filename, const char* name=0 );
 
-    virtual void write( CvFileStorage* storage, const char* name );
+    virtual void write( CvFileStorage* storage, const char* name ) const;
     virtual void read( CvFileStorage* storage, CvFileNode* node );
 
 protected:
     const char* default_model_name;
 };
-
 
 /****************************************************************************************\
 *                                 Normal Bayes Classifier                                *
@@ -211,6 +215,9 @@ protected:
    It is used for optimizing statmodel accuracy by varying model parameters,
    the accuracy estimate being computed by cross-validation.
    The grid is logarithmic, so <step> must be greater then 1. */
+
+class CvMLData;
+
 struct CV_EXPORTS CvParamGrid
 {
     // SVM params type
@@ -243,14 +250,23 @@ public:
 
     CvNormalBayesClassifier( const CvMat* _train_data, const CvMat* _responses,
         const CvMat* _var_idx=0, const CvMat* _sample_idx=0 );
-
+    
     virtual bool train( const CvMat* _train_data, const CvMat* _responses,
         const CvMat* _var_idx = 0, const CvMat* _sample_idx=0, bool update=false );
-
+   
     virtual float predict( const CvMat* _samples, CvMat* results=0 ) const;
     virtual void clear();
 
-    virtual void write( CvFileStorage* storage, const char* name );
+#ifndef SWIG
+    CvNormalBayesClassifier( const cv::Mat& _train_data, const cv::Mat& _responses,
+                            const cv::Mat& _var_idx=cv::Mat(), const cv::Mat& _sample_idx=cv::Mat() );
+    virtual bool train( const cv::Mat& _train_data, const cv::Mat& _responses,
+                       const cv::Mat& _var_idx = cv::Mat(), const cv::Mat& _sample_idx=cv::Mat(),
+                       bool update=false );
+    virtual float predict( const cv::Mat& _samples, cv::Mat* results=0 ) const;
+#endif
+    
+    virtual void write( CvFileStorage* storage, const char* name ) const;
     virtual void read( CvFileStorage* storage, CvFileNode* node );
 
 protected:
@@ -285,10 +301,24 @@ public:
     virtual bool train( const CvMat* _train_data, const CvMat* _responses,
                         const CvMat* _sample_idx=0, bool is_regression=false,
                         int _max_k=32, bool _update_base=false );
-
+    
     virtual float find_nearest( const CvMat* _samples, int k, CvMat* results=0,
         const float** neighbors=0, CvMat* neighbor_responses=0, CvMat* dist=0 ) const;
-
+    
+#ifndef SWIG
+    CvKNearest( const cv::Mat& _train_data, const cv::Mat& _responses,
+               const cv::Mat& _sample_idx=cv::Mat(), bool _is_regression=false, int max_k=32 );
+    
+    virtual bool train( const cv::Mat& _train_data, const cv::Mat& _responses,
+                       const cv::Mat& _sample_idx=cv::Mat(), bool is_regression=false,
+                       int _max_k=32, bool _update_base=false );    
+    
+    virtual float find_nearest( const cv::Mat& _samples, int k, cv::Mat* results=0,
+                                const float** neighbors=0,
+                                cv::Mat* neighbor_responses=0,
+                                cv::Mat* dist=0 ) const;
+#endif
+    
     virtual void clear();
     int get_max_k() const;
     int get_var_count() const;
@@ -501,6 +531,7 @@ public:
     virtual bool train( const CvMat* _train_data, const CvMat* _responses,
                         const CvMat* _var_idx=0, const CvMat* _sample_idx=0,
                         CvSVMParams _params=CvSVMParams() );
+    
     virtual bool train_auto( const CvMat* _train_data, const CvMat* _responses,
         const CvMat* _var_idx, const CvMat* _sample_idx, CvSVMParams _params,
         int k_fold = 10,
@@ -511,8 +542,29 @@ public:
         CvParamGrid coef_grid   = get_default_grid(CvSVM::COEF),
         CvParamGrid degree_grid = get_default_grid(CvSVM::DEGREE) );
 
-    virtual float predict( const CvMat* _sample ) const;
+    virtual float predict( const CvMat* _sample, bool returnDFVal=false ) const;
 
+#ifndef SWIG
+    CvSVM( const cv::Mat& _train_data, const cv::Mat& _responses,
+          const cv::Mat& _var_idx=cv::Mat(), const cv::Mat& _sample_idx=cv::Mat(),
+          CvSVMParams _params=CvSVMParams() );
+    
+    virtual bool train( const cv::Mat& _train_data, const cv::Mat& _responses,
+                       const cv::Mat& _var_idx=cv::Mat(), const cv::Mat& _sample_idx=cv::Mat(),
+                       CvSVMParams _params=CvSVMParams() );
+    
+    virtual bool train_auto( const cv::Mat& _train_data, const cv::Mat& _responses,
+                            const cv::Mat& _var_idx, const cv::Mat& _sample_idx, CvSVMParams _params,
+                            int k_fold = 10,
+                            CvParamGrid C_grid      = get_default_grid(CvSVM::C),
+                            CvParamGrid gamma_grid  = get_default_grid(CvSVM::GAMMA),
+                            CvParamGrid p_grid      = get_default_grid(CvSVM::P),
+                            CvParamGrid nu_grid     = get_default_grid(CvSVM::NU),
+                            CvParamGrid coef_grid   = get_default_grid(CvSVM::COEF),
+                            CvParamGrid degree_grid = get_default_grid(CvSVM::DEGREE) );
+    virtual float predict( const cv::Mat& _sample, bool returnDFVal=false ) const;    
+#endif
+    
     virtual int get_support_vector_count() const;
     virtual const float* get_support_vector(int i) const;
     virtual CvSVMParams get_params() const { return params; };
@@ -520,7 +572,7 @@ public:
 
     static CvParamGrid get_default_grid( int param_id );
 
-    virtual void write( CvFileStorage* storage, const char* name );
+    virtual void write( CvFileStorage* storage, const char* name ) const;
     virtual void read( CvFileStorage* storage, CvFileNode* node );
     int get_var_count() const { return var_idx ? var_idx->cols : var_all; }
 
@@ -535,7 +587,7 @@ protected:
     virtual void create_kernel();
     virtual void create_solver();
 
-    virtual void write_params( CvFileStorage* fs );
+    virtual void write_params( CvFileStorage* fs ) const;
     virtual void read_params( CvFileStorage* fs, CvFileNode* node );
 
     CvSVMParams params;
@@ -595,6 +647,7 @@ public:
     CvEM();
     CvEM( const CvMat* samples, const CvMat* sample_idx=0,
           CvEMParams params=CvEMParams(), CvMat* labels=0 );
+    //CvEM (CvEMParams params, CvMat * means, CvMat ** covs, CvMat * weights, CvMat * probs, CvMat * log_weight_div_det, CvMat * inv_eigen_values, CvMat** cov_rotate_mats);
 
     virtual ~CvEM();
 
@@ -602,15 +655,30 @@ public:
                         CvEMParams params=CvEMParams(), CvMat* labels=0 );
 
     virtual float predict( const CvMat* sample, CvMat* probs ) const;
+
+#ifndef SWIG
+    CvEM( const cv::Mat& samples, const cv::Mat& sample_idx=cv::Mat(),
+         CvEMParams params=CvEMParams(), cv::Mat* labels=0 );
+    
+    virtual bool train( const cv::Mat& samples, const cv::Mat& sample_idx=cv::Mat(),
+                       CvEMParams params=CvEMParams(), cv::Mat* labels=0 );
+    
+    virtual float predict( const cv::Mat& sample, cv::Mat* probs ) const;
+#endif
+    
     virtual void clear();
 
-    int get_nclusters() const;
-    const CvMat* get_means() const;
-    const CvMat** get_covs() const;
-    const CvMat* get_weights() const;
-    const CvMat* get_probs() const;
+    int           get_nclusters() const;
+    const CvMat*  get_means()     const;
+    const CvMat** get_covs()      const;
+    const CvMat*  get_weights()   const;
+    const CvMat*  get_probs()     const;
 
-    inline double get_log_likelihood () const { return log_likelihood; };
+    inline double         get_log_likelihood     () const { return log_likelihood;     };
+    
+//    inline const CvMat *  get_log_weight_div_det () const { return log_weight_div_det; };
+//    inline const CvMat *  get_inv_eigen_values   () const { return inv_eigen_values;   };
+//    inline const CvMat ** get_cov_rotate_mats    () const { return cov_rotate_mats;    };
 
 protected:
 
@@ -637,12 +705,11 @@ protected:
 
 /****************************************************************************************\
 *                                      Decision Tree                                     *
-\****************************************************************************************/
-
-struct CvPair32s32f
+\****************************************************************************************/\
+struct CvPair16u32s
 {
-    int i;
-    float val;
+    unsigned short* u;
+    int* i;
 };
 
 
@@ -652,6 +719,7 @@ struct CvPair32s32f
 struct CvDTreeSplit
 {
     int var_idx;
+    int condensed_idx;
     int inversed;
     float quality;
     CvDTreeSplit* next;
@@ -752,13 +820,14 @@ struct CV_EXPORTS CvDTreeTrainData
                           const CvDTreeParams& _params=CvDTreeParams(),
                           bool _shared=false, bool _add_labels=false,
                           bool _update_data=false );
+    virtual void do_responses_copy();
 
     virtual void get_vectors( const CvMat* _subsample_idx,
          float* values, uchar* missing, float* responses, bool get_class_idx=false );
 
     virtual CvDTreeNode* subsample_data( const CvMat* _subsample_idx );
 
-    virtual void write_params( CvFileStorage* fs );
+    virtual void write_params( CvFileStorage* fs ) const;
     virtual void read_params( CvFileStorage* fs, CvFileNode* node );
 
     // release all the data
@@ -766,13 +835,15 @@ struct CV_EXPORTS CvDTreeTrainData
 
     int get_num_classes() const;
     int get_var_type(int vi) const;
-    int get_work_var_count() const;
+    int get_work_var_count() const {return work_var_count;}
 
-    virtual int* get_class_labels( CvDTreeNode* n );
-    virtual float* get_ord_responses( CvDTreeNode* n );
-    virtual int* get_labels( CvDTreeNode* n );
-    virtual int* get_cat_var_data( CvDTreeNode* n, int vi );
-    virtual CvPair32s32f* get_ord_var_data( CvDTreeNode* n, int vi );
+    virtual void get_ord_responses( CvDTreeNode* n, float* values_buf, const float** values );    
+    virtual void get_class_labels( CvDTreeNode* n, int* labels_buf, const int** labels );
+    virtual void get_cv_labels( CvDTreeNode* n, int* labels_buf, const int** labels );
+    virtual void get_sample_indices( CvDTreeNode* n, int* indices_buf, const int** labels );
+    virtual int get_cat_var_data( CvDTreeNode* n, int vi, int* cat_values_buf, const int** cat_values );
+    virtual int get_ord_var_data( CvDTreeNode* n, int vi, float* ord_values_buf, int* indices_buf,
+        const float** ord_values, const int** indices );
     virtual int get_child_buf_idx( CvDTreeNode* n );
 
     ////////////////////////////////////
@@ -788,14 +859,35 @@ struct CV_EXPORTS CvDTreeTrainData
     virtual void free_train_data();
     virtual void free_node( CvDTreeNode* node );
 
+    // inner arrays for getting predictors and responses
+    float* get_pred_float_buf();
+    int* get_pred_int_buf();
+    float* get_resp_float_buf();
+    int* get_resp_int_buf();
+    int* get_cv_lables_buf();
+    int* get_sample_idx_buf();
+
+    vector<vector<float> > pred_float_buf;
+    vector<vector<int> > pred_int_buf;
+    vector<vector<float> > resp_float_buf;
+    vector<vector<int> > resp_int_buf;
+    vector<vector<int> > cv_lables_buf;
+    vector<vector<int> > sample_idx_buf;
+
     int sample_count, var_all, var_count, max_c_count;
-    int ord_var_count, cat_var_count;
+    int ord_var_count, cat_var_count, work_var_count;
     bool have_labels, have_priors;
     bool is_classifier;
+    int tflag;
+
+    const CvMat* train_data;
+    const CvMat* responses;
+    CvMat* responses_copy; // used in Boosting
 
     int buf_count, buf_size;
     bool shared;
-
+    int is_buf_16u;
+    
     CvMat* cat_count;
     CvMat* cat_ofs;
     CvMat* cat_map;
@@ -840,20 +932,36 @@ public:
                         const CvMat* _missing_mask=0,
                         CvDTreeParams params=CvDTreeParams() );
 
+    virtual bool train( CvMLData* _data, CvDTreeParams _params=CvDTreeParams() );
+
+    virtual float calc_error( CvMLData* _data, int type , vector<float> *resp = 0 ); // type in {CV_TRAIN_ERROR, CV_TEST_ERROR}
+
     virtual bool train( CvDTreeTrainData* _train_data, const CvMat* _subsample_idx );
 
     virtual CvDTreeNode* predict( const CvMat* _sample, const CvMat* _missing_data_mask=0,
                                   bool preprocessed_input=false ) const;
+
+#ifndef SWIG
+    virtual bool train( const cv::Mat& _train_data, int _tflag,
+                       const cv::Mat& _responses, const cv::Mat& _var_idx=cv::Mat(),
+                       const cv::Mat& _sample_idx=cv::Mat(), const cv::Mat& _var_type=cv::Mat(),
+                       const cv::Mat& _missing_mask=cv::Mat(),
+                       CvDTreeParams params=CvDTreeParams() );
+    
+    virtual CvDTreeNode* predict( const cv::Mat& _sample, const cv::Mat& _missing_data_mask=cv::Mat(),
+                                  bool preprocessed_input=false ) const;
+#endif
+    
     virtual const CvMat* get_var_importance();
     virtual void clear();
 
     virtual void read( CvFileStorage* fs, CvFileNode* node );
-    virtual void write( CvFileStorage* fs, const char* name );
+    virtual void write( CvFileStorage* fs, const char* name ) const;
 
     // special read & write methods for trees in the tree ensembles
     virtual void read( CvFileStorage* fs, CvFileNode* node,
                        CvDTreeTrainData* data );
-    virtual void write( CvFileStorage* fs );
+    virtual void write( CvFileStorage* fs ) const;
 
     const CvDTreeNode* get_root() const;
     int get_pruned_tree_idx() const;
@@ -866,10 +974,14 @@ protected:
     virtual void try_split_node( CvDTreeNode* n );
     virtual void split_node_data( CvDTreeNode* n );
     virtual CvDTreeSplit* find_best_split( CvDTreeNode* n );
-    virtual CvDTreeSplit* find_split_ord_class( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_cat_class( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_ord_reg( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_cat_reg( CvDTreeNode* n, int vi );
+    virtual CvDTreeSplit* find_split_ord_class( CvDTreeNode* n, int vi, 
+                            float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_class( CvDTreeNode* n, int vi,
+                            float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_ord_reg( CvDTreeNode* n, int vi, 
+                            float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_reg( CvDTreeNode* n, int vi, 
+                            float init_quality = 0, CvDTreeSplit* _split = 0 );
     virtual CvDTreeSplit* find_surrogate_split_ord( CvDTreeNode* n, int vi );
     virtual CvDTreeSplit* find_surrogate_split_cat( CvDTreeNode* n, int vi );
     virtual double calc_node_dir( CvDTreeNode* node );
@@ -885,19 +997,19 @@ protected:
     virtual void free_prune_data(bool cut_tree);
     virtual void free_tree();
 
-    virtual void write_node( CvFileStorage* fs, CvDTreeNode* node );
-    virtual void write_split( CvFileStorage* fs, CvDTreeSplit* split );
+    virtual void write_node( CvFileStorage* fs, CvDTreeNode* node ) const;
+    virtual void write_split( CvFileStorage* fs, CvDTreeSplit* split ) const;
     virtual CvDTreeNode* read_node( CvFileStorage* fs, CvFileNode* node, CvDTreeNode* parent );
     virtual CvDTreeSplit* read_split( CvFileStorage* fs, CvFileNode* node );
-    virtual void write_tree_nodes( CvFileStorage* fs );
+    virtual void write_tree_nodes( CvFileStorage* fs ) const;
     virtual void read_tree_nodes( CvFileStorage* fs, CvFileNode* node );
 
     CvDTreeNode* root;
-
-    int pruned_tree_idx;
     CvMat* var_importance;
-
     CvDTreeTrainData* data;
+
+public:
+    int pruned_tree_idx;
 };
 
 
@@ -977,15 +1089,33 @@ public:
                         const CvMat* _sample_idx=0, const CvMat* _var_type=0,
                         const CvMat* _missing_mask=0,
                         CvRTParams params=CvRTParams() );
+    
+    virtual bool train( CvMLData* data, CvRTParams params=CvRTParams() );
     virtual float predict( const CvMat* sample, const CvMat* missing = 0 ) const;
+    virtual float predict_prob( const CvMat* sample, const CvMat* missing = 0 ) const;
+
+#ifndef SWIG
+    virtual bool train( const cv::Mat& _train_data, int _tflag,
+                       const cv::Mat& _responses, const cv::Mat& _var_idx=cv::Mat(),
+                       const cv::Mat& _sample_idx=cv::Mat(), const cv::Mat& _var_type=cv::Mat(),
+                       const cv::Mat& _missing_mask=cv::Mat(),
+                       CvRTParams params=CvRTParams() );
+    virtual float predict( const cv::Mat& sample, const cv::Mat& missing = cv::Mat() ) const;
+    virtual float predict_prob( const cv::Mat& sample, const cv::Mat& missing = cv::Mat() ) const;
+#endif
+    
     virtual void clear();
 
     virtual const CvMat* get_var_importance();
     virtual float get_proximity( const CvMat* sample1, const CvMat* sample2,
         const CvMat* missing1 = 0, const CvMat* missing2 = 0 ) const;
+    
+    virtual float calc_error( CvMLData* _data, int type , vector<float> *resp = 0 ); // type in {CV_TRAIN_ERROR, CV_TEST_ERROR}
+
+    virtual float get_train_error();    
 
     virtual void read( CvFileStorage* fs, CvFileNode* node );
-    virtual void write( CvFileStorage* fs, const char* name );
+    virtual void write( CvFileStorage* fs, const char* name ) const;
 
     CvMat* get_active_var_mask();
     CvRNG* get_rng();
@@ -995,7 +1125,7 @@ public:
 
 protected:
 
-    bool grow_forest( const CvTermCriteria term_crit );
+    virtual bool grow_forest( const CvTermCriteria term_crit );
 
     // array of the trees of the forest
     CvForestTree** trees;
@@ -1008,6 +1138,67 @@ protected:
 
     CvRNG rng;
     CvMat* active_var_mask;
+};
+
+/****************************************************************************************\
+*                           Extremely randomized trees Classifier                        *
+\****************************************************************************************/
+struct CV_EXPORTS CvERTreeTrainData : public CvDTreeTrainData
+{
+    virtual void set_data( const CvMat* _train_data, int _tflag,
+                          const CvMat* _responses, const CvMat* _var_idx=0,
+                          const CvMat* _sample_idx=0, const CvMat* _var_type=0,
+                          const CvMat* _missing_mask=0,
+                          const CvDTreeParams& _params=CvDTreeParams(),
+                          bool _shared=false, bool _add_labels=false,
+                          bool _update_data=false );
+    virtual int get_ord_var_data( CvDTreeNode* n, int vi, float* ord_values_buf, int* missing_buf,
+        const float** ord_values, const int** missing );
+    virtual void get_sample_indices( CvDTreeNode* n, int* indices_buf, const int** indices );
+    virtual void get_cv_labels( CvDTreeNode* n, int* labels_buf, const int** labels );
+    virtual int get_cat_var_data( CvDTreeNode* n, int vi, int* cat_values_buf, const int** cat_values );
+    virtual void get_vectors( const CvMat* _subsample_idx,
+         float* values, uchar* missing, float* responses, bool get_class_idx=false );
+    virtual CvDTreeNode* subsample_data( const CvMat* _subsample_idx );
+    const CvMat* missing_mask;
+};
+
+class CV_EXPORTS CvForestERTree : public CvForestTree
+{
+protected:
+    virtual double calc_node_dir( CvDTreeNode* node );
+    virtual CvDTreeSplit* find_split_ord_class( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_class( CvDTreeNode* n, int vi,
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_ord_reg( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_reg( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    //virtual void complete_node_dir( CvDTreeNode* node );
+    virtual void split_node_data( CvDTreeNode* n );
+};
+
+class CV_EXPORTS CvERTrees : public CvRTrees
+{
+public:
+    CvERTrees();
+    virtual ~CvERTrees();
+    virtual bool train( const CvMat* _train_data, int _tflag,
+                        const CvMat* _responses, const CvMat* _var_idx=0,
+                        const CvMat* _sample_idx=0, const CvMat* _var_type=0,
+                        const CvMat* _missing_mask=0,
+                        CvRTParams params=CvRTParams());
+#ifndef SWIG
+    virtual bool train( const cv::Mat& _train_data, int _tflag,
+                       const cv::Mat& _responses, const cv::Mat& _var_idx=cv::Mat(),
+                       const cv::Mat& _sample_idx=cv::Mat(), const cv::Mat& _var_type=cv::Mat(),
+                       const cv::Mat& _missing_mask=cv::Mat(),
+                       CvRTParams params=CvRTParams());
+#endif
+    virtual bool train( CvMLData* data, CvRTParams params=CvRTParams() );
+protected:
+    virtual bool grow_forest( const CvTermCriteria term_crit );
 };
 
 
@@ -1050,8 +1241,8 @@ public:
                         const CvMat* _sample_idx=0, const CvMat* _var_type=0,
                         const CvMat* _missing_mask=0,
                         CvDTreeParams params=CvDTreeParams() );
-
     virtual bool train( CvDTreeTrainData* _train_data, const CvMat* _subsample_idx );
+
     virtual void read( CvFileStorage* fs, CvFileNode* node );
     virtual void read( CvFileStorage* fs, CvFileNode* node,
                        CvDTreeTrainData* data );
@@ -1062,10 +1253,14 @@ protected:
     virtual void try_split_node( CvDTreeNode* n );
     virtual CvDTreeSplit* find_surrogate_split_ord( CvDTreeNode* n, int vi );
     virtual CvDTreeSplit* find_surrogate_split_cat( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_ord_class( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_cat_class( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_ord_reg( CvDTreeNode* n, int vi );
-    virtual CvDTreeSplit* find_split_cat_reg( CvDTreeNode* n, int vi );
+    virtual CvDTreeSplit* find_split_ord_class( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_class( CvDTreeNode* n, int vi,
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_ord_reg( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
+    virtual CvDTreeSplit* find_split_cat_reg( CvDTreeNode* n, int vi, 
+        float init_quality = 0, CvDTreeSplit* _split = 0 );
     virtual void calc_node_value( CvDTreeNode* n );
     virtual double calc_node_dir( CvDTreeNode* n );
 
@@ -1090,24 +1285,50 @@ public:
              const CvMat* _sample_idx=0, const CvMat* _var_type=0,
              const CvMat* _missing_mask=0,
              CvBoostParams params=CvBoostParams() );
-
+    
     virtual bool train( const CvMat* _train_data, int _tflag,
              const CvMat* _responses, const CvMat* _var_idx=0,
              const CvMat* _sample_idx=0, const CvMat* _var_type=0,
              const CvMat* _missing_mask=0,
              CvBoostParams params=CvBoostParams(),
              bool update=false );
+    
+    virtual bool train( CvMLData* data,
+             CvBoostParams params=CvBoostParams(),
+             bool update=false );
 
     virtual float predict( const CvMat* _sample, const CvMat* _missing=0,
                            CvMat* weak_responses=0, CvSlice slice=CV_WHOLE_SEQ,
-                           bool raw_mode=false ) const;
+                           bool raw_mode=false, bool return_sum=false ) const;
+
+#ifndef SWIG
+    CvBoost( const cv::Mat& _train_data, int _tflag,
+            const cv::Mat& _responses, const cv::Mat& _var_idx=cv::Mat(),
+            const cv::Mat& _sample_idx=cv::Mat(), const cv::Mat& _var_type=cv::Mat(),
+            const cv::Mat& _missing_mask=cv::Mat(),
+            CvBoostParams params=CvBoostParams() );
+    
+    virtual bool train( const cv::Mat& _train_data, int _tflag,
+                       const cv::Mat& _responses, const cv::Mat& _var_idx=cv::Mat(),
+                       const cv::Mat& _sample_idx=cv::Mat(), const cv::Mat& _var_type=cv::Mat(),
+                       const cv::Mat& _missing_mask=cv::Mat(),
+                       CvBoostParams params=CvBoostParams(),
+                       bool update=false );
+    
+    virtual float predict( const cv::Mat& _sample, const cv::Mat& _missing=cv::Mat(),
+                          cv::Mat* weak_responses=0, CvSlice slice=CV_WHOLE_SEQ,
+                          bool raw_mode=false, bool return_sum=false ) const;
+#endif
+    
+    virtual float calc_error( CvMLData* _data, int type , vector<float> *resp = 0 ); // type in {CV_TRAIN_ERROR, CV_TEST_ERROR}
 
     virtual void prune( CvSlice slice );
 
     virtual void clear();
 
-    virtual void write( CvFileStorage* storage, const char* name );
+    virtual void write( CvFileStorage* storage, const char* name ) const;
     virtual void read( CvFileStorage* storage, CvFileNode* node );
+    virtual const CvMat* get_active_vars(bool absolute_idx=true);
 
     CvSeq* get_weak_predictors();
 
@@ -1115,18 +1336,23 @@ public:
     CvMat* get_subtree_weights();
     CvMat* get_weak_response();
     const CvBoostParams& get_params() const;
+    const CvDTreeTrainData* get_data() const;
 
 protected:
 
     virtual bool set_params( const CvBoostParams& _params );
     virtual void update_weights( CvBoostTree* tree );
     virtual void trim_weights();
-    virtual void write_params( CvFileStorage* fs );
+    virtual void write_params( CvFileStorage* fs ) const;
     virtual void read_params( CvFileStorage* fs, CvFileNode* node );
 
     CvDTreeTrainData* data;
     CvBoostParams params;
     CvSeq* weak;
+
+    CvMat* active_vars;
+    CvMat* active_vars_abs;
+    bool have_active_cat_vars;
 
     CvMat* orig_response;
     CvMat* sum_response;
@@ -1177,14 +1403,30 @@ public:
     virtual void create( const CvMat* _layer_sizes,
                          int _activ_func=SIGMOID_SYM,
                          double _f_param1=0, double _f_param2=0 );
-
+    
     virtual int train( const CvMat* _inputs, const CvMat* _outputs,
                        const CvMat* _sample_weights, const CvMat* _sample_idx=0,
                        CvANN_MLP_TrainParams _params = CvANN_MLP_TrainParams(),
                        int flags=0 );
-    virtual float predict( const CvMat* _inputs,
-                           CvMat* _outputs ) const;
-
+    virtual float predict( const CvMat* _inputs, CvMat* _outputs ) const;
+    
+#ifndef SWIG
+    CvANN_MLP( const cv::Mat& _layer_sizes,
+              int _activ_func=SIGMOID_SYM,
+              double _f_param1=0, double _f_param2=0 );
+    
+    virtual void create( const cv::Mat& _layer_sizes,
+                        int _activ_func=SIGMOID_SYM,
+                        double _f_param1=0, double _f_param2=0 );    
+    
+    virtual int train( const cv::Mat& _inputs, const cv::Mat& _outputs,
+                      const cv::Mat& _sample_weights, const cv::Mat& _sample_idx=cv::Mat(),
+                      CvANN_MLP_TrainParams _params = CvANN_MLP_TrainParams(),
+                      int flags=0 );    
+    
+    virtual float predict( const cv::Mat& _inputs, cv::Mat& _outputs ) const;
+#endif
+    
     virtual void clear();
 
     // possible activation functions
@@ -1194,7 +1436,7 @@ public:
     enum { UPDATE_WEIGHTS = 1, NO_INPUT_SCALE = 2, NO_OUTPUT_SCALE = 4 };
 
     virtual void read( CvFileStorage* fs, CvFileNode* node );
-    virtual void write( CvFileStorage* storage, const char* name );
+    virtual void write( CvFileStorage* storage, const char* name ) const;
 
     int get_layer_count() { return layer_sizes ? layer_sizes->cols : 0; }
     const CvMat* get_layer_sizes() { return layer_sizes; }
@@ -1226,7 +1468,7 @@ protected:
     virtual void calc_input_scale( const CvVectors* vecs, int flags );
     virtual void calc_output_scale( const CvVectors* vecs, int flags );
 
-    virtual void write_params( CvFileStorage* fs );
+    virtual void write_params( CvFileStorage* fs ) const;
     virtual void read_params( CvFileStorage* fs, CvFileNode* node );
 
     CvMat* layer_sizes;
@@ -1554,11 +1796,153 @@ CVAPI(void) cvCreateTestSet( int type, CvMat** samples,
                  CvMat** responses,
                  int num_classes, ... );
 
-/* Aij <- Aji for i > j if lower_to_upper != 0
-              for i < j if lower_to_upper = 0 */
-CVAPI(void) cvCompleteSymm( CvMat* matrix, int lower_to_upper );
 
 #endif
+
+/****************************************************************************************\
+*                                      Data                                             *
+\****************************************************************************************/
+
+#include <map>
+#include <string>
+#include <iostream>
+using namespace std;
+
+#define CV_COUNT     0
+#define CV_PORTION   1
+
+struct CV_EXPORTS CvTrainTestSplit
+{
+public:
+    CvTrainTestSplit();
+    CvTrainTestSplit( int _train_sample_count, bool _mix = true);
+    CvTrainTestSplit( float _train_sample_portion, bool _mix = true);
+
+    union
+    {
+        int count;
+        float portion;
+    } train_sample_part;
+    int train_sample_part_mode;
+
+    union
+    {
+        int *count;
+        float *portion;
+    } *class_part;
+    int class_part_mode;
+
+    bool mix;    
+};
+
+class CV_EXPORTS CvMLData
+{
+public:
+    CvMLData();
+    virtual ~CvMLData();
+
+    // returns:
+    // 0 - OK  
+    // 1 - file can not be opened or is not correct
+    int read_csv(const char* filename);
+
+    const CvMat* get_values(){ return values; };
+
+    const CvMat* get_responses();
+
+    const CvMat* get_missing(){ return missing; };
+
+    void set_response_idx( int idx ); // idx < 0 to set all vars as predictors
+    int get_response_idx() { return response_idx; }
+
+    const CvMat* get_train_sample_idx() { return train_sample_idx; };
+    const CvMat* get_test_sample_idx() { return test_sample_idx; };
+    void mix_train_and_test_idx();
+    void set_train_test_split( const CvTrainTestSplit * spl);
+    
+    const CvMat* get_var_idx();
+    void chahge_var_idx( int vi, bool state );
+
+    const CvMat* get_var_types();
+    int get_var_type( int var_idx ) { return var_types->data.ptr[var_idx]; };
+    // following 2 methods enable to change vars type
+    // use these methods to assign CV_VAR_CATEGORICAL type for categorical variable
+    // with numerical labels; in the other cases var types are correctly determined automatically
+    void set_var_types( const char* str );  // str examples:
+                                            // "ord[0-17],cat[18]", "ord[0,2,4,10-12], cat[1,3,5-9,13,14]",
+                                            // "cat", "ord" (all vars are categorical/ordered)
+    void change_var_type( int var_idx, int type); // type in { CV_VAR_ORDERED, CV_VAR_CATEGORICAL }    
+ 
+    void set_delimiter( char ch );
+    char get_delimiter() { return delimiter; };
+
+    void set_miss_ch( char ch );
+    char get_miss_ch() { return miss_ch; };
+    
+protected:
+    virtual void clear();
+
+    void str_to_flt_elem( const char* token, float& flt_elem, int& type);
+    void free_train_test_idx();
+    
+    char delimiter;
+    char miss_ch;
+    //char flt_separator;
+
+    CvMat* values;
+    CvMat* missing;
+    CvMat* var_types;
+    CvMat* var_idx_mask;
+
+    CvMat* response_out; // header
+    CvMat* var_idx_out; // mat
+    CvMat* var_types_out; // mat
+
+    int response_idx;
+
+    int train_sample_count;
+    bool mix;
+   
+    int total_class_count;
+    map<string, int> *class_map;
+
+    CvMat* train_sample_idx;
+    CvMat* test_sample_idx;
+    int* sample_idx; // data of train_sample_idx and test_sample_idx
+
+    CvRNG rng;
+};
+
+
+namespace cv
+{
+    
+typedef CvStatModel StatModel;
+typedef CvParamGrid ParamGrid;
+typedef CvNormalBayesClassifier NormalBayesClassifier;
+typedef CvKNearest KNearest;
+typedef CvSVMParams SVMParams;
+typedef CvSVMKernel SVMKernel;
+typedef CvSVMSolver SVMSolver;
+typedef CvSVM SVM;
+typedef CvEMParams EMParams;
+typedef CvEM ExpectationMaximization;
+typedef CvDTreeParams DTreeParams;
+typedef CvMLData TrainData;
+typedef CvDTree DecisionTree;
+typedef CvForestTree ForestTree;
+typedef CvRTParams RandomTreeParams;
+typedef CvRTrees RandomTrees;
+typedef CvERTreeTrainData ERTreeTRainData;
+typedef CvForestERTree ERTree;
+typedef CvERTrees ERTrees;
+typedef CvBoostParams BoostParams;
+typedef CvBoostTree BoostTree;
+typedef CvBoost Boost;
+typedef CvANN_MLP_TrainParams ANN_MLP_TrainParams;
+typedef CvANN_MLP NeuralNet_MLP;
+    
+}
 
 #endif /*__ML_H__*/
 /* End of file. */
