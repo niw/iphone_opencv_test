@@ -17,12 +17,12 @@ If you want to build it from source code, you can do by next steps.
 
         % tar xjvf opencv-2.0.0.tar.bz2
 
-3.  Apply patch for iPhone SDK
+4.  Apply patch for iPhone SDK
 
         % cd OpenCV-2.0.0
 		% patch -p0 < ../cvcalibration.cpp.patch_opencv-2.0.0
 
-4.  Following next steps to build OpenCV static library for simulator
+5.  Following next steps to build OpenCV static library for simulator
 
         % cd OpenCV-2.0.0
 		% mkdir build_simulator
@@ -30,7 +30,7 @@ If you want to build it from source code, you can do by next steps.
 		% make
 		% make install # Install all files into ../../opencv_simulator
 
-5.  Following next steps to build OpenCV static library for device
+6.  Following next steps to build OpenCV static library for device
 
         % cd OpenCV-2.0.0
 		% mkdir build_device
@@ -42,9 +42,9 @@ Patch and Configure support script
 ----------------------------------
 
 OpenCV 2.0.0 (and also 1.1.0) has a glitch which refuse builing the library with iPhone SDK.
-You need to apply the patch(cvcalibration.cpp.patch) so that you can build it.
+You need to apply the patch ``cvcalibration.cpp.patch`` so that you can build it.
 
-Congiure support script(configure\_opencv) has some options to build OpenCV with iPhone SDK.
+Congiure support script ``configure_opencv`` has some options to build OpenCV with iPhone SDK.
 Try to ``--help`` option to get the all options of it.
 
 Change Log
