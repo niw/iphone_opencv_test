@@ -10,14 +10,14 @@ if [ "$1" = "--help" -o "$1" = "-h" ]; then
 	echo "                Default = 3.1.2"
 	echo "  GCC_VERSION   Select GCC Version (4.0 for SDK 2.x, 3.x, 4.2 for SDK 3.x and more)"
 	echo "                Default = 4.0 for SDK 2.x, 4.2 for SDK 3.x"
-	echo "  ARCH          Select target architecture (arm for device, i686 for simulator)"
-	echo "                Default = i686"
+	echo "  ARCH          Select target architecture (device or simulator)"
+	echo "                Default = simulator"
 	echo ""
 	echo "EXAMPLES"
-	echo "  % $0                            Making OpenCV with SDK3.0 using GCC4.2 for iPhone simulator"
-	echo "  % $0 GCC_VERISON=4.0 ARCH=arm   Making OpenCV with SDK3.0 using GCC4.0 for iPhone device"
-	echo "  % $0 SDK_VERISON=3.0 ARCH=arm   Making OpenCV with SDK3.0 using GCC4.2 for iPhone device"
-	echo "  % $0 SDK_VERSION=2.2.1          Making OpenCV with SDK2.2.1 using GCC4.0 for iPhone simulator"
+	echo "  % $0                             Making OpenCV with SDK3.1.2 using GCC4.2 for iPhone simulator"
+	echo "  % $0 GCC_VERISON=4.0 ARCH=device Making OpenCV with SDK3.1.2 using GCC4.0 for iPhone device"
+	echo "  % $0 SDK_VERISON=3.0 ARCH=device Making OpenCV with SDK3.0 using GCC4.2 for iPhone device"
+	echo "  % $0 SDK_VERSION=2.2.1           Making OpenCV with SDK2.2.1 using GCC4.0 for iPhone simulator"
 	exit
 fi
 if [ -z "${SDK_VERSION}" ]; then
@@ -31,17 +31,19 @@ if [ -z "${GCC_VERSION}" ]; then
 	fi
 fi
 if [ -z "${ARCH}" ]; then
-	ARCH=i686
+	ARCH=simulator
 fi
-if [ "${ARCH}" = "i686" ]; then
+if [ "${ARCH}" = "simulator" ]; then
 	ARCH_SDKNAME=Simulator
 	ARCH_FLAG=i686
-elif [ "${ARCH}" = "arm" ]; then
+	ARCH_HOST=i686
+elif [ "${ARCH}" = "device" ]; then
 	ARCH_SDKNAME=OS
 	ARCH_FLAG=armv6
+	ARCH_HOST=arm
 else
-	echo "Please select target architecture with ARCH enviroment variable (i686 or arm)"
-	exit
+	echo "Please select target architecture with ARCH enviroment variable (simulator or device)."
+	exit 1
 fi
 echo "Use iPhone SDK ${SDK_VERSION}(gcc ${GCC_VERSION}) for ${ARCH}"
 
@@ -54,7 +56,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:${BIN}
 
 ../configure --prefix=${PREFIX} \
 	--build=i686-apple-darwin9 \
-	--host=${ARCH}-apple-darwin9 \
+	--host=${ARCH_HOST}-apple-darwin9 \
 	--enable-static \
 	--disable-shared \
 	--disable-sse \
