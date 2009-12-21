@@ -50,12 +50,12 @@ if [ -z "${ARCH}" ]; then
 fi
 if [ "${ARCH}" = "simulator" ]; then
 	ARCH_SDKNAME=Simulator
-	ARCH_FLAG=i686
-	ARCH_HOST=i686
+	ARCH_FLAG="-arch i686 -mmacosx-version-min=10.5"
+	ARCH_HOST=i686-apple-darwin9
 elif [ "${ARCH}" = "device" ]; then
 	ARCH_SDKNAME=OS
-	ARCH_FLAG=armv6
-	ARCH_HOST=arm
+	ARCH_FLAG="-arch armv6 -miphoneos-version-min=${SDK_VERSION}"
+	ARCH_HOST=arm-apple-darwin9
 else
 	echo "Please select target architecture with ARCH enviroment variable (simulator or device)."
 	exit 1
@@ -71,8 +71,8 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:${BIN}
 
 ${CONFIGURE} \
 	--prefix=${PREFIX} \
-	--build=i686-apple-darwin9 \
-	--host=${ARCH_HOST}-apple-darwin9 \
+	--build=i686-apple-darwin \
+	--host=${ARCH_HOST} \
 	--enable-static \
 	--disable-shared \
 	--disable-sse \
@@ -89,8 +89,8 @@ ${CONFIGURE} \
 	$* \
 	CC=${BIN}/gcc-${GCC_VERSION} \
 	CXX=${BIN}/g++-${GCC_VERSION} \
-	CFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
-	CXXFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
-	CPP=${BIN}/cpp-${GCC_VERSION} \
-	CXXCPP=${BIN}/cpp-${GCC_VERSION} \
+	CFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
+	CXXFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
+	CPP=${BIN}/cpp \
+	CXXCPP=${BIN}/cpp \
 	AR=${BIN}/ar
