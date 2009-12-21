@@ -40,7 +40,8 @@
 @end
 
 typedef enum {
-	ActionSheetToSelectTypeOfSource = 1,
+	ActionSheetToSelectNone = 0,
+	ActionSheetToSelectTypeOfSource,
 	ActionSheetToSelectTypeOfMarks
 } OpenCVTestViewControllerActionSheetAction;
 
@@ -55,6 +56,7 @@ typedef enum {
 - (IBAction)saveImage:(id)sender;
 - (IBAction)edgeDetect:(id)sender;
 - (IBAction)faceDetect:(id)sender;
+- (IBAction)interestDetect:(id)sender;
 
 @property (nonatomic, retain) UIImageView *imageView;
 @end

@@ -1,6 +1,7 @@
 #import "OpenCVTestViewController.h"
 
 #import <opencv/cv.h>
+#import "../OpenSURF/surflib.h"
 
 @implementation OpenCVTestViewController
 @synthesize imageView;
@@ -168,6 +169,27 @@
 	}
 }
 
+- (void)opencvInterestDetect {
+	if(imageView.image) {
+		cvSetErrMode(CV_ErrModeParent);
+
+		// Create grayscale IplImage from UIImage
+		IplImage *img = [self CreateIplImageFromUIImage:imageView.image];
+
+		// Detect and describe interest points in the image
+		IpVec ipts;
+		surfDetDes(img, ipts, false, 3, 4, 2, 0.0004f);
+
+		// Draw the detected points
+		drawIpoints(img, ipts);
+
+		imageView.image = [self UIImageFromIplImage:img];
+		cvReleaseImage(&img);
+
+		[self hideProgressIndicator];
+	}
+}
+
 
 #pragma mark -
 #pragma mark IBAction
@@ -211,6 +233,11 @@
 		[actionSheet showInView:self.view];
 		[actionSheet release];
 	}
+}
+
+- (IBAction)interestDetect:(id)sender {
+	[self showProgressIndicator:@"Detecting"];
+	[self performSelectorInBackground:@selector(opencvInterestDetect) withObject:nil];
 }
 
 #pragma mark -
@@ -274,7 +301,7 @@
 			break;
 		}
 	}
-	actionSheetAction = 0;
+	actionSheetAction = ActionSheetToSelectNone;
 }
 
 #pragma mark -

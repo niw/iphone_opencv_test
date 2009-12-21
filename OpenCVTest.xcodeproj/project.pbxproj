@@ -17,6 +17,11 @@
 		540723E40E3DD25B00B598A2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5452E0730E3D119700FE4518 /* CoreGraphics.framework */; };
 		540ABC6B0E3E1C5300E30885 /* haarcascade_frontalface_default.xml in Resources */ = {isa = PBXBuildFile; fileRef = 540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */; };
 		540ABCF60E3E280700E30885 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 540ABCF50E3E280700E30885 /* Icon.png */; };
+		542F1D7410DFD2EA00AEC671 /* integral.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 542F1D6A10DFD2EA00AEC671 /* integral.cpp */; };
+		542F1D7510DFD2EA00AEC671 /* ipoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 542F1D6C10DFD2EA00AEC671 /* ipoint.cpp */; };
+		542F1D7610DFD2EA00AEC671 /* surf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 542F1D6F10DFD2EA00AEC671 /* surf.cpp */; };
+		542F1D7710DFD2EA00AEC671 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 542F1D7210DFD2EA00AEC671 /* utils.cpp */; };
+		542F1E0510DFE40C00AEC671 /* fasthessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 542F1E0410DFE40C00AEC671 /* fasthessian.cpp */; };
 		549913C70E3E3D2100BD1311 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 549913C60E3E3D2100BD1311 /* Default.png */; };
 		54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 54BBAF3C0F04148D00568ED9 /* Tink.aiff */; };
 		54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */; };
@@ -30,12 +35,24 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		28AD733E0D9D9553002E5188 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		28D7ACF60DDB3853001CB0EB /* OpenCVTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCVTestViewController.h; sourceTree = "<group>"; };
-		28D7ACF70DDB3853001CB0EB /* OpenCVTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenCVTestViewController.m; sourceTree = "<group>"; };
+		28D7ACF70DDB3853001CB0EB /* OpenCVTestViewController.m */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = OpenCVTestViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* OpenCVTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCVTest_Prefix.pch; sourceTree = "<group>"; };
 		540723ED0E3DD25B00B598A2 /* OpenCVTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenCVTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = haarcascade_frontalface_default.xml; path = opencv_device/share/opencv/haarcascades/haarcascade_frontalface_default.xml; sourceTree = "<group>"; };
 		540ABCF50E3E280700E30885 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		542F1D6A10DFD2EA00AEC671 /* integral.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = integral.cpp; sourceTree = "<group>"; };
+		542F1D6B10DFD2EA00AEC671 /* integral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = integral.h; sourceTree = "<group>"; };
+		542F1D6C10DFD2EA00AEC671 /* ipoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ipoint.cpp; sourceTree = "<group>"; };
+		542F1D6D10DFD2EA00AEC671 /* ipoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ipoint.h; sourceTree = "<group>"; };
+		542F1D6E10DFD2EA00AEC671 /* kmeans.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kmeans.h; sourceTree = "<group>"; };
+		542F1D6F10DFD2EA00AEC671 /* surf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = surf.cpp; sourceTree = "<group>"; };
+		542F1D7010DFD2EA00AEC671 /* surf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surf.h; sourceTree = "<group>"; };
+		542F1D7110DFD2EA00AEC671 /* surflib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surflib.h; sourceTree = "<group>"; };
+		542F1D7210DFD2EA00AEC671 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		542F1D7310DFD2EA00AEC671 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		542F1E0410DFE40C00AEC671 /* fasthessian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fasthessian.cpp; sourceTree = "<group>"; };
+		542F1E0810DFE45D00AEC671 /* fasthessian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fasthessian.h; sourceTree = "<group>"; };
 		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		549913C60E3E3D2100BD1311 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -82,6 +99,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				542F1D6910DFD2C500AEC671 /* OpenSURF */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -132,6 +150,25 @@
 			children = (
 			);
 			name = Libraries;
+			sourceTree = "<group>";
+		};
+		542F1D6910DFD2C500AEC671 /* OpenSURF */ = {
+			isa = PBXGroup;
+			children = (
+				542F1E0410DFE40C00AEC671 /* fasthessian.cpp */,
+				542F1E0810DFE45D00AEC671 /* fasthessian.h */,
+				542F1D6A10DFD2EA00AEC671 /* integral.cpp */,
+				542F1D6B10DFD2EA00AEC671 /* integral.h */,
+				542F1D6C10DFD2EA00AEC671 /* ipoint.cpp */,
+				542F1D6D10DFD2EA00AEC671 /* ipoint.h */,
+				542F1D6E10DFD2EA00AEC671 /* kmeans.h */,
+				542F1D6F10DFD2EA00AEC671 /* surf.cpp */,
+				542F1D7010DFD2EA00AEC671 /* surf.h */,
+				542F1D7110DFD2EA00AEC671 /* surflib.h */,
+				542F1D7210DFD2EA00AEC671 /* utils.cpp */,
+				542F1D7310DFD2EA00AEC671 /* utils.h */,
+			);
+			path = OpenSURF;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -196,6 +233,11 @@
 				540723DE0E3DD25B00B598A2 /* main.m in Sources */,
 				540723DF0E3DD25B00B598A2 /* OpenCVTestAppDelegate.m in Sources */,
 				540723E00E3DD25B00B598A2 /* OpenCVTestViewController.m in Sources */,
+				542F1D7410DFD2EA00AEC671 /* integral.cpp in Sources */,
+				542F1D7510DFD2EA00AEC671 /* ipoint.cpp in Sources */,
+				542F1D7610DFD2EA00AEC671 /* surf.cpp in Sources */,
+				542F1D7710DFD2EA00AEC671 /* utils.cpp in Sources */,
+				542F1E0510DFE40C00AEC671 /* fasthessian.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
