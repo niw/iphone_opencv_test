@@ -91,6 +91,6 @@ ${CONFIGURE} \
 	CXX=${BIN}/g++-${GCC_VERSION} \
 	CFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
 	CXXFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
-	CPP=${BIN}/cpp-${GCC_VERSION} \
-	CXXCPP=${BIN}/cpp-${GCC_VERSION} \
+	CPP=${BIN}/cpp \
+	CXXCPP=${BIN}/cpp \
 	AR=${BIN}/ar
