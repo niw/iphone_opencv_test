@@ -50,11 +50,11 @@ if [ -z "${ARCH}" ]; then
 fi
 if [ "${ARCH}" = "simulator" ]; then
 	ARCH_SDKNAME=Simulator
-	ARCH_FLAG=i686
+	ARCH_FLAG="-arch i686 -mmacosx-version-min=10.5"
 	ARCH_HOST=i686
 elif [ "${ARCH}" = "device" ]; then
 	ARCH_SDKNAME=OS
-	ARCH_FLAG=armv6
+	ARCH_FLAG="-arch armv6 -miphoneos-version-min=${SDK_VERSION}"
 	ARCH_HOST=arm
 else
 	echo "Please select target architecture with ARCH enviroment variable (simulator or device)."
@@ -89,8 +89,8 @@ ${CONFIGURE} \
 	$* \
 	CC=${BIN}/gcc-${GCC_VERSION} \
 	CXX=${BIN}/g++-${GCC_VERSION} \
-	CFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
-	CXXFLAGS="-arch ${ARCH_FLAG} -isysroot ${SDK}" \
+	CFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
+	CXXFLAGS="${ARCH_FLAG} -isysroot ${SDK}" \
 	CPP=${BIN}/cpp-${GCC_VERSION} \
 	CXXCPP=${BIN}/cpp-${GCC_VERSION} \
 	AR=${BIN}/ar
