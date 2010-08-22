@@ -41,8 +41,8 @@
 //M*/
 
 
-#ifndef _CXCORE_H_
-#define _CXCORE_H_
+#ifndef __OPENCV_CORE_H__
+#define __OPENCV_CORE_H__
 
 #ifdef __IPL_H__
 #define HAVE_IPL
@@ -1303,6 +1303,13 @@ CVAPI(void)  cvRectangle( CvArr* img, CvPoint pt1, CvPoint pt2,
                           int line_type CV_DEFAULT(8),
                           int shift CV_DEFAULT(0));
 
+/* Draws a rectangle specified by a CvRect structure */
+CVAPI(void)  cvRectangleR( CvArr* img, CvRect r,
+                           CvScalar color, int thickness CV_DEFAULT(1),
+                           int line_type CV_DEFAULT(8),
+                           int shift CV_DEFAULT(0));
+    
+    
 /* Draws a circle with specified center and radius.
    Thickness works in the same way as with cvRectangle */
 CVAPI(void)  cvCircle( CvArr* img, CvPoint center, int radius,
@@ -1322,8 +1329,8 @@ CV_INLINE  void  cvEllipseBox( CvArr* img, CvBox2D box, CvScalar color,
                                int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) )
 {
     CvSize axes;
-    axes.width = cvRound(box.size.height*0.5);
-    axes.height = cvRound(box.size.width*0.5);
+    axes.width = cvRound(box.size.width*0.5);
+    axes.height = cvRound(box.size.height*0.5);
 
     cvEllipse( img, cvPointFrom32f( box.center ), axes, box.angle,
                0, 360, color, thickness, line_type, shift );
@@ -1763,6 +1770,21 @@ CVAPI(void*) cvLoad( const char* filename,
 CVAPI(int64)  cvGetTickCount( void );
 CVAPI(double) cvGetTickFrequency( void );
 
+/*********************************** CPU capabilities ***********************************/
+
+#define CV_CPU_NONE    0    
+#define CV_CPU_MMX     1
+#define CV_CPU_SSE     2
+#define CV_CPU_SSE2    3
+#define CV_CPU_SSE3    4
+#define CV_CPU_SSSE3   5
+#define CV_CPU_SSE4_1  6
+#define CV_CPU_SSE4_2  7
+#define CV_CPU_AVX    10
+#define CV_HARDWARE_MAX_FEATURE 255
+
+CVAPI(int) cvCheckHardwareSupport(int feature);
+
 /*********************************** Multi-Threading ************************************/
 
 /* retrieve/set the number of threads used in OpenMP implementations */
@@ -1770,329 +1792,10 @@ CVAPI(int)  cvGetNumThreads( void );
 CVAPI(void) cvSetNumThreads( int threads CV_DEFAULT(0) );
 /* get index of the thread being executed */
 CVAPI(int)  cvGetThreadNum( void );
-
-/*************** Convenience functions for better interaction with HighGUI **************/
-
-typedef IplImage* (CV_CDECL * CvLoadImageFunc)( const char* filename, int colorness );
-typedef CvMat* (CV_CDECL * CvLoadImageMFunc)( const char* filename, int colorness );
-typedef int (CV_CDECL * CvSaveImageFunc)( const char* filename, const CvArr* image,
-                                          const int* params );
-typedef void (CV_CDECL * CvShowImageFunc)( const char* windowname, const CvArr* image );
-
-CVAPI(int) cvSetImageIOFunctions( CvLoadImageFunc _load_image, CvLoadImageMFunc _load_image_m,
-                            CvSaveImageFunc _save_image, CvShowImageFunc _show_image );
-
-#define CV_SET_IMAGE_IO_FUNCTIONS() \
-    cvSetImageIOFunctions( cvLoadImage, cvLoadImageM, cvSaveImage, cvShowImage )
+    
 
 #ifdef __cplusplus
 }
-
-class CV_EXPORTS CvImage
-{
-public:
-    CvImage() : image(0), refcount(0) {}
-    CvImage( CvSize size, int depth, int channels )
-    {
-        image = cvCreateImage( size, depth, channels );
-        refcount = image ? new int(1) : 0;
-    }
-
-    CvImage( IplImage* img ) : image(img)
-    {
-        refcount = image ? new int(1) : 0;
-    }
-
-    CvImage( const CvImage& img ) : image(img.image), refcount(img.refcount)
-    {
-        if( refcount ) ++(*refcount);
-    }
-
-    CvImage( const char* filename, const char* imgname=0, int color=-1 ) : image(0), refcount(0)
-    { load( filename, imgname, color ); }
-
-    CvImage( CvFileStorage* fs, const char* mapname, const char* imgname ) : image(0), refcount(0)
-    { read( fs, mapname, imgname ); }
-
-    CvImage( CvFileStorage* fs, const char* seqname, int idx ) : image(0), refcount(0)
-    { read( fs, seqname, idx ); }
-
-    ~CvImage()
-    {
-        if( refcount && !(--*refcount) )
-        {
-            cvReleaseImage( &image );
-            delete refcount;
-        }
-    }
-
-    CvImage clone() { return CvImage(image ? cvCloneImage(image) : 0); }
-
-    void create( CvSize size, int depth, int channels )
-    {
-        if( !image || !refcount ||
-            image->width != size.width || image->height != size.height ||
-            image->depth != depth || image->nChannels != channels )
-            attach( cvCreateImage( size, depth, channels ));
-    }
-
-    void release() { detach(); }
-    void clear() { detach(); }
-
-    void attach( IplImage* img, bool use_refcount=true )
-    {
-        if( refcount && --*refcount == 0 )
-        {
-            cvReleaseImage( &image );
-            delete refcount;
-        }
-        image = img;
-        refcount = use_refcount && image ? new int(1) : 0;
-    }
-
-    void detach()
-    {
-        if( refcount && --*refcount == 0 )
-        {
-            cvReleaseImage( &image );
-            delete refcount;
-        }
-        image = 0;
-        refcount = 0;
-    }
-
-    bool load( const char* filename, const char* imgname=0, int color=-1 );
-    bool read( CvFileStorage* fs, const char* mapname, const char* imgname );
-    bool read( CvFileStorage* fs, const char* seqname, int idx );
-    void save( const char* filename, const char* imgname, const int* params=0 );
-    void write( CvFileStorage* fs, const char* imgname );
-
-    void show( const char* window_name );
-    bool is_valid() { return image != 0; }
-
-    int width() const { return image ? image->width : 0; }
-    int height() const { return image ? image->height : 0; }
-
-    CvSize size() const { return image ? cvSize(image->width, image->height) : cvSize(0,0); }
-
-    CvSize roi_size() const
-    {
-        return !image ? cvSize(0,0) :
-            !image->roi ? cvSize(image->width,image->height) :
-            cvSize(image->roi->width, image->roi->height);
-    }
-
-    CvRect roi() const
-    {
-        return !image ? cvRect(0,0,0,0) :
-            !image->roi ? cvRect(0,0,image->width,image->height) :
-            cvRect(image->roi->xOffset,image->roi->yOffset,
-                   image->roi->width,image->roi->height);
-    }
-
-    int coi() const { return !image || !image->roi ? 0 : image->roi->coi; }
-
-    void set_roi(CvRect roi) { cvSetImageROI(image,roi); }
-    void reset_roi() { cvResetImageROI(image); }
-    void set_coi(int coi) { cvSetImageCOI(image,coi); }
-    int depth() const { return image ? image->depth : 0; }
-    int channels() const { return image ? image->nChannels : 0; }
-    int pix_size() const { return image ? ((image->depth & 255)>>3)*image->nChannels : 0; }
-
-    uchar* data() { return image ? (uchar*)image->imageData : 0; }
-    const uchar* data() const { return image ? (const uchar*)image->imageData : 0; }
-    int step() const { return image ? image->widthStep : 0; }
-    int origin() const { return image ? image->origin : 0; }
-
-    uchar* roi_row(int y)
-    {
-        assert(0<=y);
-        assert(!image ?
-                1 : image->roi ?
-                y<image->roi->height : y<image->height);
-        
-        return !image ? 0 :
-            !image->roi ?
-                (uchar*)(image->imageData + y*image->widthStep) :
-                (uchar*)(image->imageData + (y+image->roi->yOffset)*image->widthStep +
-                image->roi->xOffset*((image->depth & 255)>>3)*image->nChannels);
-    }
-
-    const uchar* roi_row(int y) const
-    {
-        assert(0<=y);
-        assert(!image ?
-                1 : image->roi ?
-                y<image->roi->height : y<image->height); 
-
-        return !image ? 0 :
-            !image->roi ?
-                (const uchar*)(image->imageData + y*image->widthStep) :
-                (const uchar*)(image->imageData + (y+image->roi->yOffset)*image->widthStep +
-                image->roi->xOffset*((image->depth & 255)>>3)*image->nChannels);
-    }
-
-    operator const IplImage* () const { return image; }
-    operator IplImage* () { return image; }
-
-    CvImage& operator = (const CvImage& img)
-    {
-        if( img.refcount )
-            ++*img.refcount;
-        if( refcount && !(--*refcount) )
-            cvReleaseImage( &image );
-        image=img.image;
-        refcount=img.refcount;
-        return *this;
-    }
-
-protected:
-    IplImage* image;
-    int* refcount;
-};
-
-
-class CV_EXPORTS CvMatrix
-{
-public:
-    CvMatrix() : matrix(0) {}
-    CvMatrix( int rows, int cols, int type )
-    { matrix = cvCreateMat( rows, cols, type ); }
-
-    CvMatrix( int rows, int cols, int type, CvMat* hdr,
-              void* data=0, int step=CV_AUTOSTEP )
-    { matrix = cvInitMatHeader( hdr, rows, cols, type, data, step ); }
-
-    CvMatrix( int rows, int cols, int type, CvMemStorage* storage, bool alloc_data=true );
-
-    CvMatrix( int rows, int cols, int type, void* data, int step=CV_AUTOSTEP )
-    { matrix = cvCreateMatHeader( rows, cols, type );
-      cvSetData( matrix, data, step ); }
-
-    CvMatrix( CvMat* m )
-    { matrix = m; }
-
-    CvMatrix( const CvMatrix& m )
-    {
-        matrix = m.matrix;
-        addref();
-    }
-
-    CvMatrix( const char* filename, const char* matname=0, int color=-1 ) : matrix(0)
-    {  load( filename, matname, color ); }
-
-    CvMatrix( CvFileStorage* fs, const char* mapname, const char* matname ) : matrix(0)
-    {  read( fs, mapname, matname ); }
-
-    CvMatrix( CvFileStorage* fs, const char* seqname, int idx ) : matrix(0)
-    {  read( fs, seqname, idx ); }
-
-    ~CvMatrix()
-    {
-        release();
-    }
-
-    CvMatrix clone() { return CvMatrix(matrix ? cvCloneMat(matrix) : 0); }
-
-    void set( CvMat* m, bool add_ref )
-    {
-        release();
-        matrix = m;
-        if( add_ref )
-            addref();
-    }
-
-    void create( int rows, int cols, int type )
-    {
-        if( !matrix || !matrix->refcount ||
-            matrix->rows != rows || matrix->cols != cols ||
-            CV_MAT_TYPE(matrix->type) != type )
-            set( cvCreateMat( rows, cols, type ), false );
-    }
-
-    void addref() const
-    {
-        if( matrix )
-        {
-            if( matrix->hdr_refcount )
-                ++matrix->hdr_refcount;
-            else if( matrix->refcount )
-                ++*matrix->refcount;
-        }
-    }
-
-    void release()
-    {
-        if( matrix )
-        {
-            if( matrix->hdr_refcount )
-            {
-                if( --matrix->hdr_refcount == 0 )
-                    cvReleaseMat( &matrix );
-            }
-            else if( matrix->refcount )
-            {
-                if( --*matrix->refcount == 0 )
-                    cvFree( &matrix->refcount );
-            }
-            matrix = 0;
-        }
-    }
-
-    void clear()
-    {
-        release();
-    }
-
-    bool load( const char* filename, const char* matname=0, int color=-1 );
-    bool read( CvFileStorage* fs, const char* mapname, const char* matname );
-    bool read( CvFileStorage* fs, const char* seqname, int idx );
-    void save( const char* filename, const char* matname, const int* params=0 );
-    void write( CvFileStorage* fs, const char* matname );
-
-    void show( const char* window_name );
-
-    bool is_valid() { return matrix != 0; }
-
-    int rows() const { return matrix ? matrix->rows : 0; }
-    int cols() const { return matrix ? matrix->cols : 0; }
-
-    CvSize size() const
-    {
-        return !matrix ? cvSize(0,0) : cvSize(matrix->rows,matrix->cols);
-    }
-
-    int type() const { return matrix ? CV_MAT_TYPE(matrix->type) : 0; }
-    int depth() const { return matrix ? CV_MAT_DEPTH(matrix->type) : 0; }
-    int channels() const { return matrix ? CV_MAT_CN(matrix->type) : 0; }
-    int pix_size() const { return matrix ? CV_ELEM_SIZE(matrix->type) : 0; }
-
-    uchar* data() { return matrix ? matrix->data.ptr : 0; }
-    const uchar* data() const { return matrix ? matrix->data.ptr : 0; }
-    int step() const { return matrix ? matrix->step : 0; }
-
-    void set_data( void* data, int step=CV_AUTOSTEP )
-    { cvSetData( matrix, data, step ); }
-
-    uchar* row(int i) { return !matrix ? 0 : matrix->data.ptr + i*matrix->step; }
-    const uchar* row(int i) const
-    { return !matrix ? 0 : matrix->data.ptr + i*matrix->step; }
-
-    operator const CvMat* () const { return matrix; }
-    operator CvMat* () { return matrix; }
-
-    CvMatrix& operator = (const CvMatrix& _m)
-    {
-        _m.addref();
-        release();
-        matrix = _m.matrix;
-        return *this;
-    }
-
-protected:
-    CvMat* matrix;
-};
-
 
 // classes for automatic module/RTTI data registration/unregistration
 struct CV_EXPORTS CvModule
@@ -2123,4 +1826,4 @@ struct CV_EXPORTS CvType
 #include "cxcore.hpp"
 #endif // SKIP_INCLUDES
 
-#endif /*_CXCORE_H_*/
+#endif

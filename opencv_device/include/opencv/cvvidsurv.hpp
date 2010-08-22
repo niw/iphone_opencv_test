@@ -40,8 +40,8 @@
 //M*/
 
 
-#ifndef __CVVIDEOSURVEILLANCE_H__
-#define __CVVIDEOSURVEILLANCE_H__
+#ifndef __OPENCV_VIDEOSURVEILLANCE_H__
+#define __OPENCV_VIDEOSURVEILLANCE_H__
 
 /* Turn off the functionality until cvaux/src/Makefile.am gets updated: */
 //#if _MSC_VER >= 1200

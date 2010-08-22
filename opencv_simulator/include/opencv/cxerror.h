@@ -39,8 +39,8 @@
 //
 //M*/
 
-#ifndef _CXCORE_ERROR_H_
-#define _CXCORE_ERROR_H_
+#ifndef __OPENCV_ERROR_H__
+#define __OPENCV_ERROR_H__
 
 /************Below is declaration of error handling stuff in PLSuite manner**/
 
@@ -142,7 +142,7 @@ typedef int CVStatus;
 #define CV_ERROR( Code, Msg )                                       \
 {                                                                   \
      cvError( (Code), cvFuncName, Msg, __FILE__, __LINE__ );        \
-     EXIT;                                                          \
+     __CV_EXIT__;                                                   \
 }
 
 /* Simplified form of CV_ERROR */
@@ -180,10 +180,9 @@ typedef int CVStatus;
         CV_ERROR( CV_StsInternal, "Assertion: " #Condition " failed" ); \
 }
 
-#define __BEGIN__       {
-#define __END__         goto exit; exit: ; }
-#define __CLEANUP__
-#define EXIT            goto exit
+#define __CV_BEGIN__       {
+#define __CV_END__         goto exit; exit: ; }
+#define __CV_EXIT__        goto exit
 
 #endif /* _CXCORE_ERROR_H_ */
 

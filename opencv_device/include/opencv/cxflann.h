@@ -40,8 +40,8 @@
 //
 //M*/
 
-#ifndef CXFLANN_H_
-#define CXFLANN_H_
+#ifndef __OPENCV_FLANN_H__
+#define __OPENCV_FLANN_H__
 
 #ifdef __cplusplus
 
@@ -217,4 +217,4 @@ CV_EXPORTS int hierarchicalClustering(const Mat& features, Mat& centers,
 
 #endif // __cplusplus
 
-#endif /* CXFLANN_H_ */
+#endif

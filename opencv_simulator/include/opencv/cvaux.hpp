@@ -39,12 +39,317 @@
 //
 //M*/
 
-#ifndef __CVAUX_HPP__
-#define __CVAUX_HPP__
+#ifndef __OPENCV_AUX_HPP__
+#define __OPENCV_AUX_HPP__
 
 #ifdef __cplusplus
 
 #include <iosfwd>
+
+class CV_EXPORTS CvImage
+{
+public:
+    CvImage() : image(0), refcount(0) {}
+    CvImage( CvSize size, int depth, int channels )
+    {
+        image = cvCreateImage( size, depth, channels );
+        refcount = image ? new int(1) : 0;
+    }
+
+    CvImage( IplImage* img ) : image(img)
+    {
+        refcount = image ? new int(1) : 0;
+    }
+
+    CvImage( const CvImage& img ) : image(img.image), refcount(img.refcount)
+    {
+        if( refcount ) ++(*refcount);
+    }
+
+    CvImage( const char* filename, const char* imgname=0, int color=-1 ) : image(0), refcount(0)
+    { load( filename, imgname, color ); }
+
+    CvImage( CvFileStorage* fs, const char* mapname, const char* imgname ) : image(0), refcount(0)
+    { read( fs, mapname, imgname ); }
+
+    CvImage( CvFileStorage* fs, const char* seqname, int idx ) : image(0), refcount(0)
+    { read( fs, seqname, idx ); }
+
+    ~CvImage()
+    {
+        if( refcount && !(--*refcount) )
+        {
+            cvReleaseImage( &image );
+            delete refcount;
+        }
+    }
+
+    CvImage clone() { return CvImage(image ? cvCloneImage(image) : 0); }
+
+    void create( CvSize size, int depth, int channels )
+    {
+        if( !image || !refcount ||
+            image->width != size.width || image->height != size.height ||
+            image->depth != depth || image->nChannels != channels )
+            attach( cvCreateImage( size, depth, channels ));
+    }
+
+    void release() { detach(); }
+    void clear() { detach(); }
+
+    void attach( IplImage* img, bool use_refcount=true )
+    {
+        if( refcount && --*refcount == 0 )
+        {
+            cvReleaseImage( &image );
+            delete refcount;
+        }
+        image = img;
+        refcount = use_refcount && image ? new int(1) : 0;
+    }
+
+    void detach()
+    {
+        if( refcount && --*refcount == 0 )
+        {
+            cvReleaseImage( &image );
+            delete refcount;
+        }
+        image = 0;
+        refcount = 0;
+    }
+
+    bool load( const char* filename, const char* imgname=0, int color=-1 );
+    bool read( CvFileStorage* fs, const char* mapname, const char* imgname );
+    bool read( CvFileStorage* fs, const char* seqname, int idx );
+    void save( const char* filename, const char* imgname, const int* params=0 );
+    void write( CvFileStorage* fs, const char* imgname );
+
+    void show( const char* window_name );
+    bool is_valid() { return image != 0; }
+
+    int width() const { return image ? image->width : 0; }
+    int height() const { return image ? image->height : 0; }
+
+    CvSize size() const { return image ? cvSize(image->width, image->height) : cvSize(0,0); }
+
+    CvSize roi_size() const
+    {
+        return !image ? cvSize(0,0) :
+            !image->roi ? cvSize(image->width,image->height) :
+            cvSize(image->roi->width, image->roi->height);
+    }
+
+    CvRect roi() const
+    {
+        return !image ? cvRect(0,0,0,0) :
+            !image->roi ? cvRect(0,0,image->width,image->height) :
+            cvRect(image->roi->xOffset,image->roi->yOffset,
+                   image->roi->width,image->roi->height);
+    }
+
+    int coi() const { return !image || !image->roi ? 0 : image->roi->coi; }
+
+    void set_roi(CvRect roi) { cvSetImageROI(image,roi); }
+    void reset_roi() { cvResetImageROI(image); }
+    void set_coi(int coi) { cvSetImageCOI(image,coi); }
+    int depth() const { return image ? image->depth : 0; }
+    int channels() const { return image ? image->nChannels : 0; }
+    int pix_size() const { return image ? ((image->depth & 255)>>3)*image->nChannels : 0; }
+
+    uchar* data() { return image ? (uchar*)image->imageData : 0; }
+    const uchar* data() const { return image ? (const uchar*)image->imageData : 0; }
+    int step() const { return image ? image->widthStep : 0; }
+    int origin() const { return image ? image->origin : 0; }
+
+    uchar* roi_row(int y)
+    {
+        assert(0<=y);
+        assert(!image ?
+                1 : image->roi ?
+                y<image->roi->height : y<image->height);
+        
+        return !image ? 0 :
+            !image->roi ?
+                (uchar*)(image->imageData + y*image->widthStep) :
+                (uchar*)(image->imageData + (y+image->roi->yOffset)*image->widthStep +
+                image->roi->xOffset*((image->depth & 255)>>3)*image->nChannels);
+    }
+
+    const uchar* roi_row(int y) const
+    {
+        assert(0<=y);
+        assert(!image ?
+                1 : image->roi ?
+                y<image->roi->height : y<image->height); 
+
+        return !image ? 0 :
+            !image->roi ?
+                (const uchar*)(image->imageData + y*image->widthStep) :
+                (const uchar*)(image->imageData + (y+image->roi->yOffset)*image->widthStep +
+                image->roi->xOffset*((image->depth & 255)>>3)*image->nChannels);
+    }
+
+    operator const IplImage* () const { return image; }
+    operator IplImage* () { return image; }
+
+    CvImage& operator = (const CvImage& img)
+    {
+        if( img.refcount )
+            ++*img.refcount;
+        if( refcount && !(--*refcount) )
+            cvReleaseImage( &image );
+        image=img.image;
+        refcount=img.refcount;
+        return *this;
+    }
+
+protected:
+    IplImage* image;
+    int* refcount;
+};
+
+
+class CV_EXPORTS CvMatrix
+{
+public:
+    CvMatrix() : matrix(0) {}
+    CvMatrix( int rows, int cols, int type )
+    { matrix = cvCreateMat( rows, cols, type ); }
+
+    CvMatrix( int rows, int cols, int type, CvMat* hdr,
+              void* data=0, int step=CV_AUTOSTEP )
+    { matrix = cvInitMatHeader( hdr, rows, cols, type, data, step ); }
+
+    CvMatrix( int rows, int cols, int type, CvMemStorage* storage, bool alloc_data=true );
+
+    CvMatrix( int rows, int cols, int type, void* data, int step=CV_AUTOSTEP )
+    { matrix = cvCreateMatHeader( rows, cols, type );
+      cvSetData( matrix, data, step ); }
+
+    CvMatrix( CvMat* m )
+    { matrix = m; }
+
+    CvMatrix( const CvMatrix& m )
+    {
+        matrix = m.matrix;
+        addref();
+    }
+
+    CvMatrix( const char* filename, const char* matname=0, int color=-1 ) : matrix(0)
+    {  load( filename, matname, color ); }
+
+    CvMatrix( CvFileStorage* fs, const char* mapname, const char* matname ) : matrix(0)
+    {  read( fs, mapname, matname ); }
+
+    CvMatrix( CvFileStorage* fs, const char* seqname, int idx ) : matrix(0)
+    {  read( fs, seqname, idx ); }
+
+    ~CvMatrix()
+    {
+        release();
+    }
+
+    CvMatrix clone() { return CvMatrix(matrix ? cvCloneMat(matrix) : 0); }
+
+    void set( CvMat* m, bool add_ref )
+    {
+        release();
+        matrix = m;
+        if( add_ref )
+            addref();
+    }
+
+    void create( int rows, int cols, int type )
+    {
+        if( !matrix || !matrix->refcount ||
+            matrix->rows != rows || matrix->cols != cols ||
+            CV_MAT_TYPE(matrix->type) != type )
+            set( cvCreateMat( rows, cols, type ), false );
+    }
+
+    void addref() const
+    {
+        if( matrix )
+        {
+            if( matrix->hdr_refcount )
+                ++matrix->hdr_refcount;
+            else if( matrix->refcount )
+                ++*matrix->refcount;
+        }
+    }
+
+    void release()
+    {
+        if( matrix )
+        {
+            if( matrix->hdr_refcount )
+            {
+                if( --matrix->hdr_refcount == 0 )
+                    cvReleaseMat( &matrix );
+            }
+            else if( matrix->refcount )
+            {
+                if( --*matrix->refcount == 0 )
+                    cvFree( &matrix->refcount );
+            }
+            matrix = 0;
+        }
+    }
+
+    void clear()
+    {
+        release();
+    }
+
+    bool load( const char* filename, const char* matname=0, int color=-1 );
+    bool read( CvFileStorage* fs, const char* mapname, const char* matname );
+    bool read( CvFileStorage* fs, const char* seqname, int idx );
+    void save( const char* filename, const char* matname, const int* params=0 );
+    void write( CvFileStorage* fs, const char* matname );
+
+    void show( const char* window_name );
+
+    bool is_valid() { return matrix != 0; }
+
+    int rows() const { return matrix ? matrix->rows : 0; }
+    int cols() const { return matrix ? matrix->cols : 0; }
+
+    CvSize size() const
+    {
+        return !matrix ? cvSize(0,0) : cvSize(matrix->rows,matrix->cols);
+    }
+
+    int type() const { return matrix ? CV_MAT_TYPE(matrix->type) : 0; }
+    int depth() const { return matrix ? CV_MAT_DEPTH(matrix->type) : 0; }
+    int channels() const { return matrix ? CV_MAT_CN(matrix->type) : 0; }
+    int pix_size() const { return matrix ? CV_ELEM_SIZE(matrix->type) : 0; }
+
+    uchar* data() { return matrix ? matrix->data.ptr : 0; }
+    const uchar* data() const { return matrix ? matrix->data.ptr : 0; }
+    int step() const { return matrix ? matrix->step : 0; }
+
+    void set_data( void* data, int step=CV_AUTOSTEP )
+    { cvSetData( matrix, data, step ); }
+
+    uchar* row(int i) { return !matrix ? 0 : matrix->data.ptr + i*matrix->step; }
+    const uchar* row(int i) const
+    { return !matrix ? 0 : matrix->data.ptr + i*matrix->step; }
+
+    operator const CvMat* () const { return matrix; }
+    operator CvMat* () { return matrix; }
+
+    CvMatrix& operator = (const CvMatrix& _m)
+    {
+        _m.addref();
+        release();
+        matrix = _m.matrix;
+        return *this;
+    }
+
+protected:
+    CvMat* matrix;
+};
 
 /****************************************************************************************\
 *                                       CamShiftTracker                                  *
@@ -604,7 +909,7 @@ public:
     void operator()(const Mat& image, Point2f pt, Mat& patch, Size patchSize, RNG& rng) const;
     void operator()(const Mat& image, const Mat& transform, Mat& patch,
                     Size patchSize, RNG& rng) const;
-    void warpWholeImage(const Mat& image, Mat& _T, Mat& buf,
+    void warpWholeImage(const Mat& image, Mat& matT, Mat& buf,
                         Mat& warped, int border, RNG& rng) const;
     void generateRandomTransform(Point2f srcCenter, Point2f dstCenter,
                                  Mat& transform, RNG& rng, bool inverse=false) const;
@@ -785,322 +1090,6 @@ protected:
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////    
-//                                        One-Way Descriptor                                      //
-////////////////////////////////////////////////////////////////////////////////////////////////////    
-
-class AffinePose;
-    
-// OneWayDescriptor: incapsulates a descriptor for a single point 
-class CV_EXPORTS OneWayDescriptor
-{
-public:
-    OneWayDescriptor();
-    ~OneWayDescriptor();
-    
-    // allocates memory for given descriptor parameters
-    void Allocate(int pose_count, Size size, int nChannels);
-    
-    // GenerateSamples: generates affine transformed patches with averaging them over small transformation variations.
-    // If external poses and transforms were specified, uses them instead of generating random ones
-    // - pose_count: the number of poses to be generated
-    // - frontal: the input patch (can be a roi in a larger image)
-    // - norm: if nonzero, normalizes the output patch so that the sum of pixel intensities is 1
-    void GenerateSamples(int pose_count, IplImage* frontal, int norm = 0);
-    
-    // GenerateSamplesFast: generates affine transformed patches with averaging them over small transformation variations.
-    // Uses precalculated transformed pca components.
-    // - frontal: the input patch (can be a roi in a larger image)
-    // - pca_hr_avg: pca average vector
-    // - pca_hr_eigenvectors: pca eigenvectors
-    // - pca_descriptors: an array of precomputed descriptors of pca components containing their affine transformations
-    //   pca_descriptors[0] corresponds to the average, pca_descriptors[1]-pca_descriptors[pca_dim] correspond to eigenvectors
-    void GenerateSamplesFast(IplImage* frontal, CvMat* pca_hr_avg, 
-                             CvMat* pca_hr_eigenvectors, OneWayDescriptor* pca_descriptors);
-    
-    // sets the poses and corresponding transforms
-    void SetTransforms(AffinePose* poses, CvMat** transforms);
-    
-    // Initialize: builds a descriptor. 
-    // - pose_count: the number of poses to build. If poses were set externally, uses them rather than generating random ones
-    // - frontal: input patch. Can be a roi in a larger image
-    // - feature_name: the feature name to be associated with the descriptor
-    // - norm: if 1, the affine transformed patches are normalized so that their sum is 1 
-    void Initialize(int pose_count, IplImage* frontal, const char* feature_name = 0, int norm = 0);
-    
-    // InitializeFast: builds a descriptor using precomputed descriptors of pca components
-    // - pose_count: the number of poses to build
-    // - frontal: input patch. Can be a roi in a larger image
-    // - feature_name: the feature name to be associated with the descriptor
-    // - pca_hr_avg: average vector for PCA
-    // - pca_hr_eigenvectors: PCA eigenvectors (one vector per row)
-    // - pca_descriptors: precomputed descriptors of PCA components, the first descriptor for the average vector
-    // followed by the descriptors for eigenvectors
-    void InitializeFast(int pose_count, IplImage* frontal, const char* feature_name, 
-                        CvMat* pca_hr_avg, CvMat* pca_hr_eigenvectors, OneWayDescriptor* pca_descriptors);
-    
-    // ProjectPCASample: unwarps an image patch into a vector and projects it into PCA space
-    // - patch: input image patch
-    // - avg: PCA average vector
-    // - eigenvectors: PCA eigenvectors, one per row
-    // - pca_coeffs: output PCA coefficients
-    void ProjectPCASample(IplImage* patch, CvMat* avg, CvMat* eigenvectors, CvMat* pca_coeffs) const;
-    
-    // InitializePCACoeffs: projects all warped patches into PCA space
-    // - avg: PCA average vector
-    // - eigenvectors: PCA eigenvectors, one per row    
-    void InitializePCACoeffs(CvMat* avg, CvMat* eigenvectors);
-    
-    // EstimatePose: finds the closest match between an input patch and a set of patches with different poses
-    // - patch: input image patch
-    // - pose_idx: the output index of the closest pose
-    // - distance: the distance to the closest pose (L2 distance)
-    void EstimatePose(IplImage* patch, int& pose_idx, float& distance) const;
-    
-    // EstimatePosePCA: finds the closest match between an input patch and a set of patches with different poses. 
-    // The distance between patches is computed in PCA space
-    // - patch: input image patch
-    // - pose_idx: the output index of the closest pose
-    // - distance: distance to the closest pose (L2 distance in PCA space)
-    // - avg: PCA average vector. If 0, matching without PCA is used
-    // - eigenvectors: PCA eigenvectors, one per row
-    void EstimatePosePCA(IplImage* patch, int& pose_idx, float& distance, CvMat* avg, CvMat* eigenvalues) const;
-    
-    // GetPatchSize: returns the size of each image patch after warping (2 times smaller than the input patch) 
-    Size GetPatchSize() const
-    {
-        return m_patch_size;
-    }
-    
-    // GetInputPatchSize: returns the required size of the patch that the descriptor is built from 
-    // (2 time larger than the patch after warping)
-    Size GetInputPatchSize() const
-    {
-        return cvSize(m_patch_size.width*2, m_patch_size.height*2);
-    }
-    
-    // GetPatch: returns a patch corresponding to specified pose index
-    // - index: pose index
-    // - return value: the patch corresponding to specified pose index
-    IplImage* GetPatch(int index);
-    
-    // GetPose: returns a pose corresponding to specified pose index
-    // - index: pose index
-    // - return value: the pose corresponding to specified pose index
-    AffinePose GetPose(int index) const;
-    
-    // Save: saves all patches with different poses to a specified path
-    void Save(const char* path);
-    
-    // ReadByName: reads a descriptor from a file storage
-    // - fs: file storage
-    // - parent: parent node
-    // - name: node name
-    // - return value: 1 if succeeded, 0 otherwise
-    int ReadByName(CvFileStorage* fs, CvFileNode* parent, const char* name);
-    
-    // Write: writes a descriptor into a file storage
-    // - fs: file storage
-    // - name: node name
-    void Write(CvFileStorage* fs, const char* name);
-    
-    // GetFeatureName: returns a name corresponding to a feature
-    const char* GetFeatureName() const;
-    
-    // GetCenter: returns the center of the feature
-    Point GetCenter() const;
-    
-    void SetPCADimHigh(int pca_dim_high) {m_pca_dim_high = pca_dim_high;};
-    void SetPCADimLow(int pca_dim_low) {m_pca_dim_low = pca_dim_low;};
-    
-protected:
-    int m_pose_count; // the number of poses
-    Size m_patch_size; // size of each image
-    IplImage** m_samples; // an array of length m_pose_count containing the patch in different poses 
-    CvMat** m_pca_coeffs; // an array of length m_pose_count containing pca decomposition of the patch in different poses
-    AffinePose* m_affine_poses; // an array of poses
-    CvMat** m_transforms; // an array of affine transforms corresponding to poses
-    
-    String m_feature_name; // the name of the feature associated with the descriptor
-    Point m_center; // the coordinates of the feature (the center of the input image ROI)
-    
-    int m_pca_dim_high; // the number of descriptor pca components to use for generating affine poses
-    int m_pca_dim_low; // the number of pca components to use for comparison
-};
-
-CV_EXPORTS void findOneWayDescriptor(int desc_count, const OneWayDescriptor* descriptors,
-                                     IplImage* patch, int& desc_idx, int& pose_idx, float& distance, 
-                                     CvMat* avg = 0, CvMat* eigenvalues = 0);
-
-CV_EXPORTS void findOneWayDescriptor(int desc_count, const OneWayDescriptor* descriptors, IplImage* patch, 
-                                     float scale_min, float scale_max, float scale_step,
-                                     int& desc_idx, int& pose_idx, float& distance, float& scale, 
-                                     CvMat* avg, CvMat* eigenvectors);
-    
-    
-// OneWayDescriptorBase: encapsulates functionality for training/loading a set of one way descriptors
-// and finding the nearest closest descriptor to an input feature
-class CV_EXPORTS OneWayDescriptorBase
-{
-public:
-    
-    // creates an instance of OneWayDescriptor from a set of training files
-    // - patch_size: size of the input (large) patch
-    // - pose_count: the number of poses to generate for each descriptor
-    // - train_path: path to training files
-    // - pca_config: the name of the file that contains PCA for small patches (2 times smaller
-    // than patch_size each dimension
-    // - pca_hr_config: the name of the file that contains PCA for large patches (of patch_size size)
-    // - pca_desc_config: the name of the file that contains descriptors of PCA components
-    OneWayDescriptorBase(Size patch_size, int pose_count, const char* train_path = 0, const char* pca_config = 0, 
-                         const char* pca_hr_config = 0, const char* pca_desc_config = 0, int pyr_levels = 2, 
-                         int pca_dim_high = 100, int pca_dim_low = 100);
-    
-    ~OneWayDescriptorBase();
-    
-    // Allocate: allocates memory for a given number of descriptors
-    void Allocate(int train_feature_count);
-    
-    // AllocatePCADescriptors: allocates memory for pca descriptors
-    void AllocatePCADescriptors();
-    
-    // returns patch size
-    Size GetPatchSize() const {return m_patch_size;};
-    // returns the number of poses for each descriptor
-    int GetPoseCount() const {return m_pose_count;};
-    
-    // returns the number of pyramid levels
-    int GetPyrLevels() const {return m_pyr_levels;};
-    
-    // CreateDescriptorsFromImage: creates descriptors for each of the input features
-    // - src: input image
-    // - features: input features
-    // - pyr_levels: the number of pyramid levels
-    void CreateDescriptorsFromImage(IplImage* src, const vector<KeyPoint>& features);
-    
-    // CreatePCADescriptors: generates descriptors for PCA components, needed for fast generation of feature descriptors
-    void CreatePCADescriptors();
-    
-    // returns a feature descriptor by feature index
-    const OneWayDescriptor* GetDescriptor(int desc_idx) const;
-    
-    // FindDescriptor: finds the closest descriptor
-    // - patch: input image patch
-    // - desc_idx: output index of the closest descriptor to the input patch
-    // - pose_idx: output index of the closest pose of the closest descriptor to the input patch
-    // - distance: distance from the input patch to the closest feature pose
-    void FindDescriptor(IplImage* patch, int& desc_idx, int& pose_idx, float& distance) const;
-    
-    // FindDescriptor: finds the closest descriptor
-    // - src: input image 
-    // - pt: center of the feature
-    // - desc_idx: output index of the closest descriptor to the input patch
-    // - pose_idx: output index of the closest pose of the closest descriptor to the input patch
-    // - distance: distance from the input patch to the closest feature pose
-    void FindDescriptor(IplImage* src, Point2f pt, int& desc_idx, int& pose_idx, float& distance) const;
-    
-    // InitializePoses: generates random poses
-    void InitializePoses();
-    
-    // InitializeTransformsFromPoses: generates 2x3 affine matrices from poses (initializes m_transforms)
-    void InitializeTransformsFromPoses();
-    
-    // InitializePoseTransforms: subsequently calls InitializePoses and InitializeTransformsFromPoses
-    void InitializePoseTransforms();
-    
-    // InitializeDescriptor: initializes a descriptor
-    // - desc_idx: descriptor index
-    // - train_image: image patch (ROI is supported)
-    // - feature_label: feature textual label
-    void InitializeDescriptor(int desc_idx, IplImage* train_image, const char* feature_label);
-    
-    // InitializeDescriptors: load features from an image and create descriptors for each of them 
-    void InitializeDescriptors(IplImage* train_image, const vector<KeyPoint>& features, 
-                               const char* feature_label = "", int desc_start_idx = 0);
-    
-    // LoadPCADescriptors: loads PCA descriptors from a file
-    // - filename: input filename
-    int LoadPCADescriptors(const char* filename);
-    
-    // SavePCADescriptors: saves PCA descriptors to a file
-    // - filename: output filename
-    void SavePCADescriptors(const char* filename);
-    
-    // SetPCAHigh: sets the high resolution pca matrices (copied to internal structures)
-    void SetPCAHigh(CvMat* avg, CvMat* eigenvectors);
-    
-    // SetPCALow: sets the low resolution pca matrices (copied to internal structures)
-    void SetPCALow(CvMat* avg, CvMat* eigenvectors);
-    
-    
-protected:
-    Size m_patch_size; // patch size
-    int m_pose_count; // the number of poses for each descriptor
-    int m_train_feature_count; // the number of the training features
-    OneWayDescriptor* m_descriptors; // array of train feature descriptors
-    CvMat* m_pca_avg; // PCA average vector for small patches
-    CvMat* m_pca_eigenvectors; // PCA eigenvectors for small patches
-    CvMat* m_pca_hr_avg; // PCA average vector for large patches
-    CvMat* m_pca_hr_eigenvectors; // PCA eigenvectors for large patches
-    OneWayDescriptor* m_pca_descriptors; // an array of PCA descriptors
-    
-    AffinePose* m_poses; // array of poses
-    CvMat** m_transforms; // array of affine transformations corresponding to poses
-    
-    int m_pca_dim_high;
-    int m_pca_dim_low;
-    
-    int m_pyr_levels;
-};
-
-class CV_EXPORTS OneWayDescriptorObject : public OneWayDescriptorBase
-{
-public:
-    // creates an instance of OneWayDescriptorObject from a set of training files
-    // - patch_size: size of the input (large) patch
-    // - pose_count: the number of poses to generate for each descriptor
-    // - train_path: path to training files
-    // - pca_config: the name of the file that contains PCA for small patches (2 times smaller
-    // than patch_size each dimension
-    // - pca_hr_config: the name of the file that contains PCA for large patches (of patch_size size)
-    // - pca_desc_config: the name of the file that contains descriptors of PCA components
-    OneWayDescriptorObject(Size patch_size, int pose_count, const char* train_path, const char* pca_config, 
-                           const char* pca_hr_config = 0, const char* pca_desc_config = 0, int pyr_levels = 2);
-    
-    ~OneWayDescriptorObject();
-    
-    // Allocate: allocates memory for a given number of features
-    // - train_feature_count: the total number of features
-    // - object_feature_count: the number of features extracted from the object 
-    void Allocate(int train_feature_count, int object_feature_count);
-    
-    
-    void SetLabeledFeatures(const vector<KeyPoint>& features) {m_train_features = features;};
-    vector<KeyPoint>& GetLabeledFeatures() {return m_train_features;};
-    const vector<KeyPoint>& GetLabeledFeatures() const {return m_train_features;};
-    
-    // IsDescriptorObject: returns 1 if descriptor with specified index is positive, otherwise 0
-    int IsDescriptorObject(int desc_idx) const;
-    
-    // MatchPointToPart: returns the part number of a feature if it matches one of the object parts, otherwise -1
-    int MatchPointToPart(Point pt) const;
-    
-    // GetDescriptorPart: returns the part number of the feature corresponding to a specified descriptor  
-    // - desc_idx: descriptor index
-    int GetDescriptorPart(int desc_idx) const;
-    
-    // GetTrainFeatures: returns a set of training features
-    const vector<KeyPoint>& GetTrainFeatures() const {return m_train_features;};
-    vector<KeyPoint> _GetTrainFeatures() const;
-    
-    void InitializeObjectDescriptors(IplImage* train_image, const vector<KeyPoint>& features, 
-                                     const char* feature_label, int desc_start_idx = 0, float scale = 1.0f);
-    
-protected:
-    int* m_part_id; // contains part id for each of object descriptors
-    vector<KeyPoint> m_train_features; // train features
-    int m_object_feature_count; // the number of the positive features
-};
 
 
 // detect corners using FAST algorithm
@@ -1224,6 +1213,615 @@ protected:
     void* data;
 };
 
+struct DefaultRngAuto
+{
+    const static uint64 def_state = (uint64)-1;
+    const uint64 old_state;
+
+    DefaultRngAuto() : old_state(theRNG().state) { theRNG().state = def_state; }
+    ~DefaultRngAuto() { theRNG().state = old_state; }   
+
+    DefaultRngAuto& operator=(const DefaultRngAuto&);
+};
+
+	/****************************************************************************************\
+	*            Calonder Descriptor														 *
+	\****************************************************************************************/
+	/*!
+	A pseudo-random number generator usable with std::random_shuffle.
+	*/
+	typedef cv::RNG CalonderRng;
+	typedef unsigned int int_type;
+
+	//----------------------------
+	//randomized_tree.h
+
+	//class RTTester;
+
+	//namespace features {
+	static const size_t DEFAULT_REDUCED_NUM_DIM = 176;  
+	static const float LOWER_QUANT_PERC = .03f;
+	static const float UPPER_QUANT_PERC = .92f;
+	static const int PATCH_SIZE = 32;
+	static const int DEFAULT_DEPTH = 9;
+	static const int DEFAULT_VIEWS = 5000;
+	struct RTreeNode;
+
+	struct BaseKeypoint
+	{
+		int x;
+		int y;
+		IplImage* image;
+
+		BaseKeypoint()
+			: x(0), y(0), image(NULL)
+		{}
+
+		BaseKeypoint(int x, int y, IplImage* image)
+			: x(x), y(y), image(image)
+		{}
+	};
+
+	class CSMatrixGenerator {
+	public:
+		typedef enum { PDT_GAUSS=1, PDT_BERNOULLI, PDT_DBFRIENDLY } PHI_DISTR_TYPE;
+		~CSMatrixGenerator();
+		static float* getCSMatrix(int m, int n, PHI_DISTR_TYPE dt);     // do NOT free returned pointer   
+
+
+	private:
+		static float *cs_phi_;    // matrix for compressive sensing
+		static int cs_phi_m_, cs_phi_n_;
+	};
+
+	class CV_EXPORTS RandomizedTree
+	{  
+	public:
+		friend class RTreeClassifier;  
+		//friend class ::RTTester;
+
+
+		RandomizedTree();
+		~RandomizedTree();
+
+		void train(std::vector<BaseKeypoint> const& base_set, cv::RNG &rng,
+			int depth, int views, size_t reduced_num_dim, int num_quant_bits);
+		void train(std::vector<BaseKeypoint> const& base_set, cv::RNG &rng,
+			PatchGenerator &make_patch, int depth, int views, size_t reduced_num_dim,
+			int num_quant_bits);
+
+		// following two funcs are EXPERIMENTAL (do not use unless you know exactly what you do)
+		static void quantizeVector(float *vec, int dim, int N, float bnds[2], int clamp_mode=0);
+		static void quantizeVector(float *src, int dim, int N, float bnds[2], uchar *dst);  
+
+		// patch_data must be a 32x32 array (no row padding)
+		float* getPosterior(uchar* patch_data);
+		const float* getPosterior(uchar* patch_data) const;
+		uchar* getPosterior2(uchar* patch_data);
+
+		void read(const char* file_name, int num_quant_bits);
+		void read(std::istream &is, int num_quant_bits);
+		void write(const char* file_name) const;
+		void write(std::ostream &os) const;
+
+		int classes() { return classes_; }
+		int depth() { return depth_; }
+
+		//void setKeepFloatPosteriors(bool b) { keep_float_posteriors_ = b; }
+		void discardFloatPosteriors() { freePosteriors(1); }
+
+		inline void applyQuantization(int num_quant_bits) { makePosteriors2(num_quant_bits); }
+
+		// debug
+		void savePosteriors(std::string url, bool append=false);
+		void savePosteriors2(std::string url, bool append=false);
+
+	private:
+		int classes_;
+		int depth_;
+		int num_leaves_;  
+		std::vector<RTreeNode> nodes_;  
+		float **posteriors_;        // 16-bytes aligned posteriors
+		uchar **posteriors2_;     // 16-bytes aligned posteriors
+		std::vector<int> leaf_counts_;
+
+		void createNodes(int num_nodes, cv::RNG &rng);
+		void allocPosteriorsAligned(int num_leaves, int num_classes);
+		void freePosteriors(int which);    // which: 1=posteriors_, 2=posteriors2_, 3=both
+		void init(int classes, int depth, cv::RNG &rng);
+		void addExample(int class_id, uchar* patch_data);
+		void finalize(size_t reduced_num_dim, int num_quant_bits);  
+		int getIndex(uchar* patch_data) const;
+		inline float* getPosteriorByIndex(int index);
+		inline uchar* getPosteriorByIndex2(int index);
+		inline const float* getPosteriorByIndex(int index) const;
+		//void makeRandomMeasMatrix(float *cs_phi, PHI_DISTR_TYPE dt, size_t reduced_num_dim);  
+		void convertPosteriorsToChar();
+		void makePosteriors2(int num_quant_bits);
+		void compressLeaves(size_t reduced_num_dim);  
+		void estimateQuantPercForPosteriors(float perc[2]);
+	};
+
+	struct RTreeNode
+	{
+		short offset1, offset2;
+
+		RTreeNode() {}
+
+		RTreeNode(uchar x1, uchar y1, uchar x2, uchar y2)
+			: offset1(y1*PATCH_SIZE + x1),
+			offset2(y2*PATCH_SIZE + x2)
+		{}
+
+		//! Left child on 0, right child on 1
+		inline bool operator() (uchar* patch_data) const
+		{
+			return patch_data[offset1] > patch_data[offset2];
+		}
+	};
+
+
+
+	//} // namespace features
+	//----------------------------
+	//rtree_classifier.h
+	//class RTTester;
+
+	//namespace features {
+
+	class CV_EXPORTS RTreeClassifier
+	{   
+	public:
+		//friend class ::RTTester;
+		static const int DEFAULT_TREES = 48;
+		static const size_t DEFAULT_NUM_QUANT_BITS = 4;  
+
+		RTreeClassifier();
+
+		//modified
+		void train(std::vector<BaseKeypoint> const& base_set, 
+			cv::RNG &rng,
+			int num_trees = RTreeClassifier::DEFAULT_TREES,
+			int depth = DEFAULT_DEPTH,
+			int views = DEFAULT_VIEWS,
+			size_t reduced_num_dim = DEFAULT_REDUCED_NUM_DIM,
+			int num_quant_bits = DEFAULT_NUM_QUANT_BITS, bool print_status = true);
+		void train(std::vector<BaseKeypoint> const& base_set,
+			cv::RNG &rng, 
+			PatchGenerator &make_patch,
+			int num_trees = RTreeClassifier::DEFAULT_TREES,
+			int depth = DEFAULT_DEPTH,
+			int views = DEFAULT_VIEWS,
+			size_t reduced_num_dim = DEFAULT_REDUCED_NUM_DIM,
+			int num_quant_bits = DEFAULT_NUM_QUANT_BITS, bool print_status = true);
+
+		// sig must point to a memory block of at least classes()*sizeof(float|uchar) bytes
+		void getSignature(IplImage *patch, uchar *sig);
+		void getSignature(IplImage *patch, float *sig);
+		void getSparseSignature(IplImage *patch, float *sig, float thresh);
+		// TODO: deprecated in favor of getSignature overload, remove
+		void getFloatSignature(IplImage *patch, float *sig) { getSignature(patch, sig); }
+
+		static int countNonZeroElements(float *vec, int n, double tol=1e-10);
+		static inline void safeSignatureAlloc(uchar **sig, int num_sig=1, int sig_len=176);
+		static inline uchar* safeSignatureAlloc(int num_sig=1, int sig_len=176);  
+
+		inline int classes() { return classes_; }
+		inline int original_num_classes() { return original_num_classes_; }
+
+		void setQuantization(int num_quant_bits);
+		void discardFloatPosteriors();
+
+		void read(const char* file_name);
+		void read(std::istream &is);
+		void write(const char* file_name) const;
+		void write(std::ostream &os) const;
+
+		// experimental and debug
+		void saveAllFloatPosteriors(std::string file_url);
+		void saveAllBytePosteriors(std::string file_url);
+		void setFloatPosteriorsFromTextfile_176(std::string url);
+		float countZeroElements();
+
+		std::vector<RandomizedTree> trees_;
+
+	private:    
+		int classes_;
+		int num_quant_bits_;
+		uchar **posteriors_;
+		ushort *ptemp_;
+		int original_num_classes_;  
+		bool keep_floats_;
+	};
+    
+CV_EXPORTS bool find4QuadCornerSubpix(const Mat& img, std::vector<Point2f>& corners, Size region_size);
+
+    
+class CV_EXPORTS BackgroundSubtractor
+{
+public:
+    virtual ~BackgroundSubtractor();
+    virtual void operator()(const Mat& image, Mat& fgmask, double learningRate=0);
+};
+    
+    
+class CV_EXPORTS BackgroundSubtractorMOG : public BackgroundSubtractor
+{
+public:
+    BackgroundSubtractorMOG();
+    BackgroundSubtractorMOG(int history, int nmixtures, double backgroundRatio, double noiseSigma=0);
+    virtual ~BackgroundSubtractorMOG();
+    virtual void operator()(const Mat& image, Mat& fgmask, double learningRate=0);
+    
+    virtual void initialize(Size frameSize, int frameType);
+    
+    Size frameSize;
+    int frameType;
+    Mat bgmodel;
+    int nframes;
+    int history;
+    int nmixtures;
+    double varThreshold;
+    double backgroundRatio;
+    double noiseSigma;
+};
+ 
+
+// CvAffinePose: defines a parameterized affine transformation of an image patch.
+// An image patch is rotated on angle phi (in degrees), then scaled lambda1 times
+// along horizontal and lambda2 times along vertical direction, and then rotated again
+// on angle (theta - phi).
+class CV_EXPORTS CvAffinePose
+{
+public:
+    float phi;
+    float theta;
+    float lambda1;
+    float lambda2;
+};
+
+
+class CV_EXPORTS OneWayDescriptor
+{
+public:
+    OneWayDescriptor();
+    ~OneWayDescriptor();
+    
+    // allocates memory for given descriptor parameters
+    void Allocate(int pose_count, CvSize size, int nChannels);
+    
+    // GenerateSamples: generates affine transformed patches with averaging them over small transformation variations.
+    // If external poses and transforms were specified, uses them instead of generating random ones
+    // - pose_count: the number of poses to be generated
+    // - frontal: the input patch (can be a roi in a larger image)
+    // - norm: if nonzero, normalizes the output patch so that the sum of pixel intensities is 1
+    void GenerateSamples(int pose_count, IplImage* frontal, int norm = 0);
+    
+    // GenerateSamplesFast: generates affine transformed patches with averaging them over small transformation variations.
+    // Uses precalculated transformed pca components.
+    // - frontal: the input patch (can be a roi in a larger image)
+    // - pca_hr_avg: pca average vector
+    // - pca_hr_eigenvectors: pca eigenvectors
+    // - pca_descriptors: an array of precomputed descriptors of pca components containing their affine transformations
+    //   pca_descriptors[0] corresponds to the average, pca_descriptors[1]-pca_descriptors[pca_dim] correspond to eigenvectors
+    void GenerateSamplesFast(IplImage* frontal, CvMat* pca_hr_avg,
+                             CvMat* pca_hr_eigenvectors, OneWayDescriptor* pca_descriptors);
+    
+    // sets the poses and corresponding transforms
+    void SetTransforms(CvAffinePose* poses, CvMat** transforms);
+    
+    // Initialize: builds a descriptor.
+    // - pose_count: the number of poses to build. If poses were set externally, uses them rather than generating random ones
+    // - frontal: input patch. Can be a roi in a larger image
+    // - feature_name: the feature name to be associated with the descriptor
+    // - norm: if 1, the affine transformed patches are normalized so that their sum is 1
+    void Initialize(int pose_count, IplImage* frontal, const char* feature_name = 0, int norm = 0);
+    
+    // InitializeFast: builds a descriptor using precomputed descriptors of pca components
+    // - pose_count: the number of poses to build
+    // - frontal: input patch. Can be a roi in a larger image
+    // - feature_name: the feature name to be associated with the descriptor
+    // - pca_hr_avg: average vector for PCA
+    // - pca_hr_eigenvectors: PCA eigenvectors (one vector per row)
+    // - pca_descriptors: precomputed descriptors of PCA components, the first descriptor for the average vector
+    // followed by the descriptors for eigenvectors
+    void InitializeFast(int pose_count, IplImage* frontal, const char* feature_name,
+                        CvMat* pca_hr_avg, CvMat* pca_hr_eigenvectors, OneWayDescriptor* pca_descriptors);
+    
+    // ProjectPCASample: unwarps an image patch into a vector and projects it into PCA space
+    // - patch: input image patch
+    // - avg: PCA average vector
+    // - eigenvectors: PCA eigenvectors, one per row
+    // - pca_coeffs: output PCA coefficients
+    void ProjectPCASample(IplImage* patch, CvMat* avg, CvMat* eigenvectors, CvMat* pca_coeffs) const;
+    
+    // InitializePCACoeffs: projects all warped patches into PCA space
+    // - avg: PCA average vector
+    // - eigenvectors: PCA eigenvectors, one per row
+    void InitializePCACoeffs(CvMat* avg, CvMat* eigenvectors);
+    
+    // EstimatePose: finds the closest match between an input patch and a set of patches with different poses
+    // - patch: input image patch
+    // - pose_idx: the output index of the closest pose
+    // - distance: the distance to the closest pose (L2 distance)
+    void EstimatePose(IplImage* patch, int& pose_idx, float& distance) const;
+    
+    // EstimatePosePCA: finds the closest match between an input patch and a set of patches with different poses.
+    // The distance between patches is computed in PCA space
+    // - patch: input image patch
+    // - pose_idx: the output index of the closest pose
+    // - distance: distance to the closest pose (L2 distance in PCA space)
+    // - avg: PCA average vector. If 0, matching without PCA is used
+    // - eigenvectors: PCA eigenvectors, one per row
+    void EstimatePosePCA(CvArr* patch, int& pose_idx, float& distance, CvMat* avg, CvMat* eigenvalues) const;
+    
+    // GetPatchSize: returns the size of each image patch after warping (2 times smaller than the input patch)
+    CvSize GetPatchSize() const
+    {
+        return m_patch_size;
+    }
+    
+    // GetInputPatchSize: returns the required size of the patch that the descriptor is built from
+    // (2 time larger than the patch after warping)
+    CvSize GetInputPatchSize() const
+    {
+        return cvSize(m_patch_size.width*2, m_patch_size.height*2);
+    }
+    
+    // GetPatch: returns a patch corresponding to specified pose index
+    // - index: pose index
+    // - return value: the patch corresponding to specified pose index
+    IplImage* GetPatch(int index);
+    
+    // GetPose: returns a pose corresponding to specified pose index
+    // - index: pose index
+    // - return value: the pose corresponding to specified pose index
+    CvAffinePose GetPose(int index) const;
+    
+    // Save: saves all patches with different poses to a specified path
+    void Save(const char* path);
+    
+    // ReadByName: reads a descriptor from a file storage
+    // - fs: file storage
+    // - parent: parent node
+    // - name: node name
+    // - return value: 1 if succeeded, 0 otherwise
+    int ReadByName(CvFileStorage* fs, CvFileNode* parent, const char* name);
+    
+    // Write: writes a descriptor into a file storage
+    // - fs: file storage
+    // - name: node name
+    void Write(CvFileStorage* fs, const char* name);
+    
+    // GetFeatureName: returns a name corresponding to a feature
+    const char* GetFeatureName() const;
+    
+    // GetCenter: returns the center of the feature
+    CvPoint GetCenter() const;
+    
+    void SetPCADimHigh(int pca_dim_high) {m_pca_dim_high = pca_dim_high;};
+    void SetPCADimLow(int pca_dim_low) {m_pca_dim_low = pca_dim_low;};
+    
+    int GetPCADimLow() const;
+    int GetPCADimHigh() const;
+    
+    CvMat** GetPCACoeffs() const {return m_pca_coeffs;}
+    
+protected:
+    int m_pose_count; // the number of poses
+    CvSize m_patch_size; // size of each image
+    IplImage** m_samples; // an array of length m_pose_count containing the patch in different poses
+    IplImage* m_input_patch;
+    IplImage* m_train_patch;
+    CvMat** m_pca_coeffs; // an array of length m_pose_count containing pca decomposition of the patch in different poses
+    CvAffinePose* m_affine_poses; // an array of poses
+    CvMat** m_transforms; // an array of affine transforms corresponding to poses
+    
+    std::string m_feature_name; // the name of the feature associated with the descriptor
+    CvPoint m_center; // the coordinates of the feature (the center of the input image ROI)
+    
+    int m_pca_dim_high; // the number of descriptor pca components to use for generating affine poses
+    int m_pca_dim_low; // the number of pca components to use for comparison
+};
+
+
+// OneWayDescriptorBase: encapsulates functionality for training/loading a set of one way descriptors
+// and finding the nearest closest descriptor to an input feature
+class CV_EXPORTS OneWayDescriptorBase
+{
+public:
+    
+    // creates an instance of OneWayDescriptor from a set of training files
+    // - patch_size: size of the input (large) patch
+    // - pose_count: the number of poses to generate for each descriptor
+    // - train_path: path to training files
+    // - pca_config: the name of the file that contains PCA for small patches (2 times smaller
+    // than patch_size each dimension
+    // - pca_hr_config: the name of the file that contains PCA for large patches (of patch_size size)
+    // - pca_desc_config: the name of the file that contains descriptors of PCA components
+    OneWayDescriptorBase(CvSize patch_size, int pose_count, const char* train_path = 0, const char* pca_config = 0,
+                         const char* pca_hr_config = 0, const char* pca_desc_config = 0, int pyr_levels = 1,
+                         int pca_dim_high = 100, int pca_dim_low = 100);
+    
+    ~OneWayDescriptorBase();
+    
+    // Allocate: allocates memory for a given number of descriptors
+    void Allocate(int train_feature_count);
+    
+    // AllocatePCADescriptors: allocates memory for pca descriptors
+    void AllocatePCADescriptors();
+    
+    // returns patch size
+    CvSize GetPatchSize() const {return m_patch_size;};
+    // returns the number of poses for each descriptor
+    int GetPoseCount() const {return m_pose_count;};
+    
+    // returns the number of pyramid levels
+    int GetPyrLevels() const {return m_pyr_levels;};
+    
+    // returns the number of descriptors
+    int GetDescriptorCount() const {return m_train_feature_count;};
+    
+    // CreateDescriptorsFromImage: creates descriptors for each of the input features
+    // - src: input image
+    // - features: input features
+    // - pyr_levels: the number of pyramid levels
+    void CreateDescriptorsFromImage(IplImage* src, const std::vector<cv::KeyPoint>& features);
+    
+    // CreatePCADescriptors: generates descriptors for PCA components, needed for fast generation of feature descriptors
+    void CreatePCADescriptors();
+    
+    // returns a feature descriptor by feature index
+    const OneWayDescriptor* GetDescriptor(int desc_idx) const {return &m_descriptors[desc_idx];};
+    
+    // FindDescriptor: finds the closest descriptor
+    // - patch: input image patch
+    // - desc_idx: output index of the closest descriptor to the input patch
+    // - pose_idx: output index of the closest pose of the closest descriptor to the input patch
+    // - distance: distance from the input patch to the closest feature pose
+    // - _scales: scales of the input patch for each descriptor
+    // - scale_ranges: input scales variation (float[2])
+    void FindDescriptor(IplImage* patch, int& desc_idx, int& pose_idx, float& distance, float* _scale = 0, float* scale_ranges = 0) const;
+    
+    // - patch: input image patch
+    // - n: number of the closest indexes
+    // - desc_idxs: output indexes of the closest descriptor to the input patch (n)
+    // - pose_idx: output indexes of the closest pose of the closest descriptor to the input patch (n)
+    // - distances: distance from the input patch to the closest feature pose (n)
+    // - _scales: scales of the input patch
+    // - scale_ranges: input scales variation (float[2])
+    void FindDescriptor(IplImage* patch, int n, std::vector<int>& desc_idxs, std::vector<int>& pose_idxs,
+                        std::vector<float>& distances, std::vector<float>& _scales, float* scale_ranges = 0) const;
+    
+    // FindDescriptor: finds the closest descriptor
+    // - src: input image
+    // - pt: center of the feature
+    // - desc_idx: output index of the closest descriptor to the input patch
+    // - pose_idx: output index of the closest pose of the closest descriptor to the input patch
+    // - distance: distance from the input patch to the closest feature pose
+    void FindDescriptor(IplImage* src, cv::Point2f pt, int& desc_idx, int& pose_idx, float& distance) const;
+    
+    // InitializePoses: generates random poses
+    void InitializePoses();
+    
+    // InitializeTransformsFromPoses: generates 2x3 affine matrices from poses (initializes m_transforms)
+    void InitializeTransformsFromPoses();
+    
+    // InitializePoseTransforms: subsequently calls InitializePoses and InitializeTransformsFromPoses
+    void InitializePoseTransforms();
+    
+    // InitializeDescriptor: initializes a descriptor
+    // - desc_idx: descriptor index
+    // - train_image: image patch (ROI is supported)
+    // - feature_label: feature textual label
+    void InitializeDescriptor(int desc_idx, IplImage* train_image, const char* feature_label);
+    
+    void InitializeDescriptor(int desc_idx, IplImage* train_image, const cv::KeyPoint& keypoint, const char* feature_label);
+    
+    // InitializeDescriptors: load features from an image and create descriptors for each of them
+    void InitializeDescriptors(IplImage* train_image, const vector<cv::KeyPoint>& features,
+                               const char* feature_label = "", int desc_start_idx = 0);
+    
+    // LoadPCADescriptors: loads PCA descriptors from a file
+    // - filename: input filename
+    int LoadPCADescriptors(const char* filename);
+    
+    // SavePCADescriptors: saves PCA descriptors to a file
+    // - filename: output filename
+    void SavePCADescriptors(const char* filename);
+    
+    // SetPCAHigh: sets the high resolution pca matrices (copied to internal structures)
+    void SetPCAHigh(CvMat* avg, CvMat* eigenvectors);
+    
+    // SetPCALow: sets the low resolution pca matrices (copied to internal structures)
+    void SetPCALow(CvMat* avg, CvMat* eigenvectors);
+    
+    int GetLowPCA(CvMat** avg, CvMat** eigenvectors)
+    {
+        *avg = m_pca_avg;
+        *eigenvectors = m_pca_eigenvectors;
+        return m_pca_dim_low;
+    };
+    
+    void ConvertDescriptorsArrayToTree(); // Converting pca_descriptors array to KD tree
+    
+    
+protected:
+    CvSize m_patch_size; // patch size
+    int m_pose_count; // the number of poses for each descriptor
+    int m_train_feature_count; // the number of the training features
+    OneWayDescriptor* m_descriptors; // array of train feature descriptors
+    CvMat* m_pca_avg; // PCA average Vector for small patches
+    CvMat* m_pca_eigenvectors; // PCA eigenvectors for small patches
+    CvMat* m_pca_hr_avg; // PCA average Vector for large patches
+    CvMat* m_pca_hr_eigenvectors; // PCA eigenvectors for large patches
+    OneWayDescriptor* m_pca_descriptors; // an array of PCA descriptors
+    
+    cv::flann::Index* m_pca_descriptors_tree;
+    CvMat* m_pca_descriptors_matrix;
+    
+    CvAffinePose* m_poses; // array of poses
+    CvMat** m_transforms; // array of affine transformations corresponding to poses
+    
+    int m_pca_dim_high;
+    int m_pca_dim_low;
+    
+    int m_pyr_levels;
+    
+};
+
+class OneWayDescriptorObject : public OneWayDescriptorBase
+{
+public:
+    // creates an instance of OneWayDescriptorObject from a set of training files
+    // - patch_size: size of the input (large) patch
+    // - pose_count: the number of poses to generate for each descriptor
+    // - train_path: path to training files
+    // - pca_config: the name of the file that contains PCA for small patches (2 times smaller
+    // than patch_size each dimension
+    // - pca_hr_config: the name of the file that contains PCA for large patches (of patch_size size)
+    // - pca_desc_config: the name of the file that contains descriptors of PCA components
+    OneWayDescriptorObject(CvSize patch_size, int pose_count, const char* train_path, const char* pca_config,
+                           const char* pca_hr_config = 0, const char* pca_desc_config = 0, int pyr_levels = 1);
+    
+    ~OneWayDescriptorObject();
+    
+    // Allocate: allocates memory for a given number of features
+    // - train_feature_count: the total number of features
+    // - object_feature_count: the number of features extracted from the object
+    void Allocate(int train_feature_count, int object_feature_count);
+    
+    
+    void SetLabeledFeatures(const vector<cv::KeyPoint>& features) {m_train_features = features;};
+    vector<cv::KeyPoint>& GetLabeledFeatures() {return m_train_features;};
+    const vector<cv::KeyPoint>& GetLabeledFeatures() const {return m_train_features;};
+    vector<cv::KeyPoint> _GetLabeledFeatures() const;
+    
+    // IsDescriptorObject: returns 1 if descriptor with specified index is positive, otherwise 0
+    int IsDescriptorObject(int desc_idx) const;
+    
+    // MatchPointToPart: returns the part number of a feature if it matches one of the object parts, otherwise -1
+    int MatchPointToPart(CvPoint pt) const;
+    
+    // GetDescriptorPart: returns the part number of the feature corresponding to a specified descriptor
+    // - desc_idx: descriptor index
+    int GetDescriptorPart(int desc_idx) const;
+    
+    
+    void InitializeObjectDescriptors(IplImage* train_image, const vector<cv::KeyPoint>& features,
+                                     const char* feature_label, int desc_start_idx = 0, float scale = 1.0f,
+                                     int is_background = 0);
+    
+    // GetObjectFeatureCount: returns the number of object features
+    int GetObjectFeatureCount() const {return m_object_feature_count;};
+    
+protected:
+    int* m_part_id; // contains part id for each of object descriptors
+    vector<cv::KeyPoint> m_train_features; // train features
+    int m_object_feature_count; // the number of the positive features
+    
+};
+    
 
 }
 

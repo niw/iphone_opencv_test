@@ -39,8 +39,8 @@
 //
 //M*/
 
-#ifndef __CVAUX__H__
-#define __CVAUX__H__
+#ifndef __OPENCV_AUX_H__
+#define __OPENCV_AUX_H__
 
 #include "cv.h"
 
@@ -246,6 +246,10 @@ CVAPI(void)  cvFindHandRegionA( CvPoint3D32f* points, int count,
                                 CvPoint3D32f* center,
                                 CvMemStorage* storage, CvSeq **numbers);
 
+/* Calculates the cooficients of the homography matrix */
+CVAPI(void)  cvCalcImageHomography( float* line, CvPoint3D32f* center,
+                                    float* intrinsic, float* homography );
+
 /****************************************************************************************\
 *                           Additional operations on Subdivisions                        *
 \****************************************************************************************/
@@ -301,6 +305,19 @@ typedef enum CvGraphWeightType
     CV_WEIGHTED_ALL
 } CvGraphWeightType;
 
+
+/* Calculates histogram of a contour */
+CVAPI(void)  cvCalcPGH( const CvSeq* contour, CvHistogram* hist );
+
+#define CV_DOMINANT_IPAN 1
+
+/* Finds high-curvature points of the contour */
+CVAPI(CvSeq*) cvFindDominantPoints( CvSeq* contour, CvMemStorage* storage,
+                                   int method CV_DEFAULT(CV_DOMINANT_IPAN),
+                                   double parameter1 CV_DEFAULT(0),
+                                   double parameter2 CV_DEFAULT(0),
+                                   double parameter3 CV_DEFAULT(0),
+                                   double parameter4 CV_DEFAULT(0));
 
 /*****************************************************************************************/
 
@@ -1154,7 +1171,8 @@ CVAPI(void)  cvDeleteMoire( IplImage*  img );
 struct CvBGStatModel;
 
 typedef void (CV_CDECL * CvReleaseBGStatModel)( struct CvBGStatModel** bg_model );
-typedef int (CV_CDECL * CvUpdateBGStatModel)( IplImage* curr_frame, struct CvBGStatModel* bg_model );
+typedef int (CV_CDECL * CvUpdateBGStatModel)( IplImage* curr_frame, struct CvBGStatModel* bg_model,
+                                              double learningRate );
 
 #define CV_BG_STAT_MODEL_FIELDS()                                                   \
     int             type; /*type of BG model*/                                      \
@@ -1183,9 +1201,9 @@ CV_INLINE void cvReleaseBGStatModel( CvBGStatModel** bg_model )
 }
 
 // Updates statistical model and returns number of found foreground regions
-CV_INLINE int cvUpdateBGStatModel( IplImage* current_frame, CvBGStatModel*  bg_model )
+CV_INLINE int cvUpdateBGStatModel( IplImage* current_frame, CvBGStatModel*  bg_model, double learningRate CV_DEFAULT(-1))
 {
-    return bg_model && bg_model->update ? bg_model->update( current_frame, bg_model ) : 0;
+    return bg_model && bg_model->update ? bg_model->update( current_frame, bg_model, learningRate ) : 0;
 }
 
 // Performs FG post-processing using segmentation
@@ -1419,6 +1437,37 @@ CVAPI(CvSeq*) cvSegmentFGMask( CvArr *fgmask, int poly1Hull0 CV_DEFAULT(1),
                                float perimScale CV_DEFAULT(4.f),
                                CvMemStorage* storage CV_DEFAULT(0),
                                CvPoint offset CV_DEFAULT(cvPoint(0,0)));
+
+typedef struct CvConDensation
+{
+    int MP;
+    int DP;
+    float* DynamMatr;       /* Matrix of the linear Dynamics system  */
+    float* State;           /* Vector of State                       */
+    int SamplesNum;         /* Number of the Samples                 */
+    float** flSamples;      /* arr of the Sample Vectors             */
+    float** flNewSamples;   /* temporary array of the Sample Vectors */
+    float* flConfidence;    /* Confidence for each Sample            */
+    float* flCumulative;    /* Cumulative confidence                 */
+    float* Temp;            /* Temporary vector                      */
+    float* RandomSample;    /* RandomVector to update sample set     */
+    struct CvRandState* RandS; /* Array of structures to generate random vectors */
+}
+CvConDensation;
+                               
+/* Creates ConDensation filter state */
+CVAPI(CvConDensation*)  cvCreateConDensation( int dynam_params,
+                                             int measure_params,
+                                             int sample_count );
+
+/* Releases ConDensation filter state */
+CVAPI(void)  cvReleaseConDensation( CvConDensation** condens );
+
+/* Updates ConDensation filter by time (predict future state of the system) */
+CVAPI(void)  cvConDensUpdateByTime( CvConDensation* condens);
+
+/* Initializes ConDensation filter samples  */
+CVAPI(void)  cvConDensInitSampleSet( CvConDensation* condens, CvMat* lower_bound, CvMat* upper_bound );                               
 
 #ifdef __cplusplus
 }

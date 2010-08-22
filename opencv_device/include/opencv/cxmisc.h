@@ -45,17 +45,10 @@
    and, probably, other libraries. If you need some of this functionality,
    the safe way is to copy it into your code and rename the macros.
 */
-#ifndef _CXCORE_MISC_H_
-#define _CXCORE_MISC_H_
-
-#ifdef HAVE_CONFIG_H
-    #include "cvconfig.h"
-#endif
+#ifndef __OPENCV_MISC_H__
+#define __OPENCV_MISC_H__
 
 #include <limits.h>
-#ifdef _OPENMP
-#include "omp.h"
-#endif
 
 /****************************************************************************************\
 *                              Compile-time tuning parameters                            *

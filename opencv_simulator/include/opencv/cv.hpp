@@ -40,8 +40,8 @@
 //
 //M*/
 
-#ifndef _CV_HPP_
-#define _CV_HPP_
+#ifndef __OPENCV_CV_HPP__
+#define __OPENCV_CV_HPP__
 
 #ifdef __cplusplus
 
@@ -216,6 +216,10 @@ CV_EXPORTS Ptr<FilterEngine> createMorphologyFilter(int op, int type, const Mat&
 enum { MORPH_RECT=0, MORPH_CROSS=1, MORPH_ELLIPSE=2 };
 CV_EXPORTS Mat getStructuringElement(int shape, Size ksize, Point anchor=Point(-1,-1));
 
+template<> inline void Ptr<IplConvKernel>::delete_obj()
+{ cvReleaseStructuringElement(&obj); }
+
+    
 CV_EXPORTS void copyMakeBorder( const Mat& src, Mat& dst,
                                 int top, int bottom, int left, int right,
                                 int borderType, const Scalar& value=Scalar() );
@@ -318,7 +322,7 @@ enum { INTER_NEAREST=0, INTER_LINEAR=1, INTER_CUBIC=2, INTER_AREA=3,
        INTER_LANCZOS4=4, INTER_MAX=7, WARP_INVERSE_MAP=16 };
 
 CV_EXPORTS void resize( const Mat& src, Mat& dst,
-                        Size dsize=Size(), double fx=0, double fy=0,
+                        Size dsize, double fx=0, double fy=0,
                         int interpolation=INTER_LINEAR );
 
 CV_EXPORTS void warpAffine( const Mat& src, Mat& dst,
@@ -379,6 +383,9 @@ CV_EXPORTS void undistort( const Mat& src, Mat& dst, const Mat& cameraMatrix,
 CV_EXPORTS void initUndistortRectifyMap( const Mat& cameraMatrix, const Mat& distCoeffs,
                            const Mat& R, const Mat& newCameraMatrix,
                            Size size, int m1type, Mat& map1, Mat& map2 );
+CV_EXPORTS Mat getOptimalNewCameraMatrix( const Mat& cameraMatrix, const Mat& distCoeffs,
+                                          Size imageSize, double alpha, Size newImgSize=Size(),
+                                          Rect* validPixROI=0);
 CV_EXPORTS Mat getDefaultNewCameraMatrix( const Mat& cameraMatrix, Size imgsize=Size(),
                                           bool centerPrincipalPoint=false );
 
@@ -431,6 +438,21 @@ CV_EXPORTS double compareHist( const SparseMat& H1, const SparseMat& H2, int met
 CV_EXPORTS void equalizeHist( const Mat& src, Mat& dst );
 
 CV_EXPORTS void watershed( const Mat& image, Mat& markers );
+
+enum { GC_BGD    = 0,  // background
+       GC_FGD    = 1,  // foreground
+       GC_PR_BGD = 2,  // most probably background
+       GC_PR_FGD = 3   // most probably foreground 
+     };
+
+enum { GC_INIT_WITH_RECT  = 0,
+       GC_INIT_WITH_MASK  = 1,
+       GC_EVAL            = 2
+     };
+
+CV_EXPORTS void grabCut( const Mat& img, Mat& mask, Rect rect, 
+                         Mat& bgdModel, Mat& fgdModel,
+                         int iterCount, int mode = GC_EVAL );
 
 enum { INPAINT_NS=CV_INPAINT_NS, INPAINT_TELEA=CV_INPAINT_TELEA };
 
@@ -490,11 +512,11 @@ enum { CHAIN_APPROX_NONE=CV_CHAIN_APPROX_NONE,
        CHAIN_APPROX_TC89_L1=CV_CHAIN_APPROX_TC89_L1,
        CHAIN_APPROX_TC89_KCOS=CV_CHAIN_APPROX_TC89_KCOS };
 
-CV_EXPORTS void findContours( const Mat& image, vector<vector<Point> >& contours,
+CV_EXPORTS void findContours( Mat& image, vector<vector<Point> >& contours,
                               vector<Vec4i>& hierarchy, int mode,
                               int method, Point offset=Point());
 
-CV_EXPORTS void findContours( const Mat& image, vector<vector<Point> >& contours,
+CV_EXPORTS void findContours( Mat& image, vector<vector<Point> >& contours,
                               int mode, int method, Point offset=Point());
 
 CV_EXPORTS void drawContours( Mat& image, const vector<vector<Point> >& contours,
@@ -512,7 +534,7 @@ CV_EXPORTS void approxPolyDP( const Mat& curve,
     
 CV_EXPORTS double arcLength( const Mat& curve, bool closed );
 CV_EXPORTS Rect boundingRect( const Mat& points );
-CV_EXPORTS double contourArea( const Mat& contour );    
+CV_EXPORTS double contourArea( const Mat& contour, bool oriented=false );    
 CV_EXPORTS RotatedRect minAreaRect( const Mat& points );
 CV_EXPORTS void minEnclosingCircle( const Mat& points,
                                     Point2f& center, float& radius );    
@@ -599,6 +621,7 @@ public:
 ///////////////////////////// Object Detection ////////////////////////////
 
 CV_EXPORTS void groupRectangles(vector<Rect>& rectList, int groupThreshold, double eps=0.2);
+CV_EXPORTS void groupRectangles(vector<Rect>& rectList, vector<int>& weights, int groupThreshold, double eps=0.2);
         
 class CV_EXPORTS FeatureEvaluator
 {
@@ -792,7 +815,7 @@ enum
     CALIB_ZERO_DISPARITY = CV_CALIB_ZERO_DISPARITY
 };
 
-CV_EXPORTS void calibrateCamera( const vector<vector<Point3f> >& objectPoints,
+CV_EXPORTS double calibrateCamera( const vector<vector<Point3f> >& objectPoints,
                                  const vector<vector<Point2f> >& imagePoints,
                                  Size imageSize,
                                  Mat& cameraMatrix, Mat& distCoeffs,
@@ -809,7 +832,7 @@ CV_EXPORTS void calibrationMatrixValues( const Mat& cameraMatrix,
                                 Point2d& principalPoint,
                                 double& aspectRatio );
 
-CV_EXPORTS void stereoCalibrate( const vector<vector<Point3f> >& objectPoints,
+CV_EXPORTS double stereoCalibrate( const vector<vector<Point3f> >& objectPoints,
                                  const vector<vector<Point2f> >& imagePoints1,
                                  const vector<vector<Point2f> >& imagePoints2,
                                  Mat& cameraMatrix1, Mat& distCoeffs1,
@@ -825,6 +848,14 @@ CV_EXPORTS void stereoRectify( const Mat& cameraMatrix1, const Mat& distCoeffs1,
                                Size imageSize, const Mat& R, const Mat& T,
                                Mat& R1, Mat& R2, Mat& P1, Mat& P2, Mat& Q,
                                int flags=CALIB_ZERO_DISPARITY );
+    
+CV_EXPORTS void stereoRectify( const Mat& cameraMatrix1, const Mat& distCoeffs1,
+                              const Mat& cameraMatrix2, const Mat& distCoeffs2,
+                              Size imageSize, const Mat& R, const Mat& T,
+                              Mat& R1, Mat& R2, Mat& P1, Mat& P2, Mat& Q,
+                              double alpha, Size newImageSize=Size(),
+                              Rect* validPixROI1=0, Rect* validPixROI2=0,
+                              int flags=CALIB_ZERO_DISPARITY );
 
 CV_EXPORTS bool stereoRectifyUncalibrated( const Mat& points1,
                                            const Mat& points2,
@@ -862,7 +893,8 @@ template<> inline void Ptr<CvStereoBMState>::delete_obj()
 class CV_EXPORTS StereoBM
 {
 public:
-    enum { NORMALIZED_RESPONSE = CV_STEREO_BM_NORMALIZED_RESPONSE,
+    enum { PREFILTER_NORMALIZED_RESPONSE = CV_STEREO_BM_NORMALIZED_RESPONSE,
+        PREFILTER_XSOBEL = CV_STEREO_BM_XSOBEL,
         BASIC_PRESET=CV_STEREO_BM_BASIC,
         FISH_EYE_PRESET=CV_STEREO_BM_FISH_EYE,
         NARROW_PRESET=CV_STEREO_BM_NARROW };
@@ -870,10 +902,52 @@ public:
     StereoBM();
     StereoBM(int preset, int ndisparities=0, int SADWindowSize=21);
     void init(int preset, int ndisparities=0, int SADWindowSize=21);
-    void operator()( const Mat& left, const Mat& right, Mat& disparity );
+    void operator()( const Mat& left, const Mat& right, Mat& disparity, int disptype=CV_16S );
 
     Ptr<CvStereoBMState> state;
 };
+
+    
+class CV_EXPORTS StereoSGBM
+{
+public:
+    enum { DISP_SHIFT=4, DISP_SCALE = (1<<DISP_SHIFT) };
+    
+    StereoSGBM();
+    StereoSGBM(int minDisparity, int numDisparities, int SADWindowSize,
+               int P1=0, int P2=0, int disp12MaxDiff=0,
+               int preFilterCap=0, int uniquenessRatio=0,
+               int speckleWindowSize=0, int speckleRange=0,
+               bool fullDP=false);
+    virtual ~StereoSGBM();
+    
+    virtual void operator()(const Mat& left, const Mat& right, Mat& disp);
+    
+    int minDisparity;
+    int numberOfDisparities;
+    int SADWindowSize;
+    int preFilterCap;
+    int uniquenessRatio;
+    int P1, P2;
+    int speckleWindowSize;
+    int speckleRange;
+    int disp12MaxDiff;
+    bool fullDP;
+    
+protected:
+    Mat buffer;
+};
+
+    
+CV_EXPORTS void filterSpeckles( Mat& img, double newVal, int maxSpeckleSize, double maxDiff, Mat& buf );
+    
+CV_EXPORTS Rect getValidDisparityROI( Rect roi1, Rect roi2,
+                                int minDisparity, int numberOfDisparities,
+                                int SADWindowSize );
+    
+CV_EXPORTS void validateDisparity( Mat& disparity, const Mat& cost,
+                                   int minDisparity, int numberOfDisparities,
+                                   int disp12MaxDisp=1 );
 
 CV_EXPORTS void reprojectImageTo3D( const Mat& disparity,
                                     Mat& _3dImage, const Mat& Q,
@@ -928,11 +1002,11 @@ public:
           float _max_variation, float _min_diversity,
           int _max_evolution, double _area_threshold,
           double _min_margin, int _edge_blur_size );
-    void operator()(Mat& image, vector<vector<Point> >& msers, const Mat& mask) const;
+    void operator()( const Mat& image, vector<vector<Point> >& msers, const Mat& mask ) const;
 };
 
 
-class CV_EXPORTS StarDetector : CvStarDetectorParams
+class CV_EXPORTS StarDetector : public CvStarDetectorParams
 {
 public:
     StarDetector();
@@ -966,16 +1040,16 @@ public:
     void step();
     enum { DONE=0, STARTED=1, CALC_J=2, CHECK_ERR=3 };
 
-    CvMat* mask;
-    CvMat* prevParam;
-    CvMat* param;
-    CvMat* J;
-    CvMat* err;
-    CvMat* JtJ;
-    CvMat* JtJN;
-    CvMat* JtErr;
-    CvMat* JtJV;
-    CvMat* JtJW;
+    cv::Ptr<CvMat> mask;
+    cv::Ptr<CvMat> prevParam;
+    cv::Ptr<CvMat> param;
+    cv::Ptr<CvMat> J;
+    cv::Ptr<CvMat> err;
+    cv::Ptr<CvMat> JtJ;
+    cv::Ptr<CvMat> JtJN;
+    cv::Ptr<CvMat> JtErr;
+    cv::Ptr<CvMat> JtJV;
+    cv::Ptr<CvMat> JtJW;
     double prevErrNorm, errNorm;
     int lambdaLg10;
     CvTermCriteria criteria;
@@ -1006,9 +1080,8 @@ struct CvLSHOperations
   virtual int hash_lookup(lsh_hash h, int l, int* ret_i, int ret_i_max) = 0;
 };
 
-
 #endif /* __cplusplus */
 
-#endif /* _CV_HPP_ */
+#endif
 
 /* End of file. */

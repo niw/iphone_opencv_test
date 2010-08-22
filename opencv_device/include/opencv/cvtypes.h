@@ -39,8 +39,8 @@
 //
 //M*/
 
-#ifndef _CVTYPES_H_
-#define _CVTYPES_H_
+#ifndef __OPENCV_CVTYPES_H__
+#define __OPENCV_CVTYPES_H__
 
 #ifndef SKIP_INCLUDES
   #include <assert.h>
@@ -143,7 +143,8 @@ typedef size_t CvSubdiv2DEdge;
 #define CV_SUBDIV2D_POINT_FIELDS()\
     int            flags;      \
     CvSubdiv2DEdge first;      \
-    CvPoint2D32f   pt;
+    CvPoint2D32f   pt;         \
+	int id;
 
 #define CV_SUBDIV2D_VIRTUAL_POINT_FLAG (1 << 30)
 
@@ -245,22 +246,6 @@ typedef float (CV_CDECL * CvDistanceFunction)( const float* a, const float* b, v
 }
 #endif
 
-typedef struct CvConDensation
-{
-    int MP;
-    int DP;
-    float* DynamMatr;       /* Matrix of the linear Dynamics system  */
-    float* State;           /* Vector of State                       */
-    int SamplesNum;         /* Number of the Samples                 */
-    float** flSamples;      /* arr of the Sample Vectors             */
-    float** flNewSamples;   /* temporary array of the Sample Vectors */
-    float* flConfidence;    /* Confidence for each Sample            */
-    float* flCumulative;    /* Cumulative confidence                 */
-    float* Temp;            /* Temporary vector                      */
-    float* RandomSample;    /* RandomVector to update sample set     */
-    struct CvRandState* RandS; /* Array of structures to generate random vectors */
-}
-CvConDensation;
 
 /*
 standard Kalman filter (in G. Welch' and G. Bishop's notation):
