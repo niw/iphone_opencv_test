@@ -18,6 +18,9 @@
 		540ABC6B0E3E1C5300E30885 /* haarcascade_frontalface_default.xml in Resources */ = {isa = PBXBuildFile; fileRef = 540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */; };
 		540ABCF60E3E280700E30885 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 540ABCF50E3E280700E30885 /* Icon.png */; };
 		549913C70E3E3D2100BD1311 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 549913C60E3E3D2100BD1311 /* Default.png */; };
+		54A4A00312211BFD006678AF /* libcv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00212211BFD006678AF /* libcv.a */; };
+		54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00412211C0D006678AF /* libcxcore.a */; };
+		54A4A00A12211DC3006678AF /* libopencv_lapack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00912211DC3006678AF /* libopencv_lapack.a */; };
 		54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 54BBAF3C0F04148D00568ED9 /* Tink.aiff */; };
 		54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */; };
 		54FC5BDE0E3EB3EB00F48645 /* laughing_man.png in Resources */ = {isa = PBXBuildFile; fileRef = 54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */; };
@@ -39,6 +42,9 @@
 		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		549913C60E3E3D2100BD1311 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		54A4A00212211BFD006678AF /* libcv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcv.a; path = opencv_device/lib/libcv.a; sourceTree = "<group>"; };
+		54A4A00412211C0D006678AF /* libcxcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcxcore.a; path = opencv_device/lib/libcxcore.a; sourceTree = "<group>"; };
+		54A4A00912211DC3006678AF /* libopencv_lapack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_lapack.a; path = opencv_device/lib/libopencv_lapack.a; sourceTree = "<group>"; };
 		54BBAF3C0F04148D00568ED9 /* Tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = Tink.aiff; sourceTree = "<group>"; };
 		54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = laughing_man.png; sourceTree = "<group>"; };
@@ -54,6 +60,9 @@
 				540723E30E3DD25B00B598A2 /* UIKit.framework in Frameworks */,
 				540723E40E3DD25B00B598A2 /* CoreGraphics.framework in Frameworks */,
 				54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */,
+				54A4A00312211BFD006678AF /* libcv.a in Frameworks */,
+				54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */,
+				54A4A00A12211DC3006678AF /* libopencv_lapack.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +139,9 @@
 		540723F00E3DD28C00B598A2 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				54A4A00212211BFD006678AF /* libcv.a */,
+				54A4A00412211C0D006678AF /* libcxcore.a */,
+				54A4A00912211DC3006678AF /* libopencv_lapack.a */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -214,17 +226,15 @@
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/include";
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/include";
 				INFOPLIST_FILE = Info.plist;
-				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
-					"-lstdc++",
-					"-lz",
-					"$(SRCROOT)/opencv_device/lib/libcv.a",
-					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/opencv_device/lib\"",
 				);
-				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/lib";
+				OTHER_LDFLAGS = (
 					"-lstdc++",
 					"-lz",
-					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
-					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
 			};
@@ -240,17 +250,15 @@
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/include";
 				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/include";
 				INFOPLIST_FILE = Info.plist;
-				"OTHER_LDFLAGS[sdk=iphoneos*][arch=*]" = (
-					"-lstdc++",
-					"-lz",
-					"$(SRCROOT)/opencv_device/lib/libcv.a",
-					"$(SRCROOT)/opencv_device/lib/libcxcore.a",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/opencv_device/lib\"",
 				);
-				"OTHER_LDFLAGS[sdk=iphonesimulator*][arch=*]" = (
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/lib";
+				OTHER_LDFLAGS = (
 					"-lstdc++",
 					"-lz",
-					"$(SRCROOT)/opencv_simulator/lib/libcv.a",
-					"$(SRCROOT)/opencv_simulator/lib/libcxcore.a",
 				);
 				PRODUCT_NAME = OpenCVTest;
 			};
@@ -264,9 +272,10 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.2;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Debug;
 		};
@@ -278,8 +287,9 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.2;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Release;
 		};
