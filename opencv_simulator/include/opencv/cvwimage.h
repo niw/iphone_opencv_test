@@ -97,8 +97,8 @@
 // Functions that are not part of the basic image allocation, viewing, and
 // access should come from OpenCV, except some useful functions that are not
 // part of OpenCV can be found in wimage_util.h
-#ifndef _CV_WIMAGE_H_
-#define _CV_WIMAGE_H_
+#ifndef __OPENCV_WIMAGE_H__
+#define __OPENCV_WIMAGE_H__
 
 #include "cxcore.h"
 
@@ -618,4 +618,4 @@ WImageViewC<T, C> WImageC<T, C>::View(int c, int r, int width, int height) {
 
 #endif // __cplusplus
 
-#endif  // _CV_WIMAGE_H_
+#endif

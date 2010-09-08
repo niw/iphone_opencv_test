@@ -1,7 +1,9 @@
+.DS_Store
 /build
 /*.xcodeproj/*.perspectivev3
 /*.xcodeproj/*.pbxuser
 /*.xcodeproj/*.mode*
-/opencv-*
+/OpenCV-*/
 /opencv_*/lib/*.la
 /opencv_*/lib/pkgconfig
+/opencv_*/share

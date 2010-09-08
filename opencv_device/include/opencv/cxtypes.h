@@ -40,21 +40,13 @@
 //
 //M*/
 
-#ifndef _CXCORE_TYPES_H_
-#define _CXCORE_TYPES_H_
+#ifndef __OPENCV_CORE_TYPES_H__
+#define __OPENCV_CORE_TYPES_H__
 
 #if !defined _CRT_SECURE_NO_DEPRECATE && _MSC_VER > 1300
 #define _CRT_SECURE_NO_DEPRECATE /* to avoid multiple Visual Studio 2005 warnings */
 #endif
 
-#if _MSC_VER >= 1500
-#ifndef _BIND_TO_CURRENT_CRT_VERSION
-  #define _BIND_TO_CURRENT_CRT_VERSION 1
-#endif
-#ifndef _BIND_TO_CURRENT_VCLIBS_VERSION
-  #define _BIND_TO_CURRENT_VCLIBS_VERSION 1
-#endif
-#endif
 
 #ifndef SKIP_INCLUDES
   #include <assert.h>
@@ -74,19 +66,15 @@
     #define CV_ICC   __ECL
   #elif defined __ECC
     #define CV_ICC   __ECC
+  #elif defined __INTEL_COMPILER
+    #define CV_ICC   __INTEL_COMPILER
   #endif
 
-  #if ((defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64) && \
-      (_MSC_VER >= 1400 || defined CV_ICC)) \
-      || (defined __SSE2__ && defined __GNUC__ && __GNUC__ >= 4)
+  #if (_MSC_VER >= 1400 && defined _M_X64) || (__GNUC__ >= 4 && defined __x86_64__)
+    #if defined WIN64
+		#include <intrin.h>
+	#endif
     #include <emmintrin.h>
-    #define CV_SSE2 1
-  #else
-    #define CV_SSE2 0
-  #endif
-
-  #if ((defined __SSE__ || defined __MMX__) && defined __GNUC__ && __GNUC__ >= 3)
-    #include <mmintrin.h>
   #endif
 
   #if defined __BORLANDC__
@@ -225,10 +213,10 @@ Cv64suf;
 
 CV_INLINE  int  cvRound( double value )
 {
-#if CV_SSE2 && !defined __APPLE__
+#if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__ && !defined __APPLE__)
     __m128d t = _mm_set_sd( value );
     return _mm_cvtsd_si32(t);
-#elif (defined WIN32 || defined _WIN32) && !defined WIN64 && !defined _WIN64 && defined _MSC_VER
+#elif defined _MSC_VER && defined _M_IX86
     int t;
     __asm
     {
@@ -240,7 +228,7 @@ CV_INLINE  int  cvRound( double value )
     return (int)lrint(value);
 #else
     // while this is not IEEE754-compliant rounding, it's usually a good enough approximation
-    return (int)(value + 0.5);
+    return (int)(value + (value >= 0 ? 0.5 : -0.5));
 #endif
 }
 
@@ -250,7 +238,7 @@ CV_INLINE  int  cvFloor( double value )
 #ifdef __GNUC__
     int i = (int)value;
     return i - (i > value);
-#elif CV_SSE2
+#elif defined _MSC_VER && defined _M_X64
     __m128d t = _mm_set_sd( value );
     int i = _mm_cvtsd_si32(t);
     return i - _mm_movemask_pd(_mm_cmplt_sd(t, _mm_cvtsi32_sd(t,i)));
@@ -268,7 +256,7 @@ CV_INLINE  int  cvCeil( double value )
 #ifdef __GNUC__
     int i = (int)value;
     return i + (i < value);
-#elif CV_SSE2
+#elif defined _MSC_VER && defined _M_X64
     __m128d t = _mm_set_sd( value );
     int i = _mm_cvtsd_si32(t);
     return i + _mm_movemask_pd(_mm_cmplt_sd(_mm_cvtsi32_sd(t,i), t));
@@ -631,6 +619,11 @@ CvMat;
 /* 0x3a50 = 11 10 10 01 01 00 00 ~ array of log2(sizeof(arr_type_elem)) */
 #define CV_ELEM_SIZE(type) \
     (CV_MAT_CN(type) << ((((sizeof(size_t)/4+1)*16384|0x3a50) >> CV_MAT_DEPTH(type)*2) & 3))
+
+#define IPL2CV_DEPTH(depth) \
+    ((((CV_8U)+(CV_16U<<4)+(CV_32F<<8)+(CV_64F<<16)+(CV_8S<<20)+ \
+    (CV_16S<<24)+(CV_32S<<28)) >> ((((depth) & 0xF0) >> 2) + \
+    (((depth) & IPL_DEPTH_SIGN) ? 20 : 0))) & 15)
 
 /* Inline constructor. No data is allocated internally!!!
  * (Use together with cvCreateData, or use cvCreateMat instead to

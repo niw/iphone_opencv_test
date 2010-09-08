@@ -40,8 +40,8 @@
 //
 //M*/
 
-#ifndef _CXCORE_HPP_
-#define _CXCORE_HPP_
+#ifndef __OPENCV_CORE_HPP__
+#define __OPENCV_CORE_HPP__
 
 #include "cxmisc.h"
 
@@ -59,8 +59,10 @@
 
 namespace cv {
 
+#undef abs
 #undef min
-#undef max    
+#undef max
+#undef Complex
 
 using std::vector;
 using std::string;
@@ -75,31 +77,37 @@ typedef std::basic_string<wchar_t> WString;
 CV_EXPORTS string fromUtf16(const WString& str);
 CV_EXPORTS WString toUtf16(const string& str);
 
-class CV_EXPORTS Exception
+CV_EXPORTS string format( const char* fmt, ... );
+
+class CV_EXPORTS Exception : public std::exception
 {
 public:
-    Exception() { code = 0; line = 0; }
-    Exception(int _code, const string& _err, const string& _func, const string& _file, int _line)
-        : code(_code), err(_err), func(_func), file(_file), line(_line) {}
-    Exception(const Exception& exc)
-        : code(exc.code), err(exc.err), func(exc.func), file(exc.file), line(exc.line) {}
-    Exception& operator = (const Exception& exc)
-    {
-        if( this != &exc )
-        {
-            code = exc.code; err = exc.err; func = exc.func; file = exc.file; line = exc.line;
-        }
-        return *this;
-    }
+	Exception() { code = 0; line = 0; }
+	Exception(int _code, const string& _err, const string& _func, const string& _file, int _line)
+		: code(_code), err(_err), func(_func), file(_file), line(_line)
+    { formatMessage(); }
+    
+	virtual ~Exception() throw() {}
 
-    int code;
-    string err;
-    string func;
-    string file;
-    int line;
+	virtual const char *what() const throw() { return msg.c_str(); }
+
+    void formatMessage()
+    {
+        if( func.size() > 0 )
+            msg = format("%s:%d: error: (%d) %s in function %s\n", file.c_str(), line, code, err.c_str(), func.c_str());
+        else
+            msg = format("%s:%d: error: (%d) %s\n", file.c_str(), line, code, err.c_str());
+    }
+    
+	string msg;
+
+	int code;
+	string err;
+	string func;
+	string file;
+	int line;
 };
 
-CV_EXPORTS string format( const char* fmt, ... );
 CV_EXPORTS void error( const Exception& exc );
 CV_EXPORTS bool setBreakOnError(bool value);
 CV_EXPORTS CvErrorCallback redirectError( CvErrorCallback errCallback,
@@ -127,21 +135,21 @@ CV_EXPORTS int getThreadNum();
 
 CV_EXPORTS int64 getTickCount();
 CV_EXPORTS double getTickFrequency();
+CV_EXPORTS int64 getCPUTickCount();
+
+CV_EXPORTS bool checkHardwareSupport(int feature);
 
 CV_EXPORTS void* fastMalloc(size_t);
 CV_EXPORTS void fastFree(void* ptr);
 
 template<typename _Tp> static inline _Tp* allocate(size_t n)
 {
-    _Tp* ptr = (_Tp*)fastMalloc(n*sizeof(ptr[0]));
-    ::new(ptr) _Tp[n];
-    return ptr;
+    return new _Tp[n];
 }
 
-template<typename _Tp> static inline void deallocate(_Tp* ptr, size_t n)
+template<typename _Tp> static inline void deallocate(_Tp* ptr, size_t)
 {
-    for( size_t i = 0; i < n; i++ ) (ptr+i)->~_Tp();
-    fastFree(ptr);
+    delete[] ptr;
 }
 
 template<typename _Tp> static inline _Tp* alignPtr(_Tp* ptr, int n=(int)sizeof(_Tp))
@@ -449,6 +457,7 @@ public:
     typedef _Tp value_type;
     typedef value_type work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -460,6 +469,7 @@ public:
     typedef bool value_type;
     typedef int work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -471,6 +481,7 @@ public:
     typedef uchar value_type;
     typedef int work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -482,6 +493,7 @@ public:
     typedef schar value_type;
     typedef int work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -493,6 +505,7 @@ public:
     typedef ushort value_type;
     typedef int work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -504,6 +517,7 @@ public:
     typedef short value_type;
     typedef int work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -515,6 +529,7 @@ public:
     typedef int value_type;
     typedef value_type work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -526,6 +541,7 @@ public:
     typedef float value_type;
     typedef value_type work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -537,6 +553,7 @@ public:
     typedef double value_type;
     typedef value_type work_type;
     typedef value_type channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = 1,
            fmt=DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -548,6 +565,7 @@ public:
     typedef Vec<_Tp, cn> value_type;
     typedef Vec<typename DataType<_Tp>::work_type, cn> work_type;
     typedef _Tp channel_type;
+    typedef value_type vec_type;
     enum { depth = DataDepth<channel_type>::value, channels = cn,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
@@ -562,6 +580,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 2,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Complex<_Tp> >
@@ -573,6 +592,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 2,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Point_<_Tp> >
@@ -584,6 +604,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 2,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Point3_<_Tp> >
@@ -595,6 +616,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 3,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Size_<_Tp> >
@@ -606,6 +628,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 2,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Rect_<_Tp> >
@@ -617,6 +640,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 4,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<typename _Tp> class DataType<Scalar_<_Tp> >
@@ -628,6 +652,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 4,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
 template<> class DataType<Range>
@@ -639,6 +664,7 @@ public:
     enum { depth = DataDepth<channel_type>::value, channels = 2,
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
 };
 
     
@@ -670,6 +696,7 @@ protected:
 //////////////////////////////// Mat ////////////////////////////////
 
 class Mat;
+class MatND;
 template<typename M> class CV_EXPORTS MatExpr_Base_;
 typedef MatExpr_Base_<Mat> MatExpr_Base;
 template<typename E, typename M> class MatExpr_;
@@ -731,7 +758,7 @@ public:
     // converts old-style IplImage to the new matrix; the data is not copied by default
     Mat(const IplImage* img, bool copyData=false);
     // builds matrix from std::vector with or without copying the data
-    template<typename _Tp> Mat(const vector<_Tp>& vec, bool copyData=false);
+    template<typename _Tp> explicit Mat(const vector<_Tp>& vec, bool copyData=false);
     // helper constructor to compile matrix expressions
     Mat(const MatExpr_Base& expr);
     // destructor - calls release()
@@ -917,6 +944,9 @@ public:
     operator ushort();
     operator short();
     operator unsigned();
+	//! Returns a random integer sampled uniformly from [0, N).
+	unsigned operator()(unsigned N);
+	unsigned operator ()();
     operator int();
     operator float();
     operator double();
@@ -924,6 +954,9 @@ public:
     float uniform(float a, float b);
     double uniform(double a, double b);
     void fill( Mat& mat, int distType, const Scalar& a, const Scalar& b );
+    void fill( MatND& mat, int distType, const Scalar& a, const Scalar& b );
+	//! Returns Gaussian random variate with mean zero.
+	double gaussian(double sigma);
 
     uint64 state;
 };
@@ -943,7 +976,6 @@ public:
     double epsilon;
 };
 
-CV_EXPORTS Mat cvarrToMat(const CvArr* arr, bool copyData=false, bool allowND=true, int coiMode=0);
 CV_EXPORTS void extractImageCOI(const CvArr* arr, Mat& coiimg, int coi=-1);
 CV_EXPORTS void insertImageCOI(const Mat& coiimg, CvArr* arr, int coi=-1);
 
@@ -1051,16 +1083,12 @@ CV_EXPORTS double invert(const Mat& a, Mat& c, int flags=DECOMP_LU);
 CV_EXPORTS bool solve(const Mat& a, const Mat& b, Mat& x, int flags=DECOMP_LU);
 CV_EXPORTS void sort(const Mat& a, Mat& b, int flags);
 CV_EXPORTS void sortIdx(const Mat& a, Mat& b, int flags);
-CV_EXPORTS void solveCubic(const Mat& coeffs, Mat& roots);
-CV_EXPORTS void solvePoly(const Mat& coeffs, Mat& roots, int maxIters=20, int fig=100);
+CV_EXPORTS int solveCubic(const Mat& coeffs, Mat& roots);
+CV_EXPORTS double solvePoly(const Mat& coeffs, Mat& roots, int maxIters=300);
 CV_EXPORTS bool eigen(const Mat& a, Mat& eigenvalues, int lowindex=-1,
                       int highindex=-1);
 CV_EXPORTS bool eigen(const Mat& a, Mat& eigenvalues, Mat& eigenvectors,
                       int lowindex=-1, int highindex=-1);
-//CV_EXPORTS bool selectedeigen(const Mat& a, Mat& eigenvalues, int lowindex,
-//                              int highindex);
-//CV_EXPORTS bool selectedeigen(const Mat& a, Mat& eigenvalues,
-//                              Mat& eigenvectors, int lowindex, int highindex);
 
 CV_EXPORTS void calcCovarMatrix( const Mat* samples, int nsamples,
                                  Mat& covar, Mat& mean,
@@ -1129,6 +1157,10 @@ CV_EXPORTS void line(Mat& img, Point pt1, Point pt2, const Scalar& color,
                      int thickness=1, int lineType=8, int shift=0);
 
 CV_EXPORTS void rectangle(Mat& img, Point pt1, Point pt2,
+                          const Scalar& color, int thickness=1,
+                          int lineType=8, int shift=0);
+
+CV_EXPORTS void rectangle(Mat& img, Rect rec,
                           const Scalar& color, int thickness=1,
                           int lineType=8, int shift=0);
 
@@ -1229,7 +1261,7 @@ public:
     Mat_(const MatExpr_Base& expr);
     // makes a matrix out of Vec or std::vector. The matrix will have a single column
     template<int n> explicit Mat_(const Vec<_Tp, n>& vec);
-    Mat_(const vector<_Tp>& vec, bool copyData=false);
+    explicit Mat_(const vector<_Tp>& vec, bool copyData=false);
 
     Mat_& operator = (const Mat& m);
     Mat_& operator = (const Mat_& m);
@@ -1258,17 +1290,17 @@ public:
     Mat_ clone() const;
 
     // transposition, inversion, per-element multiplication
-    MatExpr_<MatExpr_Op2_<Mat_, double, Mat_, MatOp_T_<Mat> >, Mat_> t() const;
-    MatExpr_<MatExpr_Op2_<Mat_, int, Mat_, MatOp_Inv_<Mat> >, Mat_> inv(int method=DECOMP_LU) const;
+    MatExpr_<MatExpr_Op2_<Mat, double, Mat, MatOp_T_<Mat> >, Mat> t() const;
+    MatExpr_<MatExpr_Op2_<Mat, int, Mat, MatOp_Inv_<Mat> >, Mat> inv(int method=DECOMP_LU) const;
 
-    MatExpr_<MatExpr_Op4_<Mat_, Mat_, double, char, Mat_, MatOp_MulDiv_<Mat> >, Mat_>
+    MatExpr_<MatExpr_Op4_<Mat, Mat, double, char, Mat, MatOp_MulDiv_<Mat> >, Mat>
     mul(const Mat_& m, double scale=1) const;
-    MatExpr_<MatExpr_Op4_<Mat_, Mat_, double, char, Mat_, MatOp_MulDiv_<Mat> >, Mat_>
-    mul(const MatExpr_<MatExpr_Op2_<Mat_, double, Mat_,
-        MatOp_Scale_<Mat> >, Mat_>& m, double scale=1) const;
-    MatExpr_<MatExpr_Op4_<Mat_, Mat_, double, char, Mat_, MatOp_MulDiv_<Mat> >, Mat_>    
-    mul(const MatExpr_<MatExpr_Op2_<Mat_, double, Mat_,
-        MatOp_DivRS_<Mat> >, Mat_>& m, double scale=1) const;
+    MatExpr_<MatExpr_Op4_<Mat, Mat, double, char, Mat, MatOp_MulDiv_<Mat> >, Mat>
+    mul(const MatExpr_<MatExpr_Op2_<Mat, double, Mat,
+        MatOp_Scale_<Mat> >, Mat>& m, double scale=1) const;
+    MatExpr_<MatExpr_Op4_<Mat, Mat, double, char, Mat, MatOp_MulDiv_<Mat> >, Mat>    
+    mul(const MatExpr_<MatExpr_Op2_<Mat, double, Mat,
+        MatOp_DivRS_<Mat> >, Mat>& m, double scale=1) const;
 
     // overridden forms of Mat::elemSize() etc.
     size_t elemSize() const;
@@ -1304,11 +1336,41 @@ public:
     const _Tp& operator ()(Point pt) const;
 
     // to support matrix expressions
-    operator MatExpr_<Mat_, Mat_>() const;
+    operator MatExpr_<Mat, Mat>() const;
     
     // conversion to vector.
     operator vector<_Tp>() const;
 };
+
+typedef Mat_<uchar> Mat1b;
+typedef Mat_<Vec2b> Mat2b;
+typedef Mat_<Vec3b> Mat3b;
+typedef Mat_<Vec4b> Mat4b;
+
+typedef Mat_<short> Mat1s;
+typedef Mat_<Vec2s> Mat2s;
+typedef Mat_<Vec3s> Mat3s;
+typedef Mat_<Vec4s> Mat4s;
+
+typedef Mat_<ushort> Mat1w;
+typedef Mat_<Vec2w> Mat2w;
+typedef Mat_<Vec3w> Mat3w;
+typedef Mat_<Vec4w> Mat4w;
+
+typedef Mat_<int>   Mat1i;
+typedef Mat_<Vec2i> Mat2i;
+typedef Mat_<Vec3i> Mat3i;
+typedef Mat_<Vec4i> Mat4i;
+
+typedef Mat_<float> Mat1f;
+typedef Mat_<Vec2f> Mat2f;
+typedef Mat_<Vec3f> Mat3f;
+typedef Mat_<Vec4f> Mat4f;
+
+typedef Mat_<double> Mat1d;
+typedef Mat_<Vec2d> Mat2d;
+typedef Mat_<Vec3d> Mat3d;
+typedef Mat_<Vec4d> Mat4d;
 
 //////////// Iterators & Comma initializers //////////////////
 
@@ -1434,6 +1496,8 @@ public:
     MatND(const MatND& m);
     // sub-array selection. only the header is copied
     MatND(const MatND& m, const Range* ranges);
+    // converts 2D matrix to ND matrix
+    explicit MatND(const Mat& m);
     // converts old-style nd array to MatND; optionally, copies the data
     MatND(const CvMatND* m, bool copyData=false);
     ~MatND();
@@ -2032,8 +2096,8 @@ public:
     };
 
     KDTree();
-    KDTree(const Mat& _points, bool copyPoints=true);
-    void build(const Mat& _points, bool copyPoints=true);
+    KDTree(const Mat& _points, bool copyAndReorderPoints=false);
+    void build(const Mat& _points, bool copyAndReorderPoints=false);
 
     int findNearest(const float* vec, int K, int Emax, int* neighborsIdx,
                     Mat* neighbors=0, float* dist=0) const;

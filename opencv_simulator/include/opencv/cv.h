@@ -40,8 +40,8 @@
 //
 //M*/
 
-#ifndef _CV_H_
-#define _CV_H_
+#ifndef __OPENCV_CV_H__
+#define __OPENCV_CV_H__
 
 #ifdef __IPL_H__
 #define HAVE_IPL
@@ -338,6 +338,8 @@ CVAPI(void)  cvDilate( const CvArr* src, CvArr* dst,
                        IplConvKernel* element CV_DEFAULT(NULL),
                        int iterations CV_DEFAULT(1) );
 
+#define CV_MOP_ERODE        0
+#define CV_MOP_DILATE       1
 #define CV_MOP_OPEN         2
 #define CV_MOP_CLOSE        3
 #define CV_MOP_GRADIENT     4
@@ -518,6 +520,12 @@ CVAPI(void)  cvCalcAffineFlowPyrLK( const CvArr*  prev, const CvArr*  curr,
 CVAPI(int)  cvEstimateRigidTransform( const CvArr* A, const CvArr* B,
                                       CvMat* M, int full_affine );
 
+/* Estimate optical flow for each pixel using the two-frame G. Farneback algorithm */
+CVAPI(void) cvCalcOpticalFlowFarneback( const CvArr* prev, const CvArr* next,
+                                        CvArr* flow, double pyr_scale, int levels,
+                                        int winsize, int iterations, int poly_n,
+                                        double poly_sigma, int flags );
+
 /********************************* motion templates *************************************/
 
 /****************************************************************************************\
@@ -586,20 +594,6 @@ CVAPI(int)  cvCamShift( const CvArr* prob_image, CvRect  window,
    from the object histogram back project */
 CVAPI(int)  cvMeanShift( const CvArr* prob_image, CvRect  window,
                         CvTermCriteria criteria, CvConnectedComp* comp );
-
-/* Creates ConDensation filter state */
-CVAPI(CvConDensation*)  cvCreateConDensation( int dynam_params,
-                                             int measure_params,
-                                             int sample_count );
-
-/* Releases ConDensation filter state */
-CVAPI(void)  cvReleaseConDensation( CvConDensation** condens );
-
-/* Updates ConDensation filter by time (predict future state of the system) */
-CVAPI(void)  cvConDensUpdateByTime( CvConDensation* condens);
-
-/* Initializes ConDensation filter samples  */
-CVAPI(void)  cvConDensInitSampleSet( CvConDensation* condens, CvMat* lower_bound, CvMat* upper_bound );
 
 /* Creates Kalman filter and sets A, B, Q, R and state to some initial values */
 CVAPI(CvKalman*) cvCreateKalman( int dynam_params, int measure_params,
@@ -723,16 +717,6 @@ CVAPI(CvSeq*)  cvApproxPoly( const void* src_seq,
                              int method, double parameter,
                              int parameter2 CV_DEFAULT(0));
 
-#define CV_DOMINANT_IPAN 1
-
-/* Finds high-curvature points of the contour */
-CVAPI(CvSeq*) cvFindDominantPoints( CvSeq* contour, CvMemStorage* storage,
-                                   int method CV_DEFAULT(CV_DOMINANT_IPAN),
-                                   double parameter1 CV_DEFAULT(0),
-                                   double parameter2 CV_DEFAULT(0),
-                                   double parameter3 CV_DEFAULT(0),
-                                   double parameter4 CV_DEFAULT(0));
-
 /* Calculates perimeter of a contour or length of a part of contour */
 CVAPI(double)  cvArcLength( const void* curve,
                             CvSlice slice CV_DEFAULT(CV_WHOLE_SEQ),
@@ -745,7 +729,8 @@ CVAPI(CvRect)  cvBoundingRect( CvArr* points, int update CV_DEFAULT(0) );
 
 /* Calculates area of a contour or contour segment */
 CVAPI(double)  cvContourArea( const CvArr* contour,
-                              CvSlice slice CV_DEFAULT(CV_WHOLE_SEQ));
+                              CvSlice slice CV_DEFAULT(CV_WHOLE_SEQ),
+                              int oriented CV_DEFAULT(0));
 
 /* Finds minimum area rotated rectangle bounding a set of points */
 CVAPI(CvBox2D)  cvMinAreaRect2( const CvArr* points,
@@ -779,9 +764,6 @@ CVAPI(CvSeq*)  cvContourFromContourTree( const CvContourTree* tree,
 CVAPI(double)  cvMatchContourTrees( const CvContourTree* tree1,
                                     const CvContourTree* tree2,
                                     int method, double threshold );
-
-/* Calculates histogram of a contour */
-CVAPI(void)  cvCalcPGH( const CvSeq* contour, CvHistogram* hist );
 
 #define CV_CLOCKWISE         1
 #define CV_COUNTER_CLOCKWISE 2
@@ -925,10 +907,6 @@ CVAPI(void)  cvSnakeImage( const IplImage* image, CvPoint* points,
                            float* beta, float* gamma,
                            int coeff_usage, CvSize  win,
                            CvTermCriteria criteria, int calc_gradient CV_DEFAULT(1));
-
-/* Calculates the cooficients of the homography matrix */
-CVAPI(void)  cvCalcImageHomography( float* line, CvPoint3D32f* center,
-                                    float* intrinsic, float* homography );
 
 #define CV_DIST_MASK_3   3
 #define CV_DIST_MASK_5   5
@@ -1280,7 +1258,8 @@ CVAPI(int) cvRunHaarClassifierCascade( const CvHaarClassifierCascade* cascade,
 /* Transforms the input image to compensate lens distortion */
 CVAPI(void) cvUndistort2( const CvArr* src, CvArr* dst,
                           const CvMat* camera_matrix,
-                          const CvMat* distortion_coeffs );
+                          const CvMat* distortion_coeffs,
+                          const CvMat* new_camera_matrix CV_DEFAULT(0) );
 
 /* Computes transformation map from intrinsic camera parameters
    that can used by cvRemap */
@@ -1301,6 +1280,17 @@ CVAPI(void) cvUndistortPoints( const CvMat* src, CvMat* dst,
                                const CvMat* dist_coeffs,
                                const CvMat* R CV_DEFAULT(0),
                                const CvMat* P CV_DEFAULT(0));
+    
+/* Computes the optimal new camera matrix according to the free scaling parameter alpha:
+   alpha=0 - only valid pixels will be retained in the undistorted image
+   alpha=1 - all the source image pixels will be retained in the undistorted image
+*/
+CVAPI(void) cvGetOptimalNewCameraMatrix( const CvMat* camera_matrix,
+                                         const CvMat* dist_coeffs,
+                                         CvSize image_size, double alpha,
+                                         CvMat* new_camera_matrix,
+                                         CvSize new_imag_size CV_DEFAULT(cvSize(0,0)),
+                                         CvRect* valid_pixel_ROI CV_DEFAULT(0) );
 
 /* Converts rotation vector to rotation matrix or vice versa */
 CVAPI(int) cvRodrigues2( const CvMat* src, CvMat* dst,
@@ -1376,8 +1366,17 @@ CVAPI(void) cvInitIntrinsicParams2D( const CvMat* object_points,
 #define CV_CALIB_CB_ADAPTIVE_THRESH  1
 #define CV_CALIB_CB_NORMALIZE_IMAGE  2
 #define CV_CALIB_CB_FILTER_QUADS     4
+#define CV_CALIB_CB_FAST_CHECK       8
 
-/* Detects corners on a chessboard calibration pattern */
+// Performs a fast check if a chessboard is in the input image. This is a workaround to 
+// a problem of cvFindChessboardCorners being slow on images with no chessboard
+// - src: input image
+// - size: chessboard size
+// Returns 1 if a chessboard can be in this image and findChessboardCorners should be called, 
+// 0 if there is no chessboard, -1 in case of error
+CVAPI(int) cvCheckChessboard(IplImage* src, CvSize size);
+    
+    /* Detects corners on a chessboard calibration pattern */
 CVAPI(int) cvFindChessboardCorners( const void* image, CvSize pattern_size,
                                     CvPoint2D32f* corners,
                                     int* corner_count CV_DEFAULT(NULL),
@@ -1400,7 +1399,7 @@ CVAPI(void) cvDrawChessboardCorners( CvArr* image, CvSize pattern_size,
 
 /* Finds intrinsic and extrinsic camera parameters
    from a few views of known calibration pattern */
-CVAPI(void) cvCalibrateCamera2( const CvMat* object_points,
+CVAPI(double) cvCalibrateCamera2( const CvMat* object_points,
                                 const CvMat* image_points,
                                 const CvMat* point_counts,
                                 CvSize image_size,
@@ -1428,7 +1427,7 @@ CVAPI(void) cvCalibrationMatrixValues( const CvMat *camera_matrix,
 /* Computes the transformation from one camera coordinate system to another one
    from a few correspondent views of the same calibration target. Optionally, calibrates
    both cameras */
-CVAPI(void) cvStereoCalibrate( const CvMat* object_points, const CvMat* image_points1,
+CVAPI(double) cvStereoCalibrate( const CvMat* object_points, const CvMat* image_points1,
                                const CvMat* image_points2, const CvMat* npoints,
                                CvMat* camera_matrix1, CvMat* dist_coeffs1,
                                CvMat* camera_matrix2, CvMat* dist_coeffs2,
@@ -1436,7 +1435,7 @@ CVAPI(void) cvStereoCalibrate( const CvMat* object_points, const CvMat* image_po
                                CvMat* E CV_DEFAULT(0), CvMat* F CV_DEFAULT(0),
                                CvTermCriteria term_crit CV_DEFAULT(cvTermCriteria(
                                    CV_TERMCRIT_ITER+CV_TERMCRIT_EPS,30,1e-6)),
-                               int flags CV_DEFAULT(CV_CALIB_FIX_INTRINSIC) );
+                               int flags CV_DEFAULT(CV_CALIB_FIX_INTRINSIC));
 
 #define CV_CALIB_ZERO_DISPARITY 1024
 
@@ -1447,7 +1446,11 @@ CVAPI(void) cvStereoRectify( const CvMat* camera_matrix1, const CvMat* camera_ma
                              CvSize image_size, const CvMat* R, const CvMat* T,
                              CvMat* R1, CvMat* R2, CvMat* P1, CvMat* P2,
                              CvMat* Q CV_DEFAULT(0),
-                             int flags CV_DEFAULT(CV_CALIB_ZERO_DISPARITY) );
+                             int flags CV_DEFAULT(CV_CALIB_ZERO_DISPARITY),
+                             double alpha CV_DEFAULT(-1),
+                             CvSize new_image_size CV_DEFAULT(cvSize(0,0)),
+                             CvRect* valid_pix_ROI1 CV_DEFAULT(0),
+                             CvRect* valid_pix_ROI2 CV_DEFAULT(0));
 
 /* Computes rectification transformations for uncalibrated pair of images using a set
    of point correspondences */
@@ -1510,6 +1513,7 @@ CVAPI(void) cvCorrectMatches(CvMat* F, CvMat* points1, CvMat* points2,
 /* stereo correspondence parameters and functions */
 
 #define CV_STEREO_BM_NORMALIZED_RESPONSE  0
+#define CV_STEREO_BM_XSOBEL               1
 
 /* Block matching algorithm structure */
 typedef struct CvStereoBMState
@@ -1535,13 +1539,15 @@ typedef struct CvStereoBMState
 
     int trySmallerWindows; // if 1, the results may be more accurate,
                            // at the expense of slower processing 
+    CvRect roi1, roi2;
+    int disp12MaxDiff;
 
     // temporary buffers
     CvMat* preFilteredImg0;
     CvMat* preFilteredImg1;
     CvMat* slidingSumBuf;
-    CvMat* dbmin;
-    CvMat* dbmax;
+    CvMat* cost;
+    CvMat* disp;
 }
 CvStereoBMState;
 
@@ -1556,6 +1562,13 @@ CVAPI(void) cvReleaseStereoBMState( CvStereoBMState** state );
 
 CVAPI(void) cvFindStereoCorrespondenceBM( const CvArr* left, const CvArr* right,
                                           CvArr* disparity, CvStereoBMState* state );
+    
+CVAPI(CvRect) cvGetValidDisparityROI( CvRect roi1, CvRect roi2, int minDisparity,
+                                      int numberOfDisparities, int SADWindowSize );
+    
+CVAPI(void) cvValidateDisparity( CvArr* disparity, const CvArr* cost,
+                                 int minDisparity, int numberOfDisparities,
+                                 int disp12MaxDiff CV_DEFAULT(1) );  
 
 /* Kolmogorov-Zabin stereo-correspondence algorithm (a.k.a. KZ1) */
 #define CV_STEREO_GC_OCCLUDED  SHRT_MAX
@@ -1612,4 +1625,4 @@ CVAPI(void)  cvReprojectImageTo3D( const CvArr* disparityImage,
 #include "cvcompat.h"
 #endif
 
-#endif /*_CV_H_*/
+#endif
