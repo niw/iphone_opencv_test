@@ -20,9 +20,9 @@
 		549913C70E3E3D2100BD1311 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 549913C60E3E3D2100BD1311 /* Default.png */; };
 		54A4A00312211BFD006678AF /* libcv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00212211BFD006678AF /* libcv.a */; };
 		54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00412211C0D006678AF /* libcxcore.a */; };
-		54A4A00A12211DC3006678AF /* libopencv_lapack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00912211DC3006678AF /* libopencv_lapack.a */; };
 		54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 54BBAF3C0F04148D00568ED9 /* Tink.aiff */; };
 		54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */; };
+		54ED862C123C4A8B00ED9656 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ED862B123C4A8B00ED9656 /* Accelerate.framework */; };
 		54FC5BDE0E3EB3EB00F48645 /* laughing_man.png in Resources */ = {isa = PBXBuildFile; fileRef = 54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */; };
 /* End PBXBuildFile section */
 
@@ -44,9 +44,9 @@
 		549913C60E3E3D2100BD1311 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		54A4A00212211BFD006678AF /* libcv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcv.a; path = opencv_device/lib/libcv.a; sourceTree = "<group>"; };
 		54A4A00412211C0D006678AF /* libcxcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcxcore.a; path = opencv_device/lib/libcxcore.a; sourceTree = "<group>"; };
-		54A4A00912211DC3006678AF /* libopencv_lapack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_lapack.a; path = opencv_device/lib/libopencv_lapack.a; sourceTree = "<group>"; };
 		54BBAF3C0F04148D00568ED9 /* Tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = Tink.aiff; sourceTree = "<group>"; };
 		54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		54ED862B123C4A8B00ED9656 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = laughing_man.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,7 +62,7 @@
 				54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */,
 				54A4A00312211BFD006678AF /* libcv.a in Frameworks */,
 				54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */,
-				54A4A00A12211DC3006678AF /* libopencv_lapack.a in Frameworks */,
+				54ED862C123C4A8B00ED9656 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +132,7 @@
 				5452E0730E3D119700FE4518 /* CoreGraphics.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
+				54ED862B123C4A8B00ED9656 /* Accelerate.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -141,7 +142,6 @@
 			children = (
 				54A4A00212211BFD006678AF /* libcv.a */,
 				54A4A00412211C0D006678AF /* libcxcore.a */,
-				54A4A00912211DC3006678AF /* libopencv_lapack.a */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
