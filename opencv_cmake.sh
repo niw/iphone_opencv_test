@@ -1,7 +1,17 @@
 #!/bin/sh
 
 if [ "$1" = "-h" -o "$1" = "--help" -o -z "$1" ]; then
-	echo "Usage: $0 {Device,Simulator} {OpenCV Source Dir} [OpenCV Install Dir] [iOS SDK Version = 4.0]"
+	echo "USAGE"
+	echo "    $0 [-h,--help] {device,simulator} source_dir"
+	echo "OPTIONS"
+	echo "    -h, --help     Show help and default options"
+	echo "    device         Build binary for iOS devices"
+	echo "    simulator      Build binary for iOS Simulator"
+	echo "    source_dir     Path to OpenCV source directory"
+	echo "ENVIRONMENT"
+	echo "    INSTALL_PREFIX       Path to OpenCV binary directory"
+	echo "    SDK_VERSION          iOS SDK version"
+	echo "    IPHONEOS_VERSION_MIN iOS deployment target"
 	exit
 fi
 
@@ -20,13 +30,14 @@ else
 	exit 1
 fi
 
-if [ -z "$4" ]; then
-	SDK_VERSION="4.0"
-else
-	SDK_VERSION="$4"
+if [ -z "$SDK_VERSION" ]; then
+	SDK_VERSION="4.1"
 fi
 
-IPHONEOS_VERSION_MIN="3.0"
+if [ -z "$IPHONEOS_VERSION_MIN" ]; then
+	IPHONEOS_VERSION_MIN="3.0"
+fi
+
 DEVELOPER_ROOT="/Developer/Platforms/${TARGET_SDK_NAME}.platform/Developer"
 SDK_ROOT="${DEVELOPER_ROOT}/SDKs/${TARGET_SDK_NAME}${SDK_VERSION}.sdk"
 
@@ -47,10 +58,8 @@ if [ ! -f "${OPENCV_ROOT}/CMakeLists.txt" ]; then
 	exit 1
 fi
 
-if [ -z "$3" ]; then
+if [ -z "$INSTALL_PREFIX" ]; then
 	INSTALL_PREFIX="`pwd`/../opencv_${TARGET_SDK}"
-else
-	INSTALL_PREFIX="$3"
 fi
 
 #BUILD_PATH="`pwd`/build_${TARGET_SDK}"
@@ -73,6 +82,7 @@ echo ""
 if [ "$TARGET_SDK" = "device" ]; then
 	FLAGS="-miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
 	ARCH="armv6"
+	#CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF -D CMAKE_SYSTEM_PROCESSOR=arm"
 	CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
 else
 	FLAGS=""
