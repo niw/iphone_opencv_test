@@ -9,7 +9,13 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string>Icon_57.png</string>
+	<string>Icon</string>
+	<key>CFBundleIconFiles</key>
+	<array>
+		<string>Icon_57</string>
+		<string>Icon_72</string>
+		<string>Icon_114</string>
+	</array>
 	<key>UIPrerenderedIcon</key>
 	<true/>
 	<key>CFBundleIdentifier</key>
