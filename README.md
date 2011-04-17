@@ -8,8 +8,11 @@ Building Static Link Version of OpenCV
 If you want to build it from source code, you can do by next steps.
 
 1.  Building OpenCV 2.1 requiers [CMake](http://www.cmake.org/).
-    You can easily install it by using [MacPorts](http://www.macports.org/).
+    You can easily install it by using [Homebrew](http://mxcl.github.com/homebrew/) or [MacPorts](http://www.macports.org/).
 
+        # Using Homebrew
+        % brew install cmake
+        # Using MacPorts
         % sudo port install cmake
 
 2.  Clone this project from github.com, then move into the project directory
@@ -17,7 +20,6 @@ If you want to build it from source code, you can do by next steps.
         % git clone git://github.com/niw/iphone_opencv_test.git
 
 3.  Getting source code from sourceforge. I tested with [OpenCV-2.1.0.tar.bz2](http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.1/OpenCV-2.1.0.tar.bz2/download).
-
 
 4.  Extract downloaded archive on the top of demo project directory
 
@@ -58,6 +60,7 @@ Try ``--help`` option to get the all options of it.
 
 Change Log
 ----------
+ *  04/11/2011 - Supprot iOS SDK 4.3 + XCode 4
  *  10/30/2010 - Support iOS SDK 4.1
  *  08/22/2010 - Support OpenCV 2.1.0 + iOS SDK 4.0
  *  12/21/2009 - Support Snow Leopard + iPhone SDK 3.1.2, Thank you Hyon!
