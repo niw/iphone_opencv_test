@@ -81,7 +81,7 @@ echo "OpenCV Install Prefix = $INSTALL_PREFIX"
 echo ""
 
 if [ "$TARGET_SDK" = "device" ]; then
-	CFLAGS="-arch armv6 -arch armv7 -miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
+	CFLAGS="-arch armv6 -arch armv7 -mthumb -miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
 	ARCH="armv6;armv7"
 	CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
 else
