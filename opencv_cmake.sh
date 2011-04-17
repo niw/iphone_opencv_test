@@ -12,6 +12,8 @@ if [ "$1" = "-h" -o "$1" = "--help" -o -z "$1" ]; then
 	echo "    INSTALL_PREFIX       Path to OpenCV binary directory"
 	echo "    SDK_VERSION          iOS SDK version"
 	echo "    IPHONEOS_VERSION_MIN iOS deployment target"
+	echo "    CMAKE_OPTIONS        Additional CMake options"
+	echo "    CFLAGS               Additional compiler flags"
 	exit
 fi
 
@@ -81,13 +83,13 @@ echo "OpenCV Install Prefix = $INSTALL_PREFIX"
 echo ""
 
 if [ "$TARGET_SDK" = "device" ]; then
-	CFLAGS="-arch armv6 -arch armv7 -mthumb -miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
+	CFLAGS="-arch armv6 -arch armv7 -mthumb -miphoneos-version-min=${IPHONEOS_VERSION_MIN} ${CFLAGS}"
 	ARCH="armv6;armv7"
-	CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
+	CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF ${CMAKE_OPTIONS}"
 else
-	CFLAGS="-m32"
+	CFLAGS="-m32 ${CFLAGS}"
 	ARCH="i386"
-	CMAKE_OPTIONS='-D CMAKE_OSX_DEPLOYMENT_TARGET="10.6"'
+	CMAKE_OPTIONS="-D CMAKE_OSX_DEPLOYMENT_TARGET=\"10.6\" ${CMAKE_OPTIONS}"
 fi
 
 env \
