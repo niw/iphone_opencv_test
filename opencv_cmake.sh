@@ -31,7 +31,7 @@ else
 fi
 
 if [ -z "$SDK_VERSION" ]; then
-	SDK_VERSION="4.1"
+	SDK_VERSION="4.3"
 fi
 
 if [ -z "$IPHONEOS_VERSION_MIN" ]; then
