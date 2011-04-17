@@ -81,18 +81,18 @@ echo "OpenCV Install Prefix = $INSTALL_PREFIX"
 echo ""
 
 if [ "$TARGET_SDK" = "device" ]; then
-	FLAGS="-arch armv6 -arch armv7 -miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
+	CFLAGS="-arch armv6 -arch armv7 -miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
 	ARCH="armv6;armv7"
 	CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
 else
-	FLAGS="-m32"
+	CFLAGS="-m32"
 	ARCH="i386"
 	CMAKE_OPTIONS='-D CMAKE_OSX_DEPLOYMENT_TARGET="10.6"'
 fi
 
 env \
-	CFLAGS="${FLAGS}" \
-	CXXFLAGS="${FLAGS}" \
+	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CFLAGS}" \
 cmake \
 	-D CMAKE_BUILD_TYPE=Release \
 	-D BUILD_NEW_PYTHON_SUPPORT=OFF \
@@ -107,8 +107,8 @@ cmake \
 	-D WITH_QUICKTIME=OFF \
 	-D WITH_TBB=OFF \
 	-D WITH_TIFF=OFF \
-	-D CMAKE_C_FLAGS="${FLAGS}" \
-	-D CMAKE_CXX_FLAGS="${FLAGS}" \
+	-D CMAKE_C_FLAGS="${CFLAGS}" \
+	-D CMAKE_CXX_FLAGS="${CFLAGS}" \
 	-D CMAKE_OSX_SYSROOT="${SDK_ROOT}" \
 	-D CMAKE_OSX_ARCHITECTURES="${ARCH}" \
 	-D CMAKE_C_COMPILER="${DEVELOPER_ROOT}/usr/bin/gcc" \
