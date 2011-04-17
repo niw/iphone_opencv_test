@@ -79,6 +79,8 @@
 }
 
 - (void)opencvEdgeDetect {
+	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+
 	if(imageView.image) {
 		cvSetErrMode(CV_ErrModeParent);
 
@@ -107,9 +109,13 @@
 
 		[self hideProgressIndicator];
 	}
+
+	[pool release];
 }
 
 - (void) opencvFaceDetect:(UIImage *)overlayImage  {
+	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+
 	if(imageView.image) {
 		cvSetErrMode(CV_ErrModeParent);
 
@@ -166,6 +172,8 @@
 
 		[self hideProgressIndicator];
 	}
+
+	[pool release];
 }
 
 
