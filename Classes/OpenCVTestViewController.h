@@ -40,15 +40,15 @@
 @end
 
 typedef enum {
-	ActionSheetToSelectTypeOfSource = 1,
-	ActionSheetToSelectTypeOfMarks
+    ActionSheetToSelectTypeOfSource = 1,
+    ActionSheetToSelectTypeOfMarks
 } OpenCVTestViewControllerActionSheetAction;
 
 @interface OpenCVTestViewController : UIViewController <UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
-	IBOutlet UIImageView *imageView;
-	OpenCVTestViewControllerActionSheetAction actionSheetAction;
-	UIProgressHUD *progressHUD;
-	SystemSoundID alertSoundID;
+    IBOutlet UIImageView *imageView;
+    OpenCVTestViewControllerActionSheetAction actionSheetAction;
+    UIProgressHUD *progressHUD;
+    SystemSoundID alertSoundID;
 }
 
 - (IBAction)loadImage:(id)sender;
