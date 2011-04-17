@@ -7,7 +7,7 @@ Building Static Link Version of OpenCV
 --------------------------------------
 If you want to build it from source code, you can do by next steps.
 
-1.  Building OpenCV 2.1 requiers [CMake](http://www.cmake.org/).
+1.  Building OpenCV requiers [CMake](http://www.cmake.org/).
     You can easily install it by using [MacPorts](http://www.macports.org/).
 
         % sudo port install cmake
@@ -16,17 +16,17 @@ If you want to build it from source code, you can do by next steps.
 
         % git clone git://github.com/niw/iphone_opencv_test.git
 
-3.  Getting source code from sourceforge. I tested with [OpenCV-2.1.0.tar.bz2](http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.1/OpenCV-2.1.0.tar.bz2/download).
+3.  Getting source code from sourceforge. I tested with [OpenCV-2.2.0.tar.bz2](http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.2/OpenCV-2.2.0.tar.bz2/download).
 
 
 4.  Extract downloaded archive on the top of demo project directory
 
-        % tar xjvf OpenCV-2.1.0.tar.bz2
+        % tar xjvf OpenCV-2.2.0.tar.bz2
 
 5.  Apply patch for iPhone SDK
 
-        % cd OpenCV-2.1.0
-        % patch -p1 < ../OpenCV-2.1.0.patch
+        % cd OpenCV-2.2.0
+        % patch -p1 < ../OpenCV-2.2.0.patch
 
 6.  Following next steps to build OpenCV static library for simulator.
     All files are installed into ``opencv_simulator`` directory.
@@ -36,7 +36,7 @@ If you want to build it from source code, you can do by next steps.
         % cd ..
         % mkdir build_simulator
         % cd build_simulator
-        % ../opencv_cmake.sh Simulator ../OpenCV-2.1.0
+        % ../opencv_cmake.sh Simulator ../OpenCV-2.2.0
         % make -j 4
         % make install
 
@@ -46,7 +46,7 @@ If you want to build it from source code, you can do by next steps.
         % cd ..
         % mkdir build_device
         % cd build_device
-        % ../opencv_cmake.sh Device ../OpenCV-2.1.0
+        % ../opencv_cmake.sh Device ../OpenCV-2.2.0
         % make -j 4
         % make install
 
