@@ -16,7 +16,7 @@ if [ "$1" = "-h" -o "$1" = "--help" -o -z "$1" ]; then
 fi
 
 if ! type 'cmake' > /dev/null 2>&1; then
-	echo "cmake is not found, please install cmake command which is required to build OpenCV 2.1."
+	echo "cmake is not found, please install cmake command which is required to build OpenCV."
 	exit 1;
 fi
 
@@ -72,6 +72,7 @@ fi
 #cd "${BUILD_PATH}"
 
 echo "Starting cmake..."
+echo "CMake version         = `cmake --version`"
 echo "Target SDK            = $TARGET_SDK_NAME"
 echo "iOS SDK Version       = $SDK_VERSION"
 echo "iOS Deployment Target = $IPHONEOS_VERSION_MIN"
