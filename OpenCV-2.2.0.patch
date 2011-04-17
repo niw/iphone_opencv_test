@@ -1,0 +1,41 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bc53f08..4a09793 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -212,7 +212,6 @@ else()
+     set(OPENCV_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+ endif()
+ 
+-include(OpenCVPCHSupport.cmake REQUIRED)
+ include(OpenCVModule.cmake REQUIRED)
+ 
+ if(UNIX)
+diff --git a/modules/CMakeLists.txt b/modules/CMakeLists.txt
+index 53a0f2f..372af8d 100644
+--- a/modules/CMakeLists.txt
++++ b/modules/CMakeLists.txt
+@@ -2,7 +2,6 @@ if(ANDROID)
+  configure_file("${CMAKE_SOURCE_DIR}/Android.mk.modules.in" "${CMAKE_CURRENT_BINARY_DIR}/Android.mk")
+ endif()
+ 
+-add_subdirectory(calib3d)
+ add_subdirectory(core)
+ add_subdirectory(features2d)
+ add_subdirectory(flann)
+@@ -13,7 +12,6 @@ if(MSVC OR MINGW)
+    endif()
+ endif()
+ 
+-add_subdirectory(highgui)
+ add_subdirectory(imgproc)
+ add_subdirectory(legacy)
+ add_subdirectory(contrib)
+@@ -27,8 +25,6 @@ endif()
+ add_subdirectory(video)
+ 
+ if(NOT ANDROID)
+-add_subdirectory(haartraining)
+-add_subdirectory(traincascade)
+ add_subdirectory(gpu)
+ endif()
+ 
