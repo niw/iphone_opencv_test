@@ -58,7 +58,7 @@ Try ``--help`` option to get the all options of it.
 
 Change Log
 ----------
- *  08/22/2010 - Support OpenCV 2.1.0 + iOS SDK 4.x
+ *  08/22/2010 - Support OpenCV 2.1.0 + iOS SDK 4.1
  *  12/21/2009 - Support Snow Leopard + iPhone SDK 3.1.2, Thank you Hyon!
  *  11/15/2009 - Support OpenCV to 2.0.0 + iPhone SDK 3.x
  *  03/14/2009 - Release this project with OpenCV 1.0.0 + iPhone SDK 2.x
