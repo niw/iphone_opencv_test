@@ -20,9 +20,10 @@
 		543DC7641323FA0C00AB7DCD /* Icon_114.png in Resources */ = {isa = PBXBuildFile; fileRef = 543DC7631323FA0C00AB7DCD /* Icon_114.png */; };
 		543DC7881323FD1300AB7DCD /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 543DC7871323FD1300AB7DCD /* Default@2x.png */; };
 		543DC78A1323FD1C00AB7DCD /* Icon_72.png in Resources */ = {isa = PBXBuildFile; fileRef = 543DC7891323FD1C00AB7DCD /* Icon_72.png */; };
+		5453EBCB135B8170007F724F /* libopencv_objdetect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5453EBCA135B8170007F724F /* libopencv_objdetect.a */; };
+		5453EBCF135B81C0007F724F /* libopencv_imgproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5453EBCE135B81C0007F724F /* libopencv_imgproc.a */; };
+		5453EBD3135B82ED007F724F /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5453EBD2135B82ED007F724F /* libopencv_core.a */; };
 		549913C70E3E3D2100BD1311 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 549913C60E3E3D2100BD1311 /* Default.png */; };
-		54A4A00312211BFD006678AF /* libcv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00212211BFD006678AF /* libcv.a */; };
-		54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54A4A00412211C0D006678AF /* libcxcore.a */; };
 		54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 54BBAF3C0F04148D00568ED9 /* Tink.aiff */; };
 		54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */; };
 		54ED862C123C4A8B00ED9656 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ED862B123C4A8B00ED9656 /* Accelerate.framework */; };
@@ -47,9 +48,10 @@
 		543DC7891323FD1C00AB7DCD /* Icon_72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon_72.png; sourceTree = "<group>"; };
 		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		5453EBCA135B8170007F724F /* libopencv_objdetect.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_objdetect.a; path = opencv_simulator/lib/libopencv_objdetect.a; sourceTree = "<group>"; };
+		5453EBCE135B81C0007F724F /* libopencv_imgproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgproc.a; path = opencv_simulator/lib/libopencv_imgproc.a; sourceTree = "<group>"; };
+		5453EBD2135B82ED007F724F /* libopencv_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_core.a; path = opencv_simulator/lib/libopencv_core.a; sourceTree = "<group>"; };
 		549913C60E3E3D2100BD1311 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		54A4A00212211BFD006678AF /* libcv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcv.a; path = opencv_device/lib/libcv.a; sourceTree = "<group>"; };
-		54A4A00412211C0D006678AF /* libcxcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcxcore.a; path = opencv_device/lib/libcxcore.a; sourceTree = "<group>"; };
 		54BBAF3C0F04148D00568ED9 /* Tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = Tink.aiff; sourceTree = "<group>"; };
 		54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		54ED862B123C4A8B00ED9656 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -66,9 +68,10 @@
 				540723E30E3DD25B00B598A2 /* UIKit.framework in Frameworks */,
 				540723E40E3DD25B00B598A2 /* CoreGraphics.framework in Frameworks */,
 				54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */,
-				54A4A00312211BFD006678AF /* libcv.a in Frameworks */,
-				54A4A00512211C0D006678AF /* libcxcore.a in Frameworks */,
 				54ED862C123C4A8B00ED9656 /* Accelerate.framework in Frameworks */,
+				5453EBCB135B8170007F724F /* libopencv_objdetect.a in Frameworks */,
+				5453EBCF135B81C0007F724F /* libopencv_imgproc.a in Frameworks */,
+				5453EBD3135B82ED007F724F /* libopencv_core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,8 +152,9 @@
 		540723F00E3DD28C00B598A2 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				54A4A00212211BFD006678AF /* libcv.a */,
-				54A4A00412211C0D006678AF /* libcxcore.a */,
+				5453EBD2135B82ED007F724F /* libopencv_core.a */,
+				5453EBCE135B81C0007F724F /* libopencv_imgproc.a */,
+				5453EBCA135B8170007F724F /* libopencv_objdetect.a */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -247,7 +251,6 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/opencv_device/lib\"",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/lib";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/lib";
@@ -271,7 +274,6 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/opencv_device/lib\"",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*][arch=*]" = "$(SRCROOT)/opencv_device/lib";
 				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*][arch=*]" = "$(SRCROOT)/opencv_simulator/lib";

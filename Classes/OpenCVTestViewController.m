@@ -1,6 +1,7 @@
 #import "OpenCVTestViewController.h"
 
-#import <opencv/cv.h>
+#import <opencv2/imgproc/imgproc_c.h>
+#import <opencv2/objdetect/objdetect.hpp>
 
 @implementation OpenCVTestViewController
 @synthesize imageView;
@@ -126,7 +127,7 @@
 		CvMemStorage* storage = cvCreateMemStorage(0);
 		
 		// Detect faces and draw rectangle on them
-		CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(20, 20));
+		CvSeq* faces = cvHaarDetectObjects(small_image, cascade, storage, 1.2f, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(0,0), cvSize(20, 20));
 		cvReleaseImage(&small_image);
 		
 		// Create canvas to show the results
