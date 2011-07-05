@@ -33,14 +33,14 @@ else
 fi
 
 if [ -z "$SDK_VERSION" ]; then
-	SDK_VERSION="4.3"
+	SDK_VERSION="5.0"
 fi
 
 if [ -z "$IPHONEOS_VERSION_MIN" ]; then
 	IPHONEOS_VERSION_MIN="3.0"
 fi
 
-DEVELOPER_ROOT="/Developer/Platforms/${TARGET_SDK_NAME}.platform/Developer"
+DEVELOPER_ROOT="/Developer4.2/Platforms/${TARGET_SDK_NAME}.platform/Developer"
 SDK_ROOT="${DEVELOPER_ROOT}/SDKs/${TARGET_SDK_NAME}${SDK_VERSION}.sdk"
 
 if [ ! -d "$SDK_ROOT" ]; then
