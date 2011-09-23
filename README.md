@@ -1,6 +1,6 @@
 Using OpenCV on iPhone
 ----------------------
-This source repository includes pre-compiled OpenCV library and headeres so that you can get started easily!
+This source repository does NOT include pre-compiled OpenCV library or headers! It helps you building yours, from OpenCV source code.
 More documents you can see on [this article](http://niw.at/articles/2009/03/14/using-opencv-on-iphone/).
 
 Building Static Link Version of OpenCV
@@ -17,18 +17,18 @@ If you want to build it from source code, you can do by next steps.
 
 2.  Clone this project from github.com, then move into the project directory
 
-        % git clone git://github.com/niw/iphone_opencv_test.git
+        % git clone git://github.com/stephanepechard/iphone_opencv_test.git
 
-3.  Getting source code from sourceforge. I tested with [OpenCV-2.2.0.tar.bz2](http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.2/OpenCV-2.2.0.tar.bz2/download).
+3.  Getting source code from sourceforge. I tested with [OpenCV-2.3.1.tar.bz2](http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.3.1/OpenCV-2.3.1a.tar.bz2/download).
 
 4.  Extract downloaded archive on the top of demo project directory
 
-        % tar xjvf OpenCV-2.2.0.tar.bz2
+        % tar xjvf OpenCV-2.3.1.tar.bz2
 
 5.  Apply patch for iPhone SDK
 
-        % cd OpenCV-2.2.0
-        % patch -p1 < ../OpenCV-2.2.0.patch
+        % cd OpenCV-2.3.1
+        % patch -p1 < ../OpenCV-2.3.1.patch
 
 6.  Following next steps to build OpenCV static library for simulator.
     All files are installed into ``opencv_simulator`` directory.
@@ -38,7 +38,7 @@ If you want to build it from source code, you can do by next steps.
         % cd ..
         % mkdir build_simulator
         % cd build_simulator
-        % ../opencv_cmake.sh Simulator ../OpenCV-2.2.0
+        % ../opencv_cmake.sh Simulator ../OpenCV-2.3.1
         % make -j 4
         % make install
 
@@ -48,19 +48,21 @@ If you want to build it from source code, you can do by next steps.
         % cd ..
         % mkdir build_device
         % cd build_device
-        % ../opencv_cmake.sh Device ../OpenCV-2.2.0
+        % ../opencv_cmake.sh Device ../OpenCV-2.3.1
         % make -j 4
         % make install
 
 Build support script
 --------------------
 
-uild support script ``opencv_cmake.sh`` has some options to build OpenCV with iOS SDK.
-Try ``--help`` option to get the all options of it.
+Build support script ``opencv_cmake.sh`` has some options to build OpenCV with iOS SDK.
+Try ``--help`` option to get the all options of it. By default, the iOS SDK 5.0 is used.
+It supposed you use XCode 4.2, situated in directory /Developer4.2
 
 Change Log
 ----------
- *  04/11/2011 - Supprot OpenCV 2.2.0 + iOS SDK 4.3 + XCode 4
+ *  09/23/2011 - Support OpenCV 2.3.1 + iOS SDK 5.0 + XCode 4
+ *  04/11/2011 - Support OpenCV 2.2.0 + iOS SDK 4.3 + XCode 4
  *  10/30/2010 - Support iOS SDK 4.1
  *  08/22/2010 - Support OpenCV 2.1.0 + iOS SDK 4.0
  *  12/21/2009 - Support Snow Leopard + iPhone SDK 3.1.2, Thank you Hyon!
