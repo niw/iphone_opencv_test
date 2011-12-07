@@ -26,17 +26,22 @@ Modifications to the original sources
 To be usable to use the whole library both on the simulator and on the device, I had to remove some parts of highgui like Cocoa and QuickTime support. Removing the whole highgui package prevents you to build on the simulator with some libraries linked.
 
 Here is the list of all the files I've changed (see the patch for further details):
+
 1. into ``features2d/oneway.cpp``
+
         - OneWayDescriptor::Save() does not save image anymore ;
         - function loadPCAFeatures() does not extractPatches() as before, this is probably a problem if you use it...
 
 2. into ``objdetect/latentsvmdetector.cpp``
+
         - function cvLatentSvmDetectObjects() does not swap red and blue components before and after its process.
 
 3. into ``objdetect/latentsvm.cpp``
+
         - functions showRootFilterBoxes(), showPartFilterBoxes() and showBoxes() does not show image anymore.
 
 4. into ``contrib/chamfermatching.cpp``
+
         - function ChamferMatcher::Template::show() does not show image anymore.
 
 If you know some way to recover these functionalities without breaking the build, you can propose a different patch.
