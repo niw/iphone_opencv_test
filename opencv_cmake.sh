@@ -40,7 +40,7 @@ if [ -z "$IPHONEOS_VERSION_MIN" ]; then
 	IPHONEOS_VERSION_MIN="3.0"
 fi
 
-DEVELOPER_ROOT="/Developer4.2/Platforms/${TARGET_SDK_NAME}.platform/Developer"
+DEVELOPER_ROOT="/Developer/Platforms/${TARGET_SDK_NAME}.platform/Developer"
 SDK_ROOT="${DEVELOPER_ROOT}/SDKs/${TARGET_SDK_NAME}${SDK_VERSION}.sdk"
 
 if [ ! -d "$SDK_ROOT" ]; then
@@ -89,7 +89,7 @@ if [ "$TARGET_SDK" = "device" ]; then
 else
 	CFLAGS="-m32 ${CFLAGS}"
 	ARCH="i386"
-	CMAKE_OPTIONS="-D CMAKE_OSX_DEPLOYMENT_TARGET=\"10.6\" ${CMAKE_OPTIONS}"
+	CMAKE_OPTIONS="-D CMAKE_OSX_DEPLOYMENT_TARGET=\"10.7\" ${CMAKE_OPTIONS}"
 fi
 
 env \

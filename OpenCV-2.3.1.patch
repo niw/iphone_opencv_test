@@ -1,6 +1,6 @@
-diff -crB ../OpenCV-2.3.1/CMakeLists.txt OpenCV-2.3.1/CMakeLists.txt
-*** ../OpenCV-2.3.1/CMakeLists.txt	Mon Sep 12 20:45:38 2011
---- OpenCV-2.3.1/CMakeLists.txt	Wed Sep 21 12:09:30 2011
+diff -crB OpenCV-2.3.1/CMakeLists.txt ../OpenCV-2.3.1/CMakeLists.txt
+*** OpenCV-2.3.1/CMakeLists.txt	Mon Sep 12 20:45:38 2011
+--- ../OpenCV-2.3.1/CMakeLists.txt	Wed Dec  7 17:02:31 2011
 ***************
 *** 337,343 ****
       set(OPENCV_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
@@ -18,31 +18,9 @@ diff -crB ../OpenCV-2.3.1/CMakeLists.txt OpenCV-2.3.1/CMakeLists.txt
   include(OpenCVModule.cmake REQUIRED)
   if(ANDROID)
       include(OpenCVAndroidProject.cmake REQUIRED)
-Only in OpenCV-2.3.1: CMakeLists_original.txt
-diff -crB ../OpenCV-2.3.1/modules/CMakeLists.txt OpenCV-2.3.1/modules/CMakeLists.txt
-*** ../OpenCV-2.3.1/modules/CMakeLists.txt	Mon Sep 12 20:44:07 2011
---- OpenCV-2.3.1/modules/CMakeLists.txt	Wed Sep 21 12:10:15 2011
-***************
-*** 17,25 ****
-  if(BUILD_TESTS)
-    add_subdirectory(ts)
-  endif()
-! add_subdirectory(highgui)
-  add_subdirectory(imgproc)
-! add_subdirectory(legacy)
-  add_subdirectory(contrib)
-  add_subdirectory(ml)
-  add_subdirectory(objdetect)
---- 17,25 ----
-  if(BUILD_TESTS)
-    add_subdirectory(ts)
-  endif()
-! #add_subdirectory(highgui)
-  add_subdirectory(imgproc)
-! #add_subdirectory(legacy)
-  add_subdirectory(contrib)
-  add_subdirectory(ml)
-  add_subdirectory(objdetect)
+diff -crB OpenCV-2.3.1/modules/CMakeLists.txt ../OpenCV-2.3.1/modules/CMakeLists.txt
+*** OpenCV-2.3.1/modules/CMakeLists.txt	Mon Sep 12 20:44:07 2011
+--- ../OpenCV-2.3.1/modules/CMakeLists.txt	Wed Dec  7 17:02:51 2011
 ***************
 *** 33,42 ****
   endif()
@@ -66,4 +44,262 @@ diff -crB ../OpenCV-2.3.1/modules/CMakeLists.txt OpenCV-2.3.1/modules/CMakeLists
     add_subdirectory(gpu)
 ! #  add_subdirectory(stitching)
   endif()
-Only in OpenCV-2.3.1/modules: CMakeLists_original.txt
+diff -crB OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp ../OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp
+*** OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp	Mon Sep 12 20:42:33 2011
+--- ../OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp	Wed Dec  7 17:03:26 2011
+***************
+*** 908,917 ****
+  
+  	circle(templ_color,Point(center.x + pad, center.y + pad),1,CV_RGB(0,255,0));
+  
+! 	namedWindow("templ",1);
+! 	imshow("templ",templ_color);
+  
+! 	cvWaitKey(0);
+  
+  	templ_color.release();
+  }
+--- 908,917 ----
+  
+  	circle(templ_color,Point(center.x + pad, center.y + pad),1,CV_RGB(0,255,0));
+  
+! 	//namedWindow("templ",1);
+! 	//imshow("templ",templ_color);
+  
+! 	//cvWaitKey(0);
+  
+  	templ_color.release();
+  }
+diff -crB OpenCV-2.3.1/modules/features2d/src/oneway.cpp ../OpenCV-2.3.1/modules/features2d/src/oneway.cpp
+*** OpenCV-2.3.1/modules/features2d/src/oneway.cpp	Mon Sep 12 20:43:49 2011
+--- ../OpenCV-2.3.1/modules/features2d/src/oneway.cpp	Wed Dec  7 17:04:02 2011
+***************
+*** 665,671 ****
+              cvMinMaxLoc(m_samples[i], 0, &maxval);
+              cvConvertScale(m_samples[i], patch, 255/maxval);
+              
+!             cvSaveImage(buf, patch);
+              
+              cvReleaseImage(&patch);
+          }
+--- 665,671 ----
+              cvMinMaxLoc(m_samples[i], 0, &maxval);
+              cvConvertScale(m_samples[i], patch, 255/maxval);
+              
+!             //cvSaveImage(buf, patch);
+              
+              cvReleaseImage(&patch);
+          }
+***************
+*** 1792,1803 ****
+              sprintf(filename, "%s/%s", path, imagename);
+  
+              //printf("Reading image %s...", filename);
+!             IplImage* img = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
+              //printf("done\n");
+  
+              extractPatches (img, patches, patch_size);
+  
+!             cvReleaseImage(&img);
+          }
+          fclose(pFile);
+      }
+--- 1792,1803 ----
+              sprintf(filename, "%s/%s", path, imagename);
+  
+              //printf("Reading image %s...", filename);
+!             /*IplImage* img = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
+              //printf("done\n");
+  
+              extractPatches (img, patches, patch_size);
+  
+!             cvReleaseImage(&img);*/
+          }
+          fclose(pFile);
+      }
+diff -crB OpenCV-2.3.1/modules/highgui/CMakeLists.txt ../OpenCV-2.3.1/modules/highgui/CMakeLists.txt
+*** OpenCV-2.3.1/modules/highgui/CMakeLists.txt	Mon Sep 12 20:41:29 2011
+--- ../OpenCV-2.3.1/modules/highgui/CMakeLists.txt	Wed Dec  7 17:04:58 2011
+***************
+*** 62,72 ****
+      endif()
+  endif()
+  
+! if(WITH_OPENEXR AND OPENEXR_FOUND)
+!     add_definitions(-DHAVE_OPENEXR)
+!     include_directories(${OPENEXR_INCLUDE_PATHS})
+!     set(GRFMT_LIBS ${GRFMT_LIBS} ${OPENEXR_LIBRARIES})
+! endif()
+  
+  if(MSVC)
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libcmt.lib")
+--- 62,72 ----
+      endif()
+  endif()
+  
+! #if(WITH_OPENEXR AND OPENEXR_FOUND)
+! #    add_definitions(-DHAVE_OPENEXR)
+! #    include_directories(${OPENEXR_INCLUDE_PATHS})
+! #    set(GRFMT_LIBS ${GRFMT_LIBS} ${OPENEXR_LIBRARIES})
+! #endif()
+  
+  if(MSVC)
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libcmt.lib")
+***************
+*** 83,89 ****
+      src/cap.cpp
+      src/cap_images.cpp
+      src/cap_ffmpeg.cpp
+!     src/loadsave.cpp
+      src/precomp.cpp
+      src/utils.cpp
+      src/window.cpp
+--- 83,89 ----
+      src/cap.cpp
+      src/cap_images.cpp
+      src/cap_ffmpeg.cpp
+! #    src/loadsave.cpp
+      src/precomp.cpp
+      src/utils.cpp
+      src/window.cpp
+***************
+*** 191,197 ****
+  if(APPLE)
+      add_definitions(-DHAVE_QUICKTIME=1)
+      if(NOT OPENCV_BUILD_3RDPARTY_LIBS)
+!         add_definitions(-DHAVE_IMAGEIO=1)
+      endif()
+      
+      if (NOT HAVE_QT)
+--- 191,197 ----
+  if(APPLE)
+      add_definitions(-DHAVE_QUICKTIME=1)
+      if(NOT OPENCV_BUILD_3RDPARTY_LIBS)
+! #        add_definitions(-DHAVE_IMAGEIO=1)
+      endif()
+      
+      if (NOT HAVE_QT)
+***************
+*** 199,213 ****
+              add_definitions(-DHAVE_CARBON=1)
+              set(highgui_srcs ${highgui_srcs} src/window_carbon.cpp)
+          else()
+!             add_definitions(-DHAVE_COCOA=1)
+!             set(highgui_srcs ${highgui_srcs} src/window_cocoa.mm)
+          endif()
+      endif()
+      
+      if(WITH_QUICKTIME)
+          set(highgui_srcs ${highgui_srcs} src/cap_qt.cpp)
+      else()
+!         set(highgui_srcs ${highgui_srcs} src/cap_qtkit.mm)
+      endif()
+  endif(APPLE)
+  
+--- 199,213 ----
+              add_definitions(-DHAVE_CARBON=1)
+              set(highgui_srcs ${highgui_srcs} src/window_carbon.cpp)
+          else()
+! #            add_definitions(-DHAVE_COCOA=1)
+! #            set(highgui_srcs ${highgui_srcs} src/window_cocoa.mm)
+          endif()
+      endif()
+      
+      if(WITH_QUICKTIME)
+          set(highgui_srcs ${highgui_srcs} src/cap_qt.cpp)
+      else()
+! #        set(highgui_srcs ${highgui_srcs} src/cap_qtkit.mm)
+      endif()
+  endif(APPLE)
+  
+diff -crB OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp ../OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp
+*** OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp	Mon Sep 12 20:43:22 2011
+--- ../OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp	Wed Dec  7 17:05:42 2011
+***************
+*** 388,394 ****
+          cvRectangle(image, points[i], oppositePoint, 
+                      color, thickness, line_type, shift);
+      }
+!     cvShowImage("Initial image", image);
+      return LATENT_SVM_OK;
+  }
+  
+--- 388,394 ----
+          cvRectangle(image, points[i], oppositePoint, 
+                      color, thickness, line_type, shift);
+      }
+!     //cvShowImage("Initial image", image);
+      return LATENT_SVM_OK;
+  }
+  
+***************
+*** 442,448 ****
+                          color, thickness, line_type, shift);
+          }
+      }
+!     cvShowImage("Initial image", image);
+      return LATENT_SVM_OK;
+  }
+  
+--- 442,448 ----
+                          color, thickness, line_type, shift);
+          }
+      }
+!     //cvShowImage("Initial image", image);
+      return LATENT_SVM_OK;
+  }
+  
+***************
+*** 476,482 ****
+          cvRectangle(img, points[i], oppositePoints[i], 
+                      color, thickness, line_type, shift);
+      }
+!     cvShowImage("Initial image", img);
+      return LATENT_SVM_OK;
+  }
+  
+--- 476,482 ----
+          cvRectangle(img, points[i], oppositePoints[i], 
+                      color, thickness, line_type, shift);
+      }
+!     //cvShowImage("Initial image", img);
+      return LATENT_SVM_OK;
+  }
+  
+diff -crB OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp ../OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp
+*** OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp	Mon Sep 12 20:43:22 2011
+--- ../OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp	Wed Dec  7 17:06:02 2011
+***************
+*** 97,103 ****
+  	CvSeq* result_seq = 0;
+      int error = 0;
+  
+!     cvConvertImage(image, image, CV_CVTIMG_SWAP_RB);
+      // Getting maximum filter dimensions
+  	getMaxFilterDims((const CvLSVMFilterObject**)(detector->filters), detector->num_components, 
+                       detector->num_part_filters, &maxXBorder, &maxYBorder);
+--- 97,103 ----
+  	CvSeq* result_seq = 0;
+      int error = 0;
+  
+!     //cvConvertImage(image, image, CV_CVTIMG_SWAP_RB);
+      // Getting maximum filter dimensions
+  	getMaxFilterDims((const CvLSVMFilterObject**)(detector->filters), detector->num_components, 
+                       detector->num_part_filters, &maxXBorder, &maxYBorder);
+***************
+*** 132,138 ****
+  		detection.rect = bounding_box;
+  		cvSeqPush(result_seq, &detection);
+  	}
+!     cvConvertImage(image, image, CV_CVTIMG_SWAP_RB);
+  
+      freeFeaturePyramidObject(&H);
+      free(points);
+--- 132,138 ----
+  		detection.rect = bounding_box;
+  		cvSeqPush(result_seq, &detection);
+  	}
+!     //cvConvertImage(image, image, CV_CVTIMG_SWAP_RB);
+  
+      freeFeaturePyramidObject(&H);
+      free(points);
