@@ -1,6 +1,6 @@
 diff -crB OpenCV-2.3.1/CMakeLists.txt ../OpenCV-2.3.1/CMakeLists.txt
 *** OpenCV-2.3.1/CMakeLists.txt	Mon Sep 12 20:45:38 2011
---- ../OpenCV-2.3.1/CMakeLists.txt	Wed Dec  7 17:02:31 2011
+--- ../OpenCV-2.3.1/CMakeLists.txt	Tue Dec 13 11:16:29 2011
 ***************
 *** 337,343 ****
       set(OPENCV_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
@@ -20,7 +20,7 @@ diff -crB OpenCV-2.3.1/CMakeLists.txt ../OpenCV-2.3.1/CMakeLists.txt
       include(OpenCVAndroidProject.cmake REQUIRED)
 diff -crB OpenCV-2.3.1/modules/CMakeLists.txt ../OpenCV-2.3.1/modules/CMakeLists.txt
 *** OpenCV-2.3.1/modules/CMakeLists.txt	Mon Sep 12 20:44:07 2011
---- ../OpenCV-2.3.1/modules/CMakeLists.txt	Wed Dec  7 17:02:51 2011
+--- ../OpenCV-2.3.1/modules/CMakeLists.txt	Tue Dec 13 11:16:29 2011
 ***************
 *** 33,42 ****
   endif()
@@ -46,7 +46,7 @@ diff -crB OpenCV-2.3.1/modules/CMakeLists.txt ../OpenCV-2.3.1/modules/CMakeLists
   endif()
 diff -crB OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp ../OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp
 *** OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp	Mon Sep 12 20:42:33 2011
---- ../OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp	Wed Dec  7 17:03:26 2011
+--- ../OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp	Tue Dec 13 11:16:29 2011
 ***************
 *** 908,917 ****
   
@@ -72,7 +72,7 @@ diff -crB OpenCV-2.3.1/modules/contrib/src/chamfermatching.cpp ../OpenCV-2.3.1/m
   }
 diff -crB OpenCV-2.3.1/modules/features2d/src/oneway.cpp ../OpenCV-2.3.1/modules/features2d/src/oneway.cpp
 *** OpenCV-2.3.1/modules/features2d/src/oneway.cpp	Mon Sep 12 20:43:49 2011
---- ../OpenCV-2.3.1/modules/features2d/src/oneway.cpp	Wed Dec  7 17:04:02 2011
+--- ../OpenCV-2.3.1/modules/features2d/src/oneway.cpp	Tue Dec 13 11:16:29 2011
 ***************
 *** 665,671 ****
               cvMinMaxLoc(m_samples[i], 0, &maxval);
@@ -119,7 +119,7 @@ diff -crB OpenCV-2.3.1/modules/features2d/src/oneway.cpp ../OpenCV-2.3.1/modules
       }
 diff -crB OpenCV-2.3.1/modules/highgui/CMakeLists.txt ../OpenCV-2.3.1/modules/highgui/CMakeLists.txt
 *** OpenCV-2.3.1/modules/highgui/CMakeLists.txt	Mon Sep 12 20:41:29 2011
---- ../OpenCV-2.3.1/modules/highgui/CMakeLists.txt	Wed Dec  7 17:04:58 2011
+--- ../OpenCV-2.3.1/modules/highgui/CMakeLists.txt	Tue Dec 13 11:16:29 2011
 ***************
 *** 62,72 ****
       endif()
@@ -214,7 +214,7 @@ diff -crB OpenCV-2.3.1/modules/highgui/CMakeLists.txt ../OpenCV-2.3.1/modules/hi
   
 diff -crB OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp ../OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp
 *** OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp	Mon Sep 12 20:43:22 2011
---- ../OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp	Wed Dec  7 17:05:42 2011
+--- ../OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp	Tue Dec 13 11:39:30 2011
 ***************
 *** 388,394 ****
           cvRectangle(image, points[i], oppositePoint, 
@@ -268,7 +268,7 @@ diff -crB OpenCV-2.3.1/modules/objdetect/src/latentsvm.cpp ../OpenCV-2.3.1/modul
   
 diff -crB OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp ../OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp
 *** OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp	Mon Sep 12 20:43:22 2011
---- ../OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp	Wed Dec  7 17:06:02 2011
+--- ../OpenCV-2.3.1/modules/objdetect/src/latentsvmdetector.cpp	Tue Dec 13 11:18:48 2011
 ***************
 *** 97,103 ****
   	CvSeq* result_seq = 0;
