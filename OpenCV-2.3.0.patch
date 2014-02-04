@@ -1,0 +1,67 @@
+diff -crB ../OpenCV-2.3.0/CMakeLists.txt OpenCV-2.3.0/CMakeLists.txt
+*** ../OpenCV-2.3.0/CMakeLists.txt	Mon Jul  4 06:21:50 2011
+--- OpenCV-2.3.0/CMakeLists.txt	Tue Jul  5 10:56:37 2011
+***************
+*** 301,307 ****
+      set(OPENCV_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+  endif()
+  
+! include(OpenCVPCHSupport.cmake REQUIRED)
+  include(OpenCVModule.cmake REQUIRED)
+  
+  if(PCHSupport_FOUND)
+--- 301,307 ----
+      set(OPENCV_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+  endif()
+  
+! #include(OpenCVPCHSupport.cmake REQUIRED)
+  include(OpenCVModule.cmake REQUIRED)
+  
+  if(PCHSupport_FOUND)
+diff -crB ../OpenCV-2.3.0/modules/CMakeLists.txt OpenCV-2.3.0/modules/CMakeLists.txt
+*** ../OpenCV-2.3.0/modules/CMakeLists.txt	Mon Jul  4 06:21:57 2011
+--- OpenCV-2.3.0/modules/CMakeLists.txt	Tue Jul  5 11:06:16 2011
+***************
+*** 15,23 ****
+  if(BUILD_TESTS)
+    add_subdirectory(ts)
+  endif()
+! add_subdirectory(highgui)
+  add_subdirectory(imgproc)
+! add_subdirectory(legacy)
+  add_subdirectory(contrib)
+  add_subdirectory(ml)
+  add_subdirectory(objdetect)
+--- 15,23 ----
+  if(BUILD_TESTS)
+    add_subdirectory(ts)
+  endif()
+! #add_subdirectory(highgui)
+  add_subdirectory(imgproc)
+! #add_subdirectory(legacy)
+  add_subdirectory(contrib)
+  add_subdirectory(ml)
+  add_subdirectory(objdetect)
+***************
+*** 27,36 ****
+  endif()
+  
+  add_subdirectory(video)
+! add_subdirectory(traincascade)
+! add_subdirectory(haartraining)
+  
+  if(NOT ANDROID)
+    add_subdirectory(gpu)
+!   add_subdirectory(stitching)
+  endif()
+--- 27,36 ----
+  endif()
+  
+  add_subdirectory(video)
+! #add_subdirectory(traincascade)
+! #add_subdirectory(haartraining)
+  
+  if(NOT ANDROID)
+    add_subdirectory(gpu)
+! #  add_subdirectory(stitching)
+  endif()

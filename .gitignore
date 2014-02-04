@@ -1,5 +1,5 @@
 .DS_Store
-build
+build*
 *.xcodeproj/*.perspective
 *.xcodeproj/*.perspectivev3
 *.xcodeproj/*.pbxuser
@@ -10,6 +10,4 @@ build
 xcuserdata
 Snapshots
 OpenCV-*/
-opencv_*/lib/*.la
-opencv_*/lib/pkgconfig
-opencv_*/share
+opencv_*/

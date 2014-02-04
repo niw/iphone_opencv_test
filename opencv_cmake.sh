@@ -33,7 +33,7 @@ else
 fi
 
 if [ -z "$SDK_VERSION" ]; then
-	SDK_VERSION="4.3"
+	SDK_VERSION="5.0"
 fi
 
 if [ -z "$IPHONEOS_VERSION_MIN" ]; then
@@ -89,7 +89,7 @@ if [ "$TARGET_SDK" = "device" ]; then
 else
 	CFLAGS="-m32 ${CFLAGS}"
 	ARCH="i386"
-	CMAKE_OPTIONS="-D CMAKE_OSX_DEPLOYMENT_TARGET=\"10.6\" ${CMAKE_OPTIONS}"
+	CMAKE_OPTIONS="-D CMAKE_OSX_DEPLOYMENT_TARGET=\"10.7\" ${CMAKE_OPTIONS}"
 fi
 
 env \
