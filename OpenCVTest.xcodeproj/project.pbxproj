@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		540723DB0E3DD25B00B598A2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
-		540723DC0E3DD25B00B598A2 /* lena.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 5452E0090E3D08AA00FE4518 /* lena.jpg */; };
 		540723DE0E3DD25B00B598A2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		540723DF0E3DD25B00B598A2 /* OpenCVTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* OpenCVTestAppDelegate.m */; };
 		540723E00E3DD25B00B598A2 /* OpenCVTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* OpenCVTestViewController.m */; };
@@ -27,7 +26,7 @@
 		54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 54BBAF3C0F04148D00568ED9 /* Tink.aiff */; };
 		54BBAF4F0F0414C200568ED9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */; };
 		54ED862C123C4A8B00ED9656 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54ED862B123C4A8B00ED9656 /* Accelerate.framework */; };
-		54FC5BDE0E3EB3EB00F48645 /* laughing_man.png in Resources */ = {isa = PBXBuildFile; fileRef = 54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */; };
+		54FC5BDE0E3EB3EB00F48645 /* cat.png in Resources */ = {isa = PBXBuildFile; fileRef = 54FC5BDD0E3EB3EB00F48645 /* cat.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,7 +45,6 @@
 		543DC7631323FA0C00AB7DCD /* Icon_114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon_114.png; sourceTree = "<group>"; };
 		543DC7871323FD1300AB7DCD /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		543DC7891323FD1C00AB7DCD /* Icon_72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon_72.png; sourceTree = "<group>"; };
-		5452E0090E3D08AA00FE4518 /* lena.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lena.jpg; sourceTree = "<group>"; };
 		5452E0730E3D119700FE4518 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		5453EBCA135B8170007F724F /* libopencv_objdetect.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_objdetect.a; path = opencv_simulator/lib/libopencv_objdetect.a; sourceTree = "<group>"; };
 		5453EBCE135B81C0007F724F /* libopencv_imgproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopencv_imgproc.a; path = opencv_simulator/lib/libopencv_imgproc.a; sourceTree = "<group>"; };
@@ -55,7 +53,7 @@
 		54BBAF3C0F04148D00568ED9 /* Tink.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = Tink.aiff; sourceTree = "<group>"; };
 		54BBAF4E0F0414C200568ED9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		54ED862B123C4A8B00ED9656 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
-		54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = laughing_man.png; sourceTree = "<group>"; };
+		54FC5BDD0E3EB3EB00F48645 /* cat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cat.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -129,8 +127,7 @@
 				540ABCF50E3E280700E30885 /* Icon_57.png */,
 				543DC7891323FD1C00AB7DCD /* Icon_72.png */,
 				543DC7631323FA0C00AB7DCD /* Icon_114.png */,
-				5452E0090E3D08AA00FE4518 /* lena.jpg */,
-				54FC5BDD0E3EB3EB00F48645 /* laughing_man.png */,
+				54FC5BDD0E3EB3EB00F48645 /* cat.png */,
 				54BBAF3C0F04148D00568ED9 /* Tink.aiff */,
 				540ABC6A0E3E1C5300E30885 /* haarcascade_frontalface_default.xml */,
 			);
@@ -209,11 +206,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				540723DB0E3DD25B00B598A2 /* MainWindow.xib in Resources */,
-				540723DC0E3DD25B00B598A2 /* lena.jpg in Resources */,
 				540ABC6B0E3E1C5300E30885 /* haarcascade_frontalface_default.xml in Resources */,
 				540ABCF60E3E280700E30885 /* Icon_57.png in Resources */,
 				549913C70E3E3D2100BD1311 /* Default.png in Resources */,
-				54FC5BDE0E3EB3EB00F48645 /* laughing_man.png in Resources */,
+				54FC5BDE0E3EB3EB00F48645 /* cat.png in Resources */,
 				54BBAF3D0F04148D00568ED9 /* Tink.aiff in Resources */,
 				543DC7641323FA0C00AB7DCD /* Icon_114.png in Resources */,
 				543DC7881323FD1300AB7DCD /* Default@2x.png in Resources */,

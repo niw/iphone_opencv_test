@@ -185,7 +185,7 @@
 	if(!actionSheetAction) {
 		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
 																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
-														otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", @"Use Default Lena", nil];
+														otherButtonTitles:@"Use Photo from Library", @"Take Photo with Camera", nil];
 		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
 		actionSheetAction = ActionSheetToSelectTypeOfSource;
 		[actionSheet showInView:self.view];
@@ -214,7 +214,7 @@
 	if(imageView.image && !actionSheetAction) {
 		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
 																 delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil
-														otherButtonTitles:@"Bounding Box", @"Laughing Man", nil];
+														otherButtonTitles:@"Bounding Box", @"Cat", nil];
 		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
 		actionSheetAction = ActionSheetToSelectTypeOfMarks;
 		[actionSheet showInView:self.view];
@@ -274,7 +274,7 @@
 
 			UIImage *image = nil;
 			if(buttonIndex == 1) {
-				NSString *path = [[NSBundle mainBundle] pathForResource:@"laughing_man" ofType:@"png"];
+				NSString *path = [[NSBundle mainBundle] pathForResource:@"cat" ofType:@"png"];
 				image = [UIImage imageWithContentsOfFile:path];
 			}
 
