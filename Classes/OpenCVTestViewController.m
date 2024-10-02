@@ -164,7 +164,9 @@
 			[pool release];
 		}
 		
-		imageView.image = [UIImage imageWithCGImage:CGBitmapContextCreateImage(contextRef)];
+        CGImageRef markeredImageRef = CGBitmapContextCreateImage(contextRef);
+        imageView.image = [UIImage imageWithCGImage:markeredImageRef];
+        CGImageRelease(markeredImageRef);
 		CGContextRelease(contextRef);
 		CGColorSpaceRelease(colorSpace);
 		
